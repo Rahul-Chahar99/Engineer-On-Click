@@ -50,10 +50,53 @@ const userSchema = new Schema(
     refreshToken: {
       type: String,
     },
+    address: {
+      type: String,
+      default: "",
+    },
+    aadharNo: {
+      type: Number,
+      minlength: [12, "Please Enter Correct 12 Digit Aadhar No"],
+      maxlength: [12, "Aadhar Number Can't Exceed Limit of 12 Digits"],
+      unique: true,
+      default: "",
+    },
+    mobileNo: {
+      type: Number,
+      minlength: [10, "Mobile No must be at least 10 digits long"],
+      maxlength: [10, "Mobile No  can not be more than 10 Digits"],
+      unique: true,
+      default: "",
+    },
+    jobTitle: {
+      type: String,
+      default: "",
+    },
+    socialMedia: [
+      {
+        linkedIn: {
+          type: String,
+          unique: true,
+          trim: true,
+          default: "",
+        },
+        twitter: {
+          type: String,
+          unique: true,
+          trim: true,
+          default: "",
+        },
+        github: {
+          type: String,
+          unique: true,
+          trim: true,
+          default: "",
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
-
 
 // userSchema.pre("save", async function (next) {
 //   if (!this.isModified("password")) return next();

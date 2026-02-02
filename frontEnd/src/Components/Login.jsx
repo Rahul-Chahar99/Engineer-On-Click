@@ -6,6 +6,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { logInUser, reset } from "../Features/userSlice.js";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast'
+
+
 
 function Login() {
   const dispatch = useDispatch();
@@ -21,15 +24,17 @@ function Login() {
   );
   useEffect(() => {
     if (isError) {
-      alert(message);
+      const errorMessage = typeof message === "object" ? message?.message : message;
+      toast.error(errorMessage || "Login failed");
       dispatch(reset());
     }
     if (isSuccess) {
-      alert(message);
+      const successMessage = typeof message === "object" ? message?.message : message;
+      toast.success(successMessage || "Login successful");
       dispatch(reset());
       navigate("/");
     }
-  }, [isError, isLoading, isSuccess, message, navigate]);
+  }, [isError, isLoading, isSuccess, message, navigate, dispatch]);
 
   const onLogInSubmit = (data) => {
     // determine whether identifier is an email or username
@@ -42,10 +47,12 @@ function Login() {
       payload.username = identifier;
     }
     dispatch(logInUser(payload));
+    
+    
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-center min-h-screen bg-gray-800 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
@@ -92,6 +99,7 @@ function Login() {
             className="flex w-full justify-center rounded-lg bg-black px-4 py-3 text-sm font-bold text-white shadow-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
           />
         </form>
+        
       </div>
     </div>
   );

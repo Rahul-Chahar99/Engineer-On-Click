@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { userRegister, reset } from "../Features/userSlice";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 function Singup() {
   const navigate = useNavigate();
@@ -22,11 +23,13 @@ function Singup() {
 
   useEffect(() => {
     if (isError) {
-      alert(message); //replace with a toast notification in a real app
+      const toastMsg = typeof message ==='object' ? message?.message :message;
+      toast.error(toastMsg || "Something went wrong") //replace with a toast notification in a real app
       dispatch(reset());
     }
     if (isSuccess) {
-      alert(message); //replace with a toast
+      const toastMsg = typeof message ==='object' ? message?.message :message;
+      toast.success(toastMsg || "Account created successfully")
       navigate("/login"); //redirect to login page
       dispatch(reset());
     }
@@ -60,7 +63,7 @@ function Singup() {
   };
 
   return (
-    <div className="flex items-center justify-center py-8 bg-gray-100 px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-center py-8 bg-gray-800 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-lg border border-gray-200">
         <div className="text-center mb-4">
           <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>

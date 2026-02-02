@@ -5,6 +5,7 @@ import Header from "./Header/Header"
 import Footer from "./Footer/Footer"
 import Container from "./Container/Container.jsx"
 import AuthLayout from "./AuthLayout.jsx"
+import Profile  from './Profile.jsx'
 
 export {
     Login,
@@ -13,5 +14,6 @@ export {
     Header,
     Footer,
     Container,
-    AuthLayout
+    AuthLayout,
+    Profile
 }

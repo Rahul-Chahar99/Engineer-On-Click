@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { logOutUser, reset } from "../../Features/userSlice";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 function Header() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ function Header() {
     await dispatch(logOutUser());
     dispatch(reset());
     navigate("/login");
+    toast.success("Logged out successfully");
+
   };
 
   const navItems = [
@@ -44,6 +47,7 @@ function Header() {
       slug: "/signup",
       active: !authStatus,
     },
+   
   ];
 
   return (
@@ -103,6 +107,16 @@ function Header() {
                 </button>
               </li>
             )}
+            {authStatus && (
+              <li>
+                <button
+                  onClick={()=>navigate('/profile')}
+                  className="px-2 lg:px-3 py-2 text-sm lg:text-base text-gray-700 hover:text-red-600 font-medium transition duration-200"
+                >
+                 My Profile
+                </button>
+              </li>
+            )}
           </ul>
         </nav>
 
@@ -132,6 +146,19 @@ function Header() {
               <li>
                 <button
                   onClick={() => {
+                    navigate('/profile')
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600 font-medium transition"
+                >
+                  My Profile
+                </button>
+              </li>
+            )}
+            {authStatus && (
+              <li>
+                <button
+                  onClick={() => {
                     logOutHandler();
                     setMobileMenuOpen(false);
                   }}
@@ -141,6 +168,7 @@ function Header() {
                 </button>
               </li>
             )}
+           
           </ul>
         </div>
       </Container>

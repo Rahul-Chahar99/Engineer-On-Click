@@ -51,7 +51,7 @@ function Home() {
   return (
     <div className="flex flex-col bg-gray-50 w-full">
       {/* Hero Section */}
-      <div className="flex items-center justify-center py-12 px-4 bg-linear-to-r from-blue-600 to-purple-600 text-white">
+      <div className="flex items-center justify-center py-12 px-4 bg-gray-800 text-white">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4">
             Professional Engineer Services
@@ -77,7 +77,7 @@ function Home() {
             {services.map((service) => (
               <div
                 key={service.id}
-                className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
+                className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow flex flex-col"
               >
                 <div className="text-4xl mb-4">{service.icon}</div>
                 <h3 className="text-xl font-bold mb-2 text-gray-800">
@@ -89,7 +89,7 @@ function Home() {
                     {service.price}
                   </span>
                 </div>
-                <Link to="/signup">
+                <Link to="/signup" className="mt-auto">
                   <Button className="w-full bg-blue-600 text-white py-2 font-bold hover:bg-blue-700">
                     Book Engineer
                   </Button>

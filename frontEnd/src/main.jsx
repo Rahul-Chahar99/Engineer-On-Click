@@ -1,15 +1,21 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import axios from "axios";
+
+// Global configuration: Ensure cookies (containing tokens) are sent with every request
+axios.defaults.withCredentials = true;
 
 import store from "./Features/store";
 import { Provider } from "react-redux";
-import { BrowserRouter } from "react-router-dom";
 import Home from "./Components/Home/Home.jsx";
 import Login from "./Components/Login.jsx";
 import Singup from "./Components/Singup.jsx";
 import App from "./App.jsx";
 import AuthLayout from "./Components/AuthLayout.jsx";
+import Profile from "./Components/Profile.jsx";
+
+import Contact from "./Components/Contact.jsx";
 
 import {
   createBrowserRouter,
@@ -27,6 +33,7 @@ const router = createBrowserRouter(
         <Route
           path="/login"
           element={
+            // authentication={false} means only unauthenticated users can see this (redirects if logged in)
             <AuthLayout authentication={false}>
               <Login />
             </AuthLayout>
@@ -35,10 +42,26 @@ const router = createBrowserRouter(
         <Route
           path="/signup"
           element={
+            // authentication={false} means only unauthenticated users can see this
             <AuthLayout authentication={false}>
               <Singup />
             </AuthLayout>
           }
+        />
+        <Route
+          path="/contact"
+          element={
+            <Contact />
+          }
+        />
+        <Route
+        path="profile"
+        element={
+          // authentication={true} (default) means this route is protected; requires login
+          <AuthLayout authentication>
+            <Profile/>
+          </AuthLayout>
+        }
         />
       </Route>
     </>,

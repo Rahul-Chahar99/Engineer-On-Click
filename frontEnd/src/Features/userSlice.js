@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// Async Thunk for User Registration
+// Handles the API call to register a new user
 export const userRegister = createAsyncThunk(
   "user/register",
   async (formData, { rejectWithValue }) => {
@@ -18,11 +20,13 @@ export const userRegister = createAsyncThunk(
         error.response?.data?.message ||
         error.message ||
         "Something went wrong";
+      // rejectWithValue allows us to return a custom error payload to the rejected action
       return rejectWithValue(errorMessage);
     }
   },
 );
 
+// Async Thunk for User Login
 export const logInUser = createAsyncThunk(
   "user/login",
   async (loginData, { rejectWithValue }) => {
@@ -39,6 +43,7 @@ export const logInUser = createAsyncThunk(
   },
 );
 
+// Async Thunk for User Logout
 export const logOutUser = createAsyncThunk(
   "user/logout",
   async (_, { rejectWithValue }) => {
@@ -59,24 +64,38 @@ const initialState = {
   isLoading: false,
   isError: false,
   isSuccess: false,
-  userInfo: null,
+  userInfo: null, // Stores the user object when logged in
   message: "",
-  authStatus: false,
+  authStatus: false, // Tracks if the user is currently authenticated
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    // Synchronous reducers for manual state updates
     reset: (state) => {
       state.isLoading = false;
       state.isError = false;
       state.isSuccess = false;
       state.message = "";
     },
+    // Used to manually set login state (e.g., from App.jsx session check)
+    login:(state,action)=>{
+      state.authStatus=true;
+      state.userInfo=action.payload
+    }
+    ,
+    // Used to manually clear state
+    logout:(state)=>{
+      state.authStatus=false;
+      state.userInfo = null;
+    }
   },
+  // Handle lifecycle actions of async thunks (pending, fulfilled, rejected)
   extraReducers: (builder) => {
     builder
+      // Registration Lifecycle
       .addCase(userRegister.pending, (state) => {
         state.isLoading = true;
       })
@@ -91,9 +110,10 @@ const authSlice = createSlice({
         state.isError = true;
         state.isLoading = false;
         state.isSuccess = false;
-        state.message = action.payload?.message || "Registration failed";
+        state.message = action.payload || "Registration failed";
         state.userInfo = null;
       })
+      // Login Lifecycle
       .addCase(logInUser.pending,(state)=>{
         state.isLoading= true;
       })
@@ -103,7 +123,7 @@ const authSlice = createSlice({
         state.isError = false;
         state.authStatus= true;
         state.userInfo=action.payload.data.user;
-        state.message=action.payload?.message || "User LoggedIn Successfully"
+        state.message=action.payload ||  "User LoggedIn Successfully"
       })
       .addCase(logInUser.rejected,(state,action)=>{
         state.isLoading= false;
@@ -111,8 +131,9 @@ const authSlice = createSlice({
         state.isSuccess= false;
         state.authStatus= false;
         state.userInfo= null;
-        state.message=action.payload?.message || "User LogIn Failed "
+        state.message=action.payload || "User LogIn Failed "
       })
+      // Logout Lifecycle
       .addCase(logOutUser.pending,(state)=>{
         state.isLoading= true;
       })
@@ -133,5 +154,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { reset } = authSlice.actions;
+export const { reset,login,logout } = authSlice.actions;
 export default authSlice.reducer;
