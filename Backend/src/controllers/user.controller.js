@@ -7,6 +7,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/Apiresponse.js";
 import jwt from "jsonwebtoken";
 import Contact from "../models/contact.models.js";
+import { log } from "console";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -265,7 +266,7 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
 });
 
 const getAllEngineers = asyncHandler(async (req, res) => {
-  const engineers = await User.find({ role: "user" }).select(
+  const engineers = await User.find({ role: "engineer" }).select(
     "-password -refreshToken"
   );
   if (!engineers || engineers.length === 0) {
@@ -287,14 +288,28 @@ const getAllContactForms = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, allForms, "Contact forms fetched successfully"));
 });
 const getAllCustomers = asyncHandler(async (req, res) => {
-  const customers = await User.find({role:"customer"}).select("-password -refreshToken");
-  if(!customers || customers.length===0){
-    throw new ApiError(404,"No customers found")
+  const customers = await User.find({ role: "customer" }).select(
+    "-password -refreshToken"
+  );
+  if (!customers || customers.length === 0) {
+    throw new ApiError(404, "No customers found");
   }
 
   return res
-  .status(200)
-  .json(new ApiResponse(200,customers,"Customers fetched successfully"))
+    .status(200)
+    .json(new ApiResponse(200, customers, "Customers fetched successfully"));
+});
+const deleteEngineer = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const engineer = await User.findByIdAndDelete(id);
+  if (!engineer) {
+    throw new ApiError(404, "Enginner Not Found");
+  }
+  console.log(`Deleted Engineer : ${engineer}`);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, engineer, "Enginner deleted SuccessFully "));
 });
 
 export {
@@ -306,4 +321,5 @@ export {
   getAllEngineers,
   getAllContactForms,
   getAllCustomers,
+  deleteEngineer,
 };

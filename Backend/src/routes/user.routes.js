@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUser, logInUser, logOutUser,getUser,refreshAcessToken ,getAllEngineers,getAllCustomers,getAllContactForms} from "../controllers/user.controller.js";
+import {deleteEngineer, registerUser, logInUser, logOutUser,getUser,refreshAcessToken ,getAllEngineers,getAllCustomers,getAllContactForms} from "../controllers/user.controller.js";
 import { deleteContactForm } from "../controllers/contact.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { isAdmin, verifyJWT } from "../middlewares/auth.middleware.js";
@@ -30,6 +30,7 @@ router.route('/current-user').get(verifyJWT,isAdmin,getUser)
 router.route('/refresh-token').post(refreshAcessToken)
 
 router.route('/engineers').get(verifyJWT,isAdmin,getAllEngineers)
+router.route('/engineer/:id').delete(verifyJWT,isAdmin,deleteEngineer)
 
 router.route('/customers').get(verifyJWT,isAdmin,getAllCustomers)
 
@@ -37,6 +38,7 @@ router.route('/customers').get(verifyJWT,isAdmin,getAllCustomers)
 router.route('/contact-forms').get(verifyJWT,isAdmin,getAllContactForms)
 //to delete a contact form - admin only with form id
 router.route('/contact-forms/:id').delete(verifyJWT, isAdmin, deleteContactForm)
+
 
 
 

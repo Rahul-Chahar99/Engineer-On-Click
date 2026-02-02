@@ -34,10 +34,15 @@ function Enginners() {
         if (response.status === 200) {
           const allEngineers = response.data.data || response.data;
           setEngineer(allEngineers);
-          toast.success("Enginners fetched successfully");
+          //toast.success("Enginners fetched successfully");
         }
       } catch (error) {
-        toast.error("Unable to fetch engineers");
+        //toast.error("Unable to fetch engineers");
+        console.log(`Unable to fetch Enginners : ${error.message}`);
+        
+      }
+      finally{
+        setLoading(false)
       }
     };
     getEnginners()

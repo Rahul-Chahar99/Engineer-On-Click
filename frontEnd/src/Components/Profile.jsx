@@ -20,7 +20,7 @@ function Profile() {
           <div className="md:w-1/3 bg-gray-50 p-6 md:p-8 border-r border-gray-200">
             <div className="text-center">
               <img
-                className="w-32 h-32 mx-auto rounded-full border-4 border-white shadow-lg"
+                className="w-32 h-32 mx-auto rounded-full border-4 border-white shadow-lg object-cover"
                 src={userInfo.avatar || "https://via.placeholder.com/150"}
                 alt={userInfo.fullName}
               />
