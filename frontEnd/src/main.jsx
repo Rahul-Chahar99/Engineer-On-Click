@@ -14,8 +14,11 @@ import Singup from "./Components/Singup.jsx";
 import App from "./App.jsx";
 import AuthLayout from "./Components/AuthLayout.jsx";
 import Profile from "./Components/Profile.jsx";
+import Admin_DashBoard from "./Components/Admin_DashBoard.jsx";
 
 import Contact from "./Components/Contact.jsx";
+import ContactForms from "./Components/ContactForms.jsx";
+import Enginners from "./Components/Enginners.jsx";
 
 import {
   createBrowserRouter,
@@ -60,6 +63,29 @@ const router = createBrowserRouter(
           // authentication={true} (default) means this route is protected; requires login
           <AuthLayout authentication>
             <Profile/>
+          </AuthLayout>
+        }
+        />
+        <Route
+        path="/admin-dashboard"
+        element={
+          <AuthLayout authentication>
+            <Admin_DashBoard/>
+          </AuthLayout>
+        }/>
+        <Route
+        path="/admin-dashboard/contact-forms"
+        element={
+          <AuthLayout authentication>
+            <ContactForms/>
+          </AuthLayout>
+        }
+        />
+        <Route
+        path="/admin-dashboard/engineers"
+        element={
+          <AuthLayout authentication>
+            <Enginners/>
           </AuthLayout>
         }
         />

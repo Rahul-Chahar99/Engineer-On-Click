@@ -21,6 +21,7 @@ import contactRouter from './routes/contact.routes.js'
 //routes declaration
 app.use('/api/v1/users',userRouter)
 app.use('/api/v1',contactRouter)
+app.use('/api/v1/admin-dashboard',userRouter)
 
 
 // http://localhost:8000/api/v1/users/register

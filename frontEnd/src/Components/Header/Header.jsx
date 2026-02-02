@@ -11,7 +11,7 @@ function Header() {
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const { authStatus } = useSelector((state) => state.auth);
+  const { authStatus,userInfo } = useSelector((state) => state.auth);
 
   const logOutHandler = async () => {
     await dispatch(logOutUser());
@@ -35,7 +35,7 @@ function Header() {
     {
       name: "Contact Us",
       slug: "/contact",
-      active: true,
+      active: userInfo?.role==="admin" ? false : true,
     },
     {
       name: "Login",
@@ -47,6 +47,11 @@ function Header() {
       slug: "/signup",
       active: !authStatus,
     },
+    {
+      name:"Admin Dashboard",
+      slug:"/admin-dashboard",
+      active: authStatus && userInfo?.role==="admin" ? true : false,
+    }
    
   ];
 
@@ -117,6 +122,8 @@ function Header() {
                 </button>
               </li>
             )}
+            
+            
           </ul>
         </nav>
 
@@ -155,19 +162,7 @@ function Header() {
                 </button>
               </li>
             )}
-            {authStatus && (
-              <li>
-                <button
-                  onClick={() => {
-                    logOutHandler();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600 font-medium transition"
-                >
-                  Log Out
-                </button>
-              </li>
-            )}
+            
            
           </ul>
         </div>

@@ -6,6 +6,7 @@ import { User } from "../models/user.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/Apiresponse.js";
 import jwt from "jsonwebtoken";
+import Contact from "../models/contact.models.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -263,4 +264,46 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, logInUser, logOutUser, getUser, refreshAcessToken };
+const getAllEngineers = asyncHandler(async (req, res) => {
+  const engineers = await User.find({ role: "user" }).select(
+    "-password -refreshToken"
+  );
+  if (!engineers || engineers.length === 0) {
+    throw new ApiError(404, "No engineers found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, engineers, "Engineers fetched successfully"));
+});
+
+const getAllContactForms = asyncHandler(async (req, res) => {
+  const allForms = await Contact.find({}).sort({ _id: -1 });
+  if (!allForms || allForms.length === 0) {
+    throw new ApiError(404, "No contact forms found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, allForms, "Contact forms fetched successfully"));
+});
+const getAllCustomers = asyncHandler(async (req, res) => {
+  const customers = await User.find({role:"customer"}).select("-password -refreshToken");
+  if(!customers || customers.length===0){
+    throw new ApiError(404,"No customers found")
+  }
+
+  return res
+  .status(200)
+  .json(new ApiResponse(200,customers,"Customers fetched successfully"))
+});
+
+export {
+  registerUser,
+  logInUser,
+  logOutUser,
+  getUser,
+  refreshAcessToken,
+  getAllEngineers,
+  getAllContactForms,
+  getAllCustomers,
+};

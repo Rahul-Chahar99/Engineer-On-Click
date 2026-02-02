@@ -34,3 +34,14 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     throw new ApiError(401, error?.message || "Invalid access token");
   }
 });
+
+
+//middleware to check admin role
+
+export const isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === "admin") {
+    next();
+  } else {
+    throw new ApiError(403, "Access denied. Admin role required.");
+  }
+};

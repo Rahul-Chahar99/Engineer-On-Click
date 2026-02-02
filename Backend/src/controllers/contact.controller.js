@@ -33,5 +33,14 @@ const contactForm = asyncHandler(async (req, res) => {
     .status(201)
     .json(new ApiResponse(201, contact, "Form submitted successfully"));
 });
-
-export { contactForm };
+const deleteContactForm = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const contact = await Contact.findByIdAndDelete(id);
+  if (!contact) {
+    throw new ApiError(404, "Contact form not found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, contact, "Contact form deleted successfully"));
+});
+export { contactForm, deleteContactForm };

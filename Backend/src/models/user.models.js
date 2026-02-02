@@ -72,6 +72,11 @@ const userSchema = new Schema(
       type: String,
       default: "",
     },
+    role: {
+      type: String,
+      enum: ["engineer", ",customer", "admin"],
+      default: "engineer",
+    },
     socialMedia: [
       {
         linkedIn: {
