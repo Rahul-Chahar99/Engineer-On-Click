@@ -11,14 +11,13 @@ function Header() {
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const { authStatus,userInfo } = useSelector((state) => state.auth);
+  const { authStatus, userInfo } = useSelector((state) => state.auth);
 
   const logOutHandler = async () => {
     await dispatch(logOutUser());
     dispatch(reset());
     navigate("/login");
     toast.success("Logged out successfully");
-
   };
 
   const navItems = [
@@ -35,7 +34,7 @@ function Header() {
     {
       name: "Contact Us",
       slug: "/contact",
-      active: userInfo?.role==="admin" ? false : true,
+      active: userInfo?.role === "admin" ? false : true,
     },
     {
       name: "Login",
@@ -48,11 +47,10 @@ function Header() {
       active: !authStatus,
     },
     {
-      name:"Admin Dashboard",
-      slug:"/admin-dashboard",
-      active: authStatus && userInfo?.role==="admin" ? true : false,
-    }
-   
+      name: "Admin Dashboard",
+      slug: "/admin-dashboard",
+      active: authStatus && userInfo?.role === "admin" ? true : false,
+    },
   ];
 
   return (
@@ -62,7 +60,9 @@ function Header() {
           {/* Logo */}
           <div className="mr-2 sm:mr-4 shrink-0">
             <Link to="/">
-              <div className="text-lg sm:text-xl font-bold text-blue-600">Logo</div>
+              <div className="text-lg sm:text-xl font-bold text-blue-600">
+                Logo
+              </div>
             </Link>
           </div>
 
@@ -100,7 +100,7 @@ function Header() {
                     {item.name}
                   </button>
                 </li>
-              ) : null
+              ) : null,
             )}
             {authStatus && (
               <li>
@@ -115,15 +115,13 @@ function Header() {
             {authStatus && (
               <li>
                 <button
-                  onClick={()=>navigate('/profile')}
+                  onClick={() => navigate("/profile")}
                   className="px-2 lg:px-3 py-2 text-sm lg:text-base text-gray-700 hover:text-red-600 font-medium transition duration-200"
                 >
-                 My Profile
+                  My Profile
                 </button>
               </li>
             )}
-            
-            
           </ul>
         </nav>
 
@@ -147,13 +145,13 @@ function Header() {
                     {item.name}
                   </button>
                 </li>
-              ) : null
+              ) : null,
             )}
             {authStatus && (
               <li>
                 <button
                   onClick={() => {
-                    navigate('/profile')
+                    navigate("/profile");
                     setMobileMenuOpen(false);
                   }}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600 font-medium transition"
@@ -162,8 +160,20 @@ function Header() {
                 </button>
               </li>
             )}
-            
-           
+
+            {authStatus && (
+              <li>
+                <button
+                  onClick={() => {
+                    logOutHandler();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600 font-medium transition"
+                >
+                  Log Out
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       </Container>

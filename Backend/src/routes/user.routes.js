@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {deleteEngineer, registerUser, logInUser, logOutUser,getUser,refreshAcessToken ,getAllEngineers,getAllCustomers,getAllContactForms} from "../controllers/user.controller.js";
+import {deleteEngineer,deleteCustomer, registerUser, logInUser, logOutUser,getUser,refreshAcessToken ,getAllEngineers,getAllCustomers,getAllContactForms} from "../controllers/user.controller.js";
 import { deleteContactForm } from "../controllers/contact.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { isAdmin, verifyJWT } from "../middlewares/auth.middleware.js";
@@ -25,14 +25,21 @@ router.route("/login").post(logInUser);
 
 
 // secured routes
-router.route("/logout").post(verifyJWT,isAdmin, logOutUser);
-router.route('/current-user').get(verifyJWT,isAdmin,getUser)
+router.route("/logout").post(verifyJWT, logOutUser);
+router.route('/current-user').get(verifyJWT,getUser)
 router.route('/refresh-token').post(refreshAcessToken)
 
+
+
+//here admin accessing all the engineers 
 router.route('/engineers').get(verifyJWT,isAdmin,getAllEngineers)
+
+//with this route admin can delete a engineer
 router.route('/engineer/:id').delete(verifyJWT,isAdmin,deleteEngineer)
 
+//with this route amdin can access all customers
 router.route('/customers').get(verifyJWT,isAdmin,getAllCustomers)
+router.route('/customers/:id').delete(verifyJWT,isAdmin,deleteCustomer)
 
 //to get all contact forms - admin only
 router.route('/contact-forms').get(verifyJWT,isAdmin,getAllContactForms)

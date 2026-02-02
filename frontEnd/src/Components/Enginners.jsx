@@ -72,7 +72,8 @@ function Enginners() {
                 <h2>Full Name: {engineer.fullName}</h2>
                 <p>Email : {engineer.email}</p>
                 <p>Contact No : {engineer.phoneNumber || "Not Available"}</p>
-                <p>Aadhar No : {engineer.aadharNo}</p>
+                <p>Aadhar No : {engineer.aadharNo || "Not Available"}</p>
+                <p>Job Title : {engineer.jobTitle || "Not Available"}</p>
                 <p className="text-sm text-gray-300 mt-2">
                   <strong>Account Created:</strong>{" "}
                   {engineer.createdAt

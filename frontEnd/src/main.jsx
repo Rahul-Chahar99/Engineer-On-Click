@@ -15,10 +15,11 @@ import App from "./App.jsx";
 import AuthLayout from "./Components/AuthLayout.jsx";
 import Profile from "./Components/Profile.jsx";
 import Admin_DashBoard from "./Components/Admin_DashBoard.jsx";
-
+import Customers from "./Components/Customers.jsx";
 import Contact from "./Components/Contact.jsx";
 import ContactForms from "./Components/ContactForms.jsx";
 import Enginners from "./Components/Enginners.jsx";
+import About from "./Components/About.jsx";
 
 import {
   createBrowserRouter,
@@ -33,6 +34,7 @@ const router = createBrowserRouter(
     <>
       <Route path="/" element={<App />}>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route
           path="/login"
           element={
@@ -86,6 +88,14 @@ const router = createBrowserRouter(
         element={
           <AuthLayout authentication>
             <Enginners/>
+          </AuthLayout>
+        }
+        />
+        <Route
+        path='/admin-dashboard/customers'
+        element={
+          <AuthLayout authentication>
+            <Customers/>
           </AuthLayout>
         }
         />

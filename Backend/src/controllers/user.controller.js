@@ -7,7 +7,6 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/Apiresponse.js";
 import jwt from "jsonwebtoken";
 import Contact from "../models/contact.models.js";
-import { log } from "console";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -40,7 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
   //return response else send error
   //hashpassword,
 
-  const { fullName, email, username, password } = req.body;
+  const { fullName, email, username, password, role } = req.body;
 
   // console.log("Register Request Body:", req.body);
   // console.log("Fields:", { fullName, email, username, password });
@@ -96,6 +95,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     username: username.toLowerCase(),
+    role: role || "customer",
   });
   // console.log(uploadedAvatar, uploadedCoverImage);
 
@@ -221,7 +221,7 @@ const getUser = asyncHandler(async (req, res) => {
 const refreshAcessToken = asyncHandler(async (req, res) => {
   // Check for refresh token in cookies (preferred) or body
   const incomingRefreshToken =
-    req.cookies.refreshToken || req.body.refreshToken;
+    req.cookies?.refreshToken || req.body?.refreshToken;
   if (!incomingRefreshToken) {
     throw new ApiError(401, "Unauthorized Request");
   }
@@ -265,6 +265,7 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
   }
 });
 
+//fetching details of all engineers at admin dashboard
 const getAllEngineers = asyncHandler(async (req, res) => {
   const engineers = await User.find({ role: "engineer" }).select(
     "-password -refreshToken"
@@ -272,12 +273,12 @@ const getAllEngineers = asyncHandler(async (req, res) => {
   if (!engineers || engineers.length === 0) {
     throw new ApiError(404, "No engineers found");
   }
-
   return res
     .status(200)
     .json(new ApiResponse(200, engineers, "Engineers fetched successfully"));
 });
 
+//fetching of all contact forms at admin page
 const getAllContactForms = asyncHandler(async (req, res) => {
   const allForms = await Contact.find({}).sort({ _id: -1 });
   if (!allForms || allForms.length === 0) {
@@ -287,6 +288,8 @@ const getAllContactForms = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, allForms, "Contact forms fetched successfully"));
 });
+
+//all Customers fetching at admin dashboard
 const getAllCustomers = asyncHandler(async (req, res) => {
   const customers = await User.find({ role: "customer" }).select(
     "-password -refreshToken"
@@ -299,6 +302,8 @@ const getAllCustomers = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, customers, "Customers fetched successfully"));
 });
+
+// delete engineer by id - admin only
 const deleteEngineer = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const engineer = await User.findByIdAndDelete(id);
@@ -311,6 +316,15 @@ const deleteEngineer = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, engineer, "Enginner deleted SuccessFully "));
 });
+const deleteCustomer = asyncHandler(async(req,res)=>{
+  const {id} = req.params;
+  const customer = await User.findByIdAndDelete(id)
+  if(!customer) throw new ApiError(404,"Customer Not Found")
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,customer,"Customer Deleted SuccessFully"))
+})
 
 export {
   registerUser,
@@ -322,4 +336,5 @@ export {
   getAllContactForms,
   getAllCustomers,
   deleteEngineer,
+  deleteCustomer
 };

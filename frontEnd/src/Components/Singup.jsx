@@ -43,6 +43,7 @@ function Singup() {
     formData.append("email", data.email);
     formData.append("username", data.username);
     formData.append("password", data.password);
+    formData.append("role", data.role);
 
     // to check formData contents
     // console.log("FormData contents:", {
@@ -120,7 +121,32 @@ function Singup() {
             {errors.password && (
               <p className="text-xs text-red-600">Password is required</p>
             )}
-
+            
+            <div className="flex items-center space-x-4 py-2">
+              <span className="text-sm text-gray-700 font-medium">Register as:</span>
+              <div className="flex items-center">
+                <input 
+                  id="engineer" 
+                  type="radio" 
+                  value="engineer" 
+                  className="w-4 h-4 text-black border-gray-300 focus:ring-black cursor-pointer"
+                  {...register("role", {required: "Please select a role"})} 
+                />
+                <label htmlFor="engineer" className="ml-2 text-sm text-gray-900 cursor-pointer">Engineer</label>
+              </div>
+              <div className="flex items-center">
+                <input 
+                  id="customer" 
+                  type="radio" 
+                  value="customer" 
+                  className="w-4 h-4 text-black border-gray-300 focus:ring-black cursor-pointer"
+                  {...register("role", {required: "Please select a role"})} 
+                />
+                <label htmlFor="customer" className="ml-2 text-sm text-gray-900 cursor-pointer">Customer</label>
+              </div>
+            </div>
+            {errors.role && <p className="text-xs text-red-600">{errors.role.message}</p>}
+            
             <Input
               label="Avatar"
               type="file"
