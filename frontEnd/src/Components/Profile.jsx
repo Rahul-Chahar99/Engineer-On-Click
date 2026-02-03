@@ -37,14 +37,14 @@ function Profile() {
       socialMedia: { ...prev.socialMedia, [name]: value },
     }));
   };
- const handleAvatarChange = (e)=>{
+  const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     setFormData((prev) => ({ ...prev, avatar: file }));
-  }
- const handleCoverImageChange = (e)=>{
+  };
+  const handleCoverImageChange = (e) => {
     const file = e.target.files[0];
     setFormData((prev) => ({ ...prev, coverImage: file }));
-  }
+  };
   const updateProfile = async () => {
     // Client-side validation based on the Mongoose schema
     if (formData.mobileNo && formData.mobileNo.length !== 10) {
@@ -60,7 +60,10 @@ function Profile() {
       if (key === "socialMedia") {
         if (formData.socialMedia) {
           for (const socialKey in formData.socialMedia) {
-            data.append(`socialMedia[${socialKey}]`, formData.socialMedia[socialKey]);
+            data.append(
+              `socialMedia[${socialKey}]`,
+              formData.socialMedia[socialKey],
+            );
           }
         }
       } else if (key === "avatar" || key === "coverImage") {
@@ -76,15 +79,11 @@ function Profile() {
 
     try {
       console.log("Updating profile with data:", formData);
-      const response = await axios.put(
-        "/api/v1/users/update-profile",
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.put("/api/v1/users/update-profile", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       toast.success(response.data?.message || "Profile updated successfully");
       setEdit(false);
       window.location.reload();
@@ -138,23 +137,25 @@ function Profile() {
           <div className="md:w-1/3 bg-gray-50 p-6 flex flex-col items-center justify-center border-r border-gray-200">
             <div className="text-center -mt-20 relative">
               <div className="relative inline-block group">
-              <img
-                className="w-32 h-32 mx-auto rounded-full border-4 border-white shadow-lg object-cover bg-white"
-                src={
-                  formData.avatar instanceof File
-                    ? URL.createObjectURL(formData.avatar)
-                    : formData.avatar || "https://via.placeholder.com/150"
-                }
-                alt={formData.fullName}
-              />
-              {edit && (
-                <div
-                  className="absolute inset-0 rounded-full bg-black bg-opacity-30 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => avatarRef.current.click()}
-                >
-                  <span className="text-white text-xs font-semibold">Change</span>
-                </div>
-              )}
+                <img
+                  className="w-32 h-32 mx-auto rounded-full border-4 border-white shadow-lg object-cover bg-white"
+                  src={
+                    formData.avatar instanceof File
+                      ? URL.createObjectURL(formData.avatar)
+                      : formData.avatar || "https://via.placeholder.com/150"
+                  }
+                  alt={formData.fullName}
+                />
+                {edit && (
+                  <div
+                    className="absolute inset-0 rounded-full bg-black bg-opacity-30 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => avatarRef.current.click()}
+                  >
+                    <span className="text-white text-xs font-semibold">
+                      Change
+                    </span>
+                  </div>
+                )}
               </div>
               <input
                 type="file"
@@ -166,9 +167,13 @@ function Profile() {
               <h1 className="text-2xl font-bold text-gray-800 mt-4">
                 {formData.fullName || userInfo.fullName}
               </h1>
-              <p className="text-sm text-gray-500">@{formData.username || userInfo.username}</p>
+              <p className="text-sm text-gray-500">
+                @{formData.username || userInfo.username}
+              </p>
               <p className="text-md text-gray-600 mt-2">
-                {formData.jobTitle || userInfo.jobTitle || "Job title not specified"}
+                {formData.jobTitle ||
+                  userInfo.jobTitle ||
+                  "Job title not specified"}
               </p>
             </div>
             <div className="mt-6 w-full text-center">
