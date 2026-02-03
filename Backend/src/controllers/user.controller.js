@@ -11,6 +11,19 @@ import Contact from "../models/contact.models.js";
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found while generating tokens");
+    }
+
+    // Fix for legacy data where socialMedia might be stored as an array
+    if (user.socialMedia && Array.isArray(user.socialMedia)) {
+      user.socialMedia = {
+        linkedIn: "",
+        twitter: "",
+        github: "",
+      };
+    }
+
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
@@ -20,9 +33,10 @@ const generateAccessAndRefreshToken = async (userId) => {
     await user.save({ validateBeforeSave: false });
     return { accessToken, refreshToken };
   } catch (error) {
+    if (error instanceof ApiError) throw error;
     throw new ApiError(
       500,
-      "Something went wrong while generating refresh and access token"
+      error?.message || "Something went wrong while generating refresh and access token"
     );
   }
 };

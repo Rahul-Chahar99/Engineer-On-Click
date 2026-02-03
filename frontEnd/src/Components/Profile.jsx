@@ -18,6 +18,7 @@ function Profile() {
       setFormData({
         ...userInfo,
         socialMedia:
+
           userInfo.socialMedia && !Array.isArray(userInfo.socialMedia)
             ? userInfo.socialMedia
             : { linkedIn: "", twitter: "", github: "" },
@@ -79,11 +80,8 @@ function Profile() {
 
     try {
       console.log("Updating profile with data:", formData);
-      const response = await axios.put("/api/v1/users/update-profile", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.put("/api/v1/users/update-profile", data);
+
       toast.success(response.data?.message || "Profile updated successfully");
       setEdit(false);
       window.location.reload();
@@ -247,7 +245,7 @@ function Profile() {
                 <Button
                   type="button"
                   bgColor="bg-gray-700 hover:bg-gray-900"
-                  className="px-4! py-2! flex items-center gap-2 cursor-pointer text-white font-semibold rounded-lg"
+                  className="!px-4 !py-2 flex items-center gap-2 cursor-pointer text-white font-semibold rounded-lg"
                   onClick={() => (edit ? updateProfile() : setEdit(true))}
                 >
                   {edit ? (
@@ -300,7 +298,7 @@ function Profile() {
                   value={formData.fullName || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "border-transparent! bg-transparent! px-0!"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
                 />
               </div>
               <div className="col-span-1">
@@ -312,7 +310,7 @@ function Profile() {
                   value={formData.email || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "border-transparent! bg-transparent! px-0!"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
                 />
               </div>
               <div className="col-span-1">
@@ -325,7 +323,7 @@ function Profile() {
                   onChange={handleChange}
                   disabled={!edit}
                   maxLength="10"
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "border-transparent! bg-transparent! px-0!"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
                   placeholder={edit ? "Enter mobile number" : "Not provided"}
                 />
               </div>
@@ -339,7 +337,7 @@ function Profile() {
                   onChange={handleChange}
                   disabled={!edit}
                   maxLength="12"
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "border-transparent! bg-transparent! px-0!"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
                   placeholder={edit ? "Enter Aadhar number" : "Not provided"}
                 />
               </div>
@@ -352,7 +350,7 @@ function Profile() {
                   value={formData.jobTitle || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "border-transparent! bg-transparent! px-0!"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
                   placeholder={edit ? "Enter Job Title" : "Not provided"}
                 />
               </div>
@@ -365,7 +363,7 @@ function Profile() {
                   value={formData.address || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "border-transparent! bg-transparent! px-0!"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
                   placeholder={edit ? "Enter address" : "Not provided"}
                 />
               </div>
@@ -381,7 +379,7 @@ function Profile() {
                       onChange={handleSocialChange}
                       disabled={!edit}
                       placeholder="LinkedIn URL"
-                      className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!borer-transparen!t bg-transparent! px-0!"}`}
+                      className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
                     />
                     <Input
                       name="twitter"
@@ -389,7 +387,7 @@ function Profile() {
                       onChange={handleSocialChange}
                       disabled={!edit}
                       placeholder="Twitter URL"
-                      className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!borer-transparen!t bg-transparent! px-0!"}`}
+                      className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
                     />
                     <Input
                       name="github"
@@ -397,7 +395,7 @@ function Profile() {
                       onChange={handleSocialChange}
                       disabled={!edit}
                       placeholder="GitHub URL"
-                      className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!borer-transparen!t bg-transparent! px-0!"}`}
+                      className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
                     />
                   </div>
                 </div>

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 // Async Thunk for User Registration
 // Handles the API call to register a new user
@@ -15,12 +16,10 @@ export const userRegister = createAsyncThunk(
       return response.data;
     } catch (error) {
       // Handle errors from ApiError class in backend
-      //   return rejectWithValue(error.response?.data || "something went Wrong");
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Something went wrong";
-      // rejectWithValue allows us to return a custom error payload to the rejected action
+      // const errorMessage =
+      //   error.response?.data?.message || error.message || "Registration failed";
+      // toast.error(errorMessage); // Display the toast notification here
+
       return rejectWithValue(errorMessage);
     }
   },

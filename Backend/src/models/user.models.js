@@ -58,13 +58,11 @@ const userSchema = new Schema(
       type: String,
       minlength: [12, "Please Enter Correct 12 Digit Aadhar No"],
       maxlength: [12, "Aadhar Number Can't Exceed Limit of 12 Digits"],
-      default: "",
     },
     mobileNo: {
       type: String,
       minlength: [10, "Mobile No must be at least 10 digits long"],
       maxlength: [10, "Mobile No  can not be more than 10 Digits"],
-      default: "",
     },
     jobTitle: {
       type: String,
