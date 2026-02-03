@@ -212,6 +212,50 @@ const logOutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out"));
 });
 
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const { fullName, email, mobileNo, aadharNo, address, jobTitle } = req.body;
+  // socialMedia comes as an object from req.body when sent via FormData
+  const socialMedia = req.body.socialMedia || {}; 
+
+  const userId = req.user._id;
+
+  const updateFields = {
+    fullName,
+    email,
+    mobileNo,
+    aadharNo,
+    address,
+    jobTitle,
+    socialMedia,
+  };
+
+  // Handle file uploads
+  const avatarLocalPath = req.files?.avatar?.[0]?.path;
+  const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+
+  if (avatarLocalPath) {
+    const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
+    if (!uploadedAvatar) throw new ApiError(500, "Failed to upload new avatar");
+    updateFields.avatar = uploadedAvatar.url;
+  }
+
+  if (coverImageLocalPath) {
+    const uploadedCoverImage = await uploadOnCloudinary(coverImageLocalPath);
+    if (!uploadedCoverImage) throw new ApiError(500, "Failed to upload new cover image");
+    updateFields.coverImage = uploadedCoverImage.url;
+  }
+
+  const user = await User.findByIdAndUpdate(userId, {
+    $set: {
+      ...updateFields,
+    }
+  }, { new: true }).select("-password -refreshToken");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Profile updated successfully"));
+})
+
 const getUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
@@ -291,7 +335,7 @@ const getAllContactForms = asyncHandler(async (req, res) => {
 
 //all Customers fetching at admin dashboard
 const getAllCustomers = asyncHandler(async (req, res) => {
-  const customers = await User.find({ role: "customer" }).select(
+  const customers = await User.find({ role: "customer" }).sort({ _id: -1 }).select(
     "-password -refreshToken"
   );
   if (!customers || customers.length === 0) {
@@ -326,11 +370,14 @@ const deleteCustomer = asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200,customer,"Customer Deleted SuccessFully"))
 })
 
+
+
 export {
   registerUser,
   logInUser,
   logOutUser,
   getUser,
+  updateUserProfile,
   refreshAcessToken,
   getAllEngineers,
   getAllContactForms,

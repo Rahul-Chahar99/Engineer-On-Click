@@ -55,17 +55,15 @@ const userSchema = new Schema(
       default: "",
     },
     aadharNo: {
-      type: Number,
+      type: String,
       minlength: [12, "Please Enter Correct 12 Digit Aadhar No"],
       maxlength: [12, "Aadhar Number Can't Exceed Limit of 12 Digits"],
-      unique: true,
       default: "",
     },
     mobileNo: {
-      type: Number,
+      type: String,
       minlength: [10, "Mobile No must be at least 10 digits long"],
       maxlength: [10, "Mobile No  can not be more than 10 Digits"],
-      unique: true,
       default: "",
     },
     jobTitle: {
@@ -78,28 +76,23 @@ const userSchema = new Schema(
       default: "engineer",
       required:true,
     },
-    socialMedia: [
-      {
-        linkedIn: {
-          type: String,
-          unique: true,
-          trim: true,
-          default: "",
-        },
-        twitter: {
-          type: String,
-          unique: true,
-          trim: true,
-          default: "",
-        },
-        github: {
-          type: String,
-          unique: true,
-          trim: true,
-          default: "",
-        },
+    socialMedia: {
+      linkedIn: {
+        type: String,
+        trim: true,
+        default: "",
       },
-    ],
+      twitter: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      github: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+    },
   },
   { timestamps: true }
 );
