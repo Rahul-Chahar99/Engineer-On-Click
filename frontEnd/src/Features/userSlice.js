@@ -16,10 +16,9 @@ export const userRegister = createAsyncThunk(
       return response.data;
     } catch (error) {
       // Handle errors from ApiError class in backend
-      // const errorMessage =
-      //   error.response?.data?.message || error.message || "Registration failed";
-      // toast.error(errorMessage); // Display the toast notification here
-
+      const errorMessage =
+        error.response?.data?.message || (typeof error.response?.data === "string" ? error.response?.data : error.message) || "Registration failed";
+      // The toast notification should be displayed by the component, not the thunk.
       return rejectWithValue(errorMessage);
     }
   },
@@ -34,9 +33,7 @@ export const logInUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Something went wrong";
+        error.response?.data?.message || (typeof error.response?.data === "string" ? error.response?.data : error.message) || "Login failed";
       return rejectWithValue(errorMessage);
     }
   },
@@ -51,9 +48,7 @@ export const logOutUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Something went wrong";
+        error.response?.data?.message || (typeof error.response?.data === "string" ? error.response?.data : error.message) || "Logout failed";
       return rejectWithValue(errorMessage);
     }
   },
@@ -122,7 +117,7 @@ const authSlice = createSlice({
         state.isError = false;
         state.authStatus= true;
         state.userInfo=action.payload.data.user;
-        state.message=action.payload ||  "User LoggedIn Successfully"
+        state.message=action.payload?.message ||  "User LoggedIn Successfully"
       })
       .addCase(logInUser.rejected,(state,action)=>{
         state.isLoading= false;
@@ -130,7 +125,7 @@ const authSlice = createSlice({
         state.isSuccess= false;
         state.authStatus= false;
         state.userInfo= null;
-        state.message=action.payload || "User LogIn Failed "
+        state.message=action.payload?.message || "User LogIn Failed "
       })
       // Logout Lifecycle
       .addCase(logOutUser.pending,(state)=>{
@@ -148,7 +143,7 @@ const authSlice = createSlice({
         state.isLoading= false;
         state.isError  = true;
         state.isSuccess= false;
-        state.message=action.payload?.message || "Logout failed"
+        state.message=action.payload || "Logout failed"
       })
   },
 });

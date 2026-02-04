@@ -62,6 +62,13 @@ function Enginners() {
     <Container>
       <div className="w-full py-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">All Engineer</h1>
+        <Button
+                  bgColor="bg-black text-white"
+                  className="rounded-lg" // This className will be passed to the underlying button
+                  onClick={() => window.history.back()} // Corrected: use 'onClick' (camelCase)
+                >
+                  Go Back
+                </Button>
         {engineers && engineers.length > 0 ? (
           <div className="space-y-4">
             {engineers.map((engineer, index) => (
@@ -90,7 +97,9 @@ function Enginners() {
             ))}
           </div>
         ) : (
-          <p>No Engineer Available</p>
+         <div className="flex justify-center items-center h-64">
+            <p className="text-gray-500 text-lg">No Engineer Available</p>
+          </div>
         )}
       </div>
     </Container>

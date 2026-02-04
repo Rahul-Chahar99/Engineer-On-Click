@@ -66,7 +66,6 @@ function About() {
                   We are proud to offer our services all over India. No matter where your branch or office is located, we have the reach to support your IT infrastructure.
                 </p>
               </div>
-
             </div>
           </div>
         </div>

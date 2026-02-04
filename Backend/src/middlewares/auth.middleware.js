@@ -35,7 +35,6 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
   }
 });
 
-
 //middleware to check admin role
 
 export const isAdmin = (req, res, next) => {
@@ -46,11 +45,10 @@ export const isAdmin = (req, res, next) => {
   }
 };
 
-export const isCoustomer = (req, res, next)=>{
-  if(req.user && req.user.role === "customer"){
+export const isCoustomer = (req, res, next) => {
+  if (req.user && req.user.role === "customer") {
     next();
+  } else {
+    throw new ApiError(403, "Access denied. Customer role required.");
   }
-  else{
-    throw new ApiError(403,"Access denied. Customer role required.")
-  }
-}
+};

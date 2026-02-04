@@ -8,61 +8,58 @@ import Footer from "./Components/Footer/Footer";
 import axios from "axios";
 import { Toaster } from "react-hot-toast";
 
-
-
 function App() {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-    // Axios Interceptor to handle 401 errors and refresh token
-    const interceptor = axios.interceptors.response.use(
+    // 1. Axios Interceptor: Handle 401s by refreshing token
+    const interceptorId = axios.interceptors.response.use(
+//       axios.interceptors.response.use: This registers a "listener" that intercepts every HTTP response received by the application.
+// (response) => response: The first argument handles successful responses (status 200-299). It simply returns the response as is, doing nothing extra.
+// async (error) => { ... }: The second argument handles errors (status 400+). This is where the logic lives.
       (response) => response, // Return successful responses as is
       async (error) => {
+        // originalRequest: Saves the configuration (URL, method, data, headers) of the request that just failed. We need this to retry the request later if we successfully refresh the token.
         const originalRequest = error.config;
-        // Check if error is 401, we haven't retried yet, and it's not the refresh endpoint itself
         if (
           error.response?.status === 401 &&
           !originalRequest._retry &&
           originalRequest.url !== "/api/v1/users/refresh-token"
         ) {
-          originalRequest._retry = true; // Mark request to prevent infinite loops
+          originalRequest._retry = true;
           try {
-            // Attempt to get a new access token using the refresh token (stored in HttpOnly cookie)
             await axios.post("/api/v1/users/refresh-token");
-            // Retry the original request with the new session
             return axios(originalRequest);
-          } catch (refreshError) {
-            // If refresh fails (token expired/invalid), force logout to clear state
+          } catch (error) {
             dispatch(logout());
-            return Promise.reject(refreshError);
+            return Promise.reject(error);
           }
         }
         return Promise.reject(error);
-      }
+      },
     );
 
-    // Initial Session Check:
-    // When the app loads/refreshes, verify if the user is still logged in via cookies
-    axios
-      .get("/api/v1/users/current-user")
-      .then((res) => {
-        if (res.data) {
-          dispatch(login(res.data.data));
-        } else {
-          dispatch(logout());
-        }
-      })
-      .catch((err) => {
-        // console.log(err);
+    // 2. Initial Session Check
+    (async () => {
+      try {
+        const { data } = await axios.get("/api/v1/users/current-user");
+        //data: Refers to the variable holding the entire JSON response above.
+// .data: Refers to the specific key inside that JSON object where the actual user information lives.
+// the second .data from out backend ,Your backend uses a standardized ApiResponse class (seen in user.controller.js). When it sends a response, it looks something like this:
+
+
+        dispatch(login(data.data));
+      } catch (error) {
         dispatch(logout());
-      })
-      .finally(() => setLoading(false)); // Stop loading spinner regardless of success/failure
+      } finally {
+        setLoading(false);
+      }
+    })();
 
     return () => {
-      // Cleanup: Eject the interceptor to prevent memory leaks or duplicate logic on re-renders
-      axios.interceptors.response.eject(interceptor);
+      axios.interceptors.response.eject(interceptorId);
     };
-  }, []);
+  }, [dispatch]);
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />

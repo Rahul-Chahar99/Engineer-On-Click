@@ -23,13 +23,11 @@ function Singup() {
 
   useEffect(() => {
     if (isError) {
-      const toastMsg = typeof message ==='object' ? message?.message :message;
-      toast.error(toastMsg || "Something went wrong") //replace with a toast notification in a real app
+      toast.error(message || "Something went wrong") //replace with a toast notification in a real app
       dispatch(reset());
     }
     if (isSuccess) {
-      const toastMsg = typeof message ==='object' ? message?.message :message;
-      toast.success(toastMsg || "Account created successfully")
+      toast.success(message || "Account created successfully")
       navigate("/login"); //redirect to login page
       dispatch(reset());
     }
