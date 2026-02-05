@@ -18,7 +18,6 @@ function Profile() {
       setFormData({
         ...userInfo,
         socialMedia:
-
           userInfo.socialMedia && !Array.isArray(userInfo.socialMedia)
             ? userInfo.socialMedia
             : { linkedIn: "", twitter: "", github: "" },
@@ -106,12 +105,13 @@ function Profile() {
         <div className="relative w-full h-48 bg-gray-300 group">
           <img
             src={
+              // This checks if formData.coverImage is a File object (like when a user uploads an image). If it is, it creates a temporary URL using URL.createObjectURL() so the browser can display the uploaded file immediately. If it's not a File (meaning it's likely a URL string), it uses that URL directly. If neither is available, it falls back to a placeholder image.
               formData.coverImage instanceof File
                 ? URL.createObjectURL(formData.coverImage)
                 : formData.coverImage || "https://via.placeholder.com/800x200"
             }
             alt="Cover"
-            className="w-full h-full object-cover-center"
+            className="w-full h-full  object-cover"
           />
           {edit && (
             <div
