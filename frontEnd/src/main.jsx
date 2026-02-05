@@ -20,6 +20,7 @@ import Contact from "./Components/Contact.jsx";
 import ContactForms from "./Components/ContactForms.jsx";
 import Enginners from "./Components/Enginners.jsx";
 import About from "./Components/About.jsx";
+import UpdatePassword from "./Components/UpdatePassword.jsx";
 
 import {
   createBrowserRouter,
@@ -27,7 +28,6 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -53,51 +53,55 @@ const router = createBrowserRouter(
             </AuthLayout>
           }
         />
+        <Route path="/contact" element={<Contact />} />
         <Route
-          path="/contact"
+          path="/profile"
           element={
-            <Contact />
+            // authentication={true} (default) means this route is protected; requires login
+            <AuthLayout authentication>
+              <Profile />
+            </AuthLayout>
           }
         />
         <Route
-        path="profile"
-        element={
-          // authentication={true} (default) means this route is protected; requires login
-          <AuthLayout authentication>
-            <Profile/>
-          </AuthLayout>
-        }
+          path="/profile/update-password"
+          element={
+            <AuthLayout authentication>
+              <UpdatePassword />
+            </AuthLayout>
+          }
         />
         <Route
-        path="/admin-dashboard"
-        element={
-          <AuthLayout authentication>
-            <Admin_DashBoard/>
-          </AuthLayout>
-        }/>
-        <Route
-        path="/admin-dashboard/contact-forms"
-        element={
-          <AuthLayout authentication>
-            <ContactForms/>
-          </AuthLayout>
-        }
+          path="/admin-dashboard"
+          element={
+            <AuthLayout authentication>
+              <Admin_DashBoard />
+            </AuthLayout>
+          }
         />
         <Route
-        path="/admin-dashboard/engineers"
-        element={
-          <AuthLayout authentication>
-            <Enginners/>
-          </AuthLayout>
-        }
+          path="/admin-dashboard/contact-forms"
+          element={
+            <AuthLayout authentication>
+              <ContactForms />
+            </AuthLayout>
+          }
         />
         <Route
-        path='/admin-dashboard/customers'
-        element={
-          <AuthLayout authentication>
-            <Customers/>
-          </AuthLayout>
-        }
+          path="/admin-dashboard/engineers"
+          element={
+            <AuthLayout authentication>
+              <Enginners />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/admin-dashboard/customers"
+          element={
+            <AuthLayout authentication>
+              <Customers />
+            </AuthLayout>
+          }
         />
       </Route>
     </>,
@@ -106,7 +110,6 @@ const router = createBrowserRouter(
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-
     <Provider store={store}>
       <RouterProvider router={router} />
     </Provider>

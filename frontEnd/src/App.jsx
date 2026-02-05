@@ -24,6 +24,7 @@ function App() {
         if (
           error.response?.status === 401 &&
           !originalRequest._retry &&
+          !originalRequest._skipAuthRefresh && // Added this check
           originalRequest.url !== "/api/v1/users/refresh-token"
         ) {
           originalRequest._retry = true;

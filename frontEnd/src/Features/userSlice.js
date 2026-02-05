@@ -17,7 +17,11 @@ export const userRegister = createAsyncThunk(
     } catch (error) {
       // Handle errors from ApiError class in backend
       const errorMessage =
-        error.response?.data?.message || (typeof error.response?.data === "string" ? error.response?.data : error.message) || "Registration failed";
+        error.response?.data?.message ||
+        (typeof error.response?.data === "string"
+          ? error.response?.data
+          : error.message) ||
+        "Registration failed";
       // The toast notification should be displayed by the component, not the thunk.
       return rejectWithValue(errorMessage);
     }
@@ -25,19 +29,20 @@ export const userRegister = createAsyncThunk(
 );
 
 // Async Thunk for User Login
-export const logInUser = createAsyncThunk(
-  "user/login",
-  async (loginData, { rejectWithValue }) => {
-    try {
-      const response = await axios.post("/api/v1/users/login", loginData);
-      return response.data;
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || (typeof error.response?.data === "string" ? error.response?.data : error.message) || "Login failed";
-      return rejectWithValue(errorMessage);
+export const logInUser = createAsyncThunk("user/login", async (loginData) => {
+  try {
+    const response = await axios.post("/api/v1/users/login", loginData);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      // Corrected typo: error.reponse -> error.response
+      toast.error("User Account does not exist");
     }
-  },
-);
+    if(error.response?.status === 401){
+      toast.error("Invalid Credentials");
+    }
+  }
+});
 
 // Async Thunk for User Logout
 export const logOutUser = createAsyncThunk(
@@ -48,7 +53,11 @@ export const logOutUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || (typeof error.response?.data === "string" ? error.response?.data : error.message) || "Logout failed";
+        error.response?.data?.message ||
+        (typeof error.response?.data === "string"
+          ? error.response?.data
+          : error.message) ||
+        "Logout failed";
       return rejectWithValue(errorMessage);
     }
   },
@@ -75,16 +84,15 @@ const authSlice = createSlice({
       state.message = "";
     },
     // Used to manually set login state (e.g., from App.jsx session check)
-    login:(state,action)=>{
-      state.authStatus=true;
-      state.userInfo=action.payload
-    }
-    ,
+    login: (state, action) => {
+      state.authStatus = true;
+      state.userInfo = action.payload;
+    },
     // Used to manually clear state
-    logout:(state)=>{
-      state.authStatus=false;
+    logout: (state) => {
+      state.authStatus = false;
       state.userInfo = null;
-    }
+    },
   },
   // Handle lifecycle actions of async thunks (pending, fulfilled, rejected)
   extraReducers: (builder) => {
@@ -108,45 +116,45 @@ const authSlice = createSlice({
         state.userInfo = null;
       })
       // Login Lifecycle
-      .addCase(logInUser.pending,(state)=>{
-        state.isLoading= true;
+      .addCase(logInUser.pending, (state) => {
+        state.isLoading = true;
       })
-      .addCase(logInUser.fulfilled , (state,action)=>{
-        state.isLoading= false;
-        state.isSuccess= true;
+      .addCase(logInUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
         state.isError = false;
-        state.authStatus= true;
-        state.userInfo=action.payload.data.user;
-        state.message=action.payload?.message ||  "User LoggedIn Successfully"
+        state.authStatus = true;
+        state.userInfo = action.payload.data.user;
+        state.message = action.payload?.message || "User LoggedIn Successfully";
       })
-      .addCase(logInUser.rejected,(state,action)=>{
-        state.isLoading= false;
-        state.isError  = true;
-        state.isSuccess= false;
-        state.authStatus= false;
-        state.userInfo= null;
-        state.message=action.payload?.message || "User LogIn Failed "
+      .addCase(logInUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.isSuccess = false;
+        state.authStatus = false;
+        state.userInfo = null;
+        state.message = action.payload?.message;
       })
       // Logout Lifecycle
-      .addCase(logOutUser.pending,(state)=>{
-        state.isLoading= true;
+      .addCase(logOutUser.pending, (state) => {
+        state.isLoading = true;
       })
-      .addCase(logOutUser.fulfilled,(state)=>{
-        state.isLoading= false;
-        state.isSuccess= true;
+      .addCase(logOutUser.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isSuccess = true;
         state.isError = false;
-        state.authStatus= false;
-        state.userInfo= null;
-        state.message="User logged out successfully"
+        state.authStatus = false;
+        state.userInfo = null;
+        state.message = "User logged out successfully";
       })
-      .addCase(logOutUser.rejected,(state,action)=>{
-        state.isLoading= false;
-        state.isError  = true;
-        state.isSuccess= false;
-        state.message=action.payload || "Logout failed"
-      })
+      .addCase(logOutUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.isSuccess = false;
+        state.message = action.payload || "Logout failed";
+      });
   },
 });
 
-export const { reset,login,logout } = authSlice.actions;
+export const { reset, login, logout } = authSlice.actions;
 export default authSlice.reducer;

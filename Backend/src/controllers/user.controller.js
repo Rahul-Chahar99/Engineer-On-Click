@@ -36,7 +36,8 @@ const generateAccessAndRefreshToken = async (userId) => {
     if (error instanceof ApiError) throw error;
     throw new ApiError(
       500,
-      error?.message || "Something went wrong while generating refresh and access token"
+      error?.message ||
+        "Something went wrong while generating refresh and access token"
     );
   }
 };
@@ -231,7 +232,7 @@ const logOutUser = asyncHandler(async (req, res) => {
 const updateUserProfile = asyncHandler(async (req, res) => {
   const { fullName, email, mobileNo, aadharNo, address, jobTitle } = req.body;
   // socialMedia comes as an object from req.body when sent via FormData
-  const socialMedia = req.body.socialMedia || {}; 
+  const socialMedia = req.body.socialMedia || {};
 
   const userId = req.user._id;
 
@@ -257,25 +258,48 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
   if (coverImageLocalPath) {
     const uploadedCoverImage = await uploadOnCloudinary(coverImageLocalPath);
-    if (!uploadedCoverImage) throw new ApiError(500, "Failed to upload new cover image");
+    if (!uploadedCoverImage)
+      throw new ApiError(500, "Failed to upload new cover image");
     updateFields.coverImage = uploadedCoverImage.url;
   }
 
-  const user = await User.findByIdAndUpdate(userId, {
-    $set: {
-      ...updateFields,
-    }
-  }, { new: true }).select("-password -refreshToken");
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: {
+        ...updateFields,
+      },
+    },
+    { new: true }
+  ).select("-password -refreshToken");
 
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Profile updated successfully"));
-})
+});
 
 const getUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, req.user, "User fetched successfully"));
+});
+
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword, confirmPassword } = req.body;
+  const user = await User.findById(req.user?.id);
+
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+  if (!isPasswordCorrect) throw new ApiError(401, "Invalid Password");
+
+  if (newPassword !== confirmPassword)
+    throw new ApiError(401, "Enter Same Password");
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "password Changed Successfully"));
 });
 
 const refreshAcessToken = asyncHandler(async (req, res) => {
@@ -351,9 +375,9 @@ const getAllContactForms = asyncHandler(async (req, res) => {
 
 //all Customers fetching at admin dashboard
 const getAllCustomers = asyncHandler(async (req, res) => {
-  const customers = await User.find({ role: "customer" }).sort({ _id: -1 }).select(
-    "-password -refreshToken"
-  );
+  const customers = await User.find({ role: "customer" })
+    .sort({ _id: -1 })
+    .select("-password -refreshToken");
   if (!customers || customers.length === 0) {
     throw new ApiError(404, "No customers found");
   }
@@ -376,17 +400,15 @@ const deleteEngineer = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, engineer, "Enginner deleted SuccessFully "));
 });
-const deleteCustomer = asyncHandler(async(req,res)=>{
-  const {id} = req.params;
-  const customer = await User.findByIdAndDelete(id)
-  if(!customer) throw new ApiError(404,"Customer Not Found")
+const deleteCustomer = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const customer = await User.findByIdAndDelete(id);
+  if (!customer) throw new ApiError(404, "Customer Not Found");
 
-    return res
+  return res
     .status(200)
-    .json(new ApiResponse(200,customer,"Customer Deleted SuccessFully"))
-})
-
-
+    .json(new ApiResponse(200, customer, "Customer Deleted SuccessFully"));
+});
 
 export {
   registerUser,
@@ -399,5 +421,6 @@ export {
   getAllContactForms,
   getAllCustomers,
   deleteEngineer,
-  deleteCustomer
+  deleteCustomer,
+  changeCurrentPassword,
 };

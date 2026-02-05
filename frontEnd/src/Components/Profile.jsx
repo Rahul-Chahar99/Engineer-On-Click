@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import Input from "../ReusableComponents/Input.jsx";
 import axios from "axios";
 import toast from "react-hot-toast";
+import {Link } from "react-router-dom";
 
 function Profile() {
   const { userInfo } = useSelector((state) => state.auth);
@@ -113,6 +114,7 @@ function Profile() {
             alt="Cover"
             className="w-full h-full  object-cover"
           />
+
           {edit && (
             <div
               className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
@@ -241,11 +243,19 @@ function Profile() {
               <h2 className="text-xl font-bold text-gray-800">
                 Profile Details
               </h2>
-              <div className="w-fit">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 justify-items-end"> {/* Use grid for better alignment of w-full children */}
+                <Link to="/profile/update-password">
                 <Button
                   type="button"
                   bgColor="bg-gray-700 hover:bg-gray-900"
-                  className="!px-4 !py-2 flex items-center gap-2 cursor-pointer text-white font-semibold rounded-lg"
+                  className="flex items-center justify-center cursor-pointer text-white font-semibold rounded-lg"
+                >
+                  Update Password
+                </Button></Link>
+                <Button
+                  type="button"
+                  bgColor="bg-gray-700 hover:bg-gray-900"
+                  className="flex items-center gap-2 justify-center cursor-pointer text-white font-semibold rounded-lg"
                   onClick={() => (edit ? updateProfile() : setEdit(true))}
                 >
                   {edit ? (
