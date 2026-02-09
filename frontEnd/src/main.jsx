@@ -21,6 +21,7 @@ import ContactForms from "./Components/ContactForms.jsx";
 import Enginners from "./Components/Enginners.jsx";
 import About from "./Components/About.jsx";
 import UpdatePassword from "./Components/UpdatePassword.jsx";
+import GenerateImageAuto from './Components/GenerateImageAuto.jsx'
 
 import {
   createBrowserRouter,
@@ -102,6 +103,14 @@ const router = createBrowserRouter(
               <Customers />
             </AuthLayout>
           }
+        />
+        <Route
+        path="/generate-ai-image"
+        element={
+          <AuthLayout authentication>
+            <GenerateImageAuto/>
+          </AuthLayout>
+        }
         />
       </Route>
     </>,

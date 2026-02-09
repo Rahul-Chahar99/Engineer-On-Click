@@ -134,7 +134,7 @@ function Profile() {
 
         <div className="md:flex ">
           {/* Left Column */}
-          <div className="md:w-1/3 bg-gray-50 p-6 flex flex-col items-center justify-center border-r border-gray-200">
+          <div className="md:w-1/3 bg-gray-50 p-6 flex flex-col items-center justify-center md:border-r border-gray-200">
             <div className="text-center -mt-20 relative">
               <div className="relative inline-block group">
                 <img
@@ -243,19 +243,19 @@ function Profile() {
               <h2 className="text-xl font-bold text-gray-800">
                 Profile Details
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 justify-items-end"> {/* Use grid for better alignment of w-full children */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 justify-items-center sm:justify-items-end"> {/* Center buttons on mobile, right-align on larger screens */}
                 <Link to="/profile/update-password">
                 <Button
                   type="button"
                   bgColor="bg-gray-700 hover:bg-gray-900"
-                  className="flex items-center justify-center cursor-pointer text-white font-semibold rounded-lg"
+                  className="w-full flex items-center justify-center cursor-pointer text-white font-semibold rounded-lg"
                 >
                   Update Password
                 </Button></Link>
                 <Button
                   type="button"
                   bgColor="bg-gray-700 hover:bg-gray-900"
-                  className="flex items-center gap-2 justify-center cursor-pointer text-white font-semibold rounded-lg"
+                  className="w-full flex items-center gap-2 justify-center cursor-pointer text-white font-semibold rounded-lg"
                   onClick={() => (edit ? updateProfile() : setEdit(true))}
                 >
                   {edit ? (

@@ -16,6 +16,7 @@ function Login() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
 
@@ -29,6 +30,7 @@ function Login() {
       const errorMessage = typeof message === "object" ? message?.message : message;
       toast.error(errorMessage || "Login failed");
       dispatch(reset());
+      reset()
     }
     if (isSuccess) {
       const successMessage = typeof message === "object" ? message?.message : message;

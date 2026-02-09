@@ -12,6 +12,8 @@ import {
   getAllCustomers,
   getAllContactForms,
   changeCurrentPassword,
+  getAiImage,
+  getAiImageWithTranscript
 } from "../controllers/user.controller.js";
 import { deleteContactForm } from "../controllers/contact.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -40,6 +42,8 @@ router.route("/logout").post(verifyJWT, logOutUser);
 router.route("/current-user").get(verifyJWT, getUser);
 router.route("/refresh-token").post(refreshAcessToken);
 router.route('/update-password').post(verifyJWT,changeCurrentPassword)
+router.route('/generateAiImage').post(verifyJWT,getAiImage)
+router.route('/generateImagewithTranscript').post(verifyJWT,getAiImageWithTranscript)
 
 //here admin accessing all the engineers
 router.route("/engineers").get(verifyJWT, isAdmin, getAllEngineers);
