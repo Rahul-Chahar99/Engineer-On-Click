@@ -62,18 +62,18 @@ function Singup() {
   };
 
   return (
-    <div className="flex items-center justify-center py-8 bg-gray-800 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+    <div className="flex items-center justify-center py-8 bg-base-200 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md bg-base-100 p-6 rounded-xl shadow-lg border border-base-300">
         <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
-          <p className="text-xs text-gray-500 mt-1">Join us to start your journey</p>
+          <h2 className="text-2xl font-bold text-base-content">Create Account</h2>
+          <p className="text-xs text-base-content/60 mt-1">Join us to start your journey</p>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data" className="space-y-3">
           <div className="space-y-2">
             <Input
               label="Full Name"
               placeholder="Enter your full name"
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-black focus:ring-1 focus:ring-black transition"
+              className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content placeholder-base-content/40 focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
               {...register("fullName", { required: true })}
             />
             {errors.fullName && (
@@ -84,7 +84,7 @@ function Singup() {
               label="Email Address"
               placeholder="you@example.com"
               type="email"
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-black focus:ring-1 focus:ring-black transition"
+              className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content placeholder-base-content/40 focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
               {...register("email", {
                 required: true,
                 validate: {
@@ -102,7 +102,7 @@ function Singup() {
             <Input
               label="Username"
               placeholder="Choose a username"
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-black focus:ring-1 focus:ring-black transition"
+              className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content placeholder-base-content/40 focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
               {...register("username", { required: true })}
             />
             {errors.username && (
@@ -113,7 +113,7 @@ function Singup() {
               label="Password"
               placeholder="Create a password"
               type="password"
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-black focus:ring-1 focus:ring-black transition"
+              className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content placeholder-base-content/40 focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
               {...register("password", { required: true })}
             />
             {errors.password && (
@@ -121,26 +121,26 @@ function Singup() {
             )}
             
             <div className="flex items-center space-x-4 py-2">
-              <span className="text-sm text-gray-700 font-medium">Register as:</span>
+              <span className="text-sm text-base-content font-medium">Register as:</span>
               <div className="flex items-center">
                 <input 
                   id="engineer" 
                   type="radio" 
                   value="engineer" 
-                  className="w-4 h-4 text-black border-gray-300 focus:ring-black cursor-pointer"
+                  className="radio radio-primary radio-sm"
                   {...register("role", {required: "Please select a role"})} 
                 />
-                <label htmlFor="engineer" className="ml-2 text-sm text-gray-900 cursor-pointer">Engineer</label>
+                <label htmlFor="engineer" className="ml-2 text-sm text-base-content cursor-pointer">Engineer</label>
               </div>
               <div className="flex items-center">
                 <input 
                   id="customer" 
                   type="radio" 
                   value="customer" 
-                  className="w-4 h-4 text-black border-gray-300 focus:ring-black cursor-pointer"
+                  className="radio radio-primary radio-sm"
                   {...register("role", {required: "Please select a role"})} 
                 />
-                <label htmlFor="customer" className="ml-2 text-sm text-gray-900 cursor-pointer">Customer</label>
+                <label htmlFor="customer" className="ml-2 text-sm text-base-content cursor-pointer">Customer</label>
               </div>
             </div>
             {errors.role && <p className="text-xs text-red-600">{errors.role.message}</p>}
@@ -148,7 +148,7 @@ function Singup() {
             <Input
               label="Avatar"
               type="file"
-              className="block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800 transition cursor-pointer"
+              className="block w-full text-xs text-base-content/70 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-content hover:file:bg-primary-focus transition cursor-pointer"
               {...register("avatar", { required: true })}
             />
             {errors.avatar && <p className="text-xs text-red-600">Avatar is required</p>}
@@ -156,7 +156,7 @@ function Singup() {
             <Input
               label="Cover Image"
               type="file"
-              className="block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800 transition cursor-pointer"
+              className="block w-full text-xs text-base-content/70 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-content hover:file:bg-primary-focus transition cursor-pointer"
               {...register("coverImage")}
             />
           </div>
@@ -164,7 +164,7 @@ function Singup() {
           <Button
             children={isLoading ? "registering..." : "Signup"}
             type="submit"
-            className="w-full rounded-lg bg-black px-3 py-2 text-sm font-bold text-white shadow hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition mt-3"
+            className="w-full rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-content shadow hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition mt-3"
           />
         </form>
       </div>

@@ -56,13 +56,13 @@ function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-800 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-base-200 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 bg-base-100 p-8 rounded-2xl shadow-xl border border-base-300">
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+          <h2 className="text-3xl font-extrabold text-base-content tracking-tight">
             Log in to your account
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-base-content/70">
             Welcome back! Please enter your details.
           </p>
         </div>
@@ -72,7 +72,7 @@ function Login() {
               label="Email or Username"
               type="text"
               placeholder="you@example.com or username"
-              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-black focus:ring-black sm:text-sm transition duration-200 ease-in-out"
+              className="block w-full rounded-lg border border-base-300 px-4 py-3 text-base-content placeholder-base-content/50 focus:border-primary focus:ring-primary sm:text-sm transition duration-200 ease-in-out bg-base-100"
               {...register("identifier", {
                 required: "Email or username is required",
               })}
@@ -87,7 +87,7 @@ function Login() {
               label="Password"
               type="password"
               placeholder="Enter your password"
-              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-black focus:ring-black sm:text-sm transition duration-200 ease-in-out"
+              className="block w-full rounded-lg border border-base-300 px-4 py-3 text-base-content placeholder-base-content/50 focus:border-primary focus:ring-primary sm:text-sm transition duration-200 ease-in-out bg-base-100"
               {...register("password", { required: true })}
             />
             {errors.password && (
@@ -100,7 +100,7 @@ function Login() {
           <Button
             children={isLoading ? "Logging In..." : "Log In"}
             type="submit"
-            className="flex w-full justify-center rounded-lg bg-black px-4 py-3 text-sm font-bold text-white shadow-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
+            className="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-content shadow-lg hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
           />
         </form>
         

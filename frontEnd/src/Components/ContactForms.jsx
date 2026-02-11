@@ -57,9 +57,9 @@ function ContactForms() {
   return (  
     <Container>
       <div className="w-full py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Contact Forms</h1>
+        <h1 className="text-3xl font-bold text-base-content mb-6">Contact Forms</h1>
         <Button
-          bgColor="bg-black text-white"
+          bgColor="bg-neutral text-neutral-content"
           className="rounded-lg" // This className will be passed to the underlying button
           onClick={() => window.history.back()} // Corrected: use 'onClick' (camelCase)
         >
@@ -68,17 +68,17 @@ function ContactForms() {
         {contactForms && contactForms.length > 0 ? (
           <div className="space-y-4">
             {contactForms.map((form, index) => (
-              <div key={form._id || index} className="bg-gray-800 text-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-bold text-white">{form.fullName}</h2>
+              <div key={form._id || index} className="bg-base-100 text-base-content rounded-lg shadow-lg p-6 border border-base-300">
+                <h2 className="text-xl font-bold text-base-content">{form.fullName}</h2>
                 <p className=""><strong>Email:</strong> {form.email}</p>
                 <p className=""><strong>Message:</strong> {form.message}</p>
                 <p className=""><strong>Phone Number:</strong> {form.phoneNumber}</p>
-                <p className="text-sm text-gray-300 mt-2">
+                <p className="text-sm text-base-content/70 mt-2">
                   <strong>Submitted:</strong> {form.createdAt ? new Date(form.createdAt).toLocaleString() : "Date not available"}
                 </p>
                 <Button
                 children="Delete Form"
-                bgColor="bg-red-600 hover:bg-red-700"
+                bgColor="bg-error hover:bg-error/80 text-error-content"
                 className="mt-3 rounded-lg cursor-pointer px-4 py-2 text-white font-semibold"
                 onClick={() => deleteContactForm(form._id)}
                 />
@@ -87,7 +87,7 @@ function ContactForms() {
           </div>
         ) : (
          <div className="flex justify-center items-center h-64">
-            <p className="text-gray-500 text-lg">No Contact Forms Available</p>
+            <p className="text-base-content/50 text-lg">No Contact Forms Available</p>
           </div>
         )}
       </div>

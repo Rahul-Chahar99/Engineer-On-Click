@@ -51,9 +51,9 @@ function Customers() {
   return (
     <Container>
       <div className="w-full py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">All Customer</h1>
+        <h1 className="text-3xl font-bold text-base-content mb-6">All Customer</h1>
         <Button
-          bgColor="bg-black text-white"
+          bgColor="bg-neutral text-neutral-content"
           className="rounded-lg" // This className will be passed to the underlying button
           onClick={() => window.history.back()} // Corrected: use 'onClick' (camelCase)
         >
@@ -64,12 +64,12 @@ function Customers() {
             {customers.map((customer, index) => (
               <div
                 key={customer._id || index}
-                className="bg-gray-800 text-white rounded-lg shadow-lg p-6"
+                className="bg-base-100 text-base-content rounded-lg shadow-lg p-6 border border-base-300"
               >
                 <h2>Company Name : {customer.fullName}</h2>
                 <p>Email : {customer.email}</p>
                 <p>Contact No : {customer.phoneNumber || "Not Available"}</p>
-                <p className="text-sm text-gray-300 mt-2">
+                <p className="text-sm text-base-content/70 mt-2">
                   <strong>Account Created:</strong>{" "}
                   {customer.createdAt
                     ? new Date(customer.createdAt).toLocaleString()
@@ -77,7 +77,7 @@ function Customers() {
                 </p>
                 <Button
                   children="Delete Customer"
-                  bgColor="bg-red-600 hover:bg-red-700"
+                  bgColor="bg-error hover:bg-error/80 text-error-content"
                   className="mt-3 rounded-lg cursor-pointer px-4 py-2 text-white font-semibold"
                   onClick={() => deleteCustomer(customer._id)}
                 />
@@ -86,7 +86,7 @@ function Customers() {
           </div>
         ) : (
           <div className="flex justify-center items-center h-64">
-            <p className="text-gray-500 text-lg">No Customer Available</p>
+            <p className="text-base-content/50 text-lg">No Customer Available</p>
           </div>
         )}
       </div>

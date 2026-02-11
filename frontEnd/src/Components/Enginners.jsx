@@ -61,9 +61,9 @@ function Enginners() {
   return (
     <Container>
       <div className="w-full py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">All Engineer</h1>
+        <h1 className="text-3xl font-bold text-base-content mb-6">All Engineer</h1>
         <Button
-                  bgColor="bg-black text-white"
+                  bgColor="bg-neutral text-neutral-content"
                   className="rounded-lg" // This className will be passed to the underlying button
                   onClick={() => window.history.back()} // Corrected: use 'onClick' (camelCase)
                 >
@@ -74,14 +74,14 @@ function Enginners() {
             {engineers.map((engineer, index) => (
               <div
                 key={engineer._id || index}
-                className="bg-gray-800 text-white rounded-lg shadow-lg p-6"
+                className="bg-base-100 text-base-content rounded-lg shadow-lg p-6 border border-base-300"
               >
                 <h2>Full Name: {engineer.fullName}</h2>
                 <p>Email : {engineer.email}</p>
                 <p>Contact No : {engineer.phoneNumber || "Not Available"}</p>
                 <p>Aadhar No : {engineer.aadharNo || "Not Available"}</p>
                 <p>Job Title : {engineer.jobTitle || "Not Available"}</p>
-                <p className="text-sm text-gray-300 mt-2">
+                <p className="text-sm text-base-content/70 mt-2">
                   <strong>Account Created:</strong>{" "}
                   {engineer.createdAt
                     ? new Date(engineer.createdAt).toLocaleString()
@@ -89,7 +89,7 @@ function Enginners() {
                 </p>
                 <Button
                   children="Delete Engineer"
-                  bgColor="bg-red-600 hover:bg-red-700"
+                  bgColor="bg-error hover:bg-error/80 text-error-content"
                   className="mt-3 rounded-lg cursor-pointer px-4 py-2 text-white font-semibold"
                   onClick={() => deleteEngineer(engineer._id)}
                 />
@@ -98,7 +98,7 @@ function Enginners() {
           </div>
         ) : (
          <div className="flex justify-center items-center h-64">
-            <p className="text-gray-500 text-lg">No Engineer Available</p>
+            <p className="text-base-content/50 text-lg">No Engineer Available</p>
           </div>
         )}
       </div>

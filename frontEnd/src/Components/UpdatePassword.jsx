@@ -57,13 +57,13 @@ function UpdatePassword() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-800 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-base-200 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 bg-base-100 p-8 rounded-2xl shadow-xl border border-base-300">
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+          <h2 className="text-3xl font-extrabold text-base-content tracking-tight">
             Update Password
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-base-content/70">
             Please enter your old and new password.
           </p>
         </div>
@@ -74,7 +74,7 @@ function UpdatePassword() {
               label="Old Password"
               type="password"
               placeholder="Enter your old password"
-              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-black focus:ring-black sm:text-sm transition duration-200 ease-in-out"
+              className="block w-full rounded-lg border border-base-300 px-4 py-3 text-base-content placeholder-base-content/50 focus:border-primary focus:ring-primary sm:text-sm transition duration-200 ease-in-out bg-base-100"
               {...register("oldPassword", {
                 required: "Old password is required",
               })}
@@ -89,7 +89,7 @@ function UpdatePassword() {
               label="New Password"
               type="password"
               placeholder="Enter your new password"
-              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-black focus:ring-black sm:text-sm transition duration-200 ease-in-out"
+              className="block w-full rounded-lg border border-base-300 px-4 py-3 text-base-content placeholder-base-content/50 focus:border-primary focus:ring-primary sm:text-sm transition duration-200 ease-in-out bg-base-100"
               {...register("newPassword", {
                 required: "New password is required",
               })}
@@ -104,7 +104,7 @@ function UpdatePassword() {
               label="Confirm New Password"
               type="password"
               placeholder="Confirm your new password"
-              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-black focus:ring-black sm:text-sm transition duration-200 ease-in-out"
+              className="block w-full rounded-lg border border-base-300 px-4 py-3 text-base-content placeholder-base-content/50 focus:border-primary focus:ring-primary sm:text-sm transition duration-200 ease-in-out bg-base-100"
               {...register("confirmPassword", {
                 required: "Please confirm your new password",
                 validate: (value) =>
@@ -121,7 +121,7 @@ function UpdatePassword() {
           <Button
             type="submit"
             children={loading ? "Updating..." : "Update"}
-            className="flex w-full justify-center rounded-lg bg-black px-4 py-3 text-sm font-bold text-white shadow-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
+            className="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-content shadow-lg hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
             disabled={loading}
           />
         </form>

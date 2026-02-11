@@ -49,9 +49,9 @@ function Home() {
   ];
 
   return (
-    <div className="flex flex-col bg-gray-50 w-full">
+    <div className="flex flex-col bg-base-200 w-full">
       {/* Hero Section */}
-      <div className="flex items-center justify-center py-12 px-4 bg-gray-800 text-white">
+      <div className="flex items-center justify-center py-12 px-4 bg-neutral text-neutral-content">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4">
             Professional Engineer Services
@@ -60,7 +60,7 @@ function Home() {
             Hire experienced engineers on daily basis anywhere in India
           </p>
           <Link to="/signup">
-            <Button className="bg-linear-to-r from-blue-600 to-purple-600 px-8 py-3 text-white font-bold hover:from-blue-700 hover:to-purple-700">
+            <Button className="bg-primary text-primary-content px-8 py-3 font-bold hover:bg-primary-focus">
               Get Started
             </Button>
           </Link>
@@ -70,27 +70,27 @@ function Home() {
       {/* Services Grid */}
       <div className="w-full px-4 py-12">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
+          <h2 className="text-3xl font-bold text-center mb-12 text-base-content">
             Our Services
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service) => (
               <div
                 key={service.id}
-                className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow flex flex-col"
+                className="bg-base-100 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow flex flex-col border border-base-300"
               >
                 <div className="text-4xl mb-4">{service.icon}</div>
-                <h3 className="text-xl font-bold mb-2 text-gray-800">
+                <h3 className="text-xl font-bold mb-2 text-base-content">
                   {service.title}
                 </h3>
-                <p className="text-gray-600 mb-4">{service.description}</p>
+                <p className="text-base-content/70 mb-4">{service.description}</p>
                 <div className="mb-4">
-                  <span className="text-2xl font-bold text-blue-600">
+                  <span className="text-2xl font-bold text-primary">
                     {service.price}
                   </span>
                 </div>
                 <Link to="/signup" className="mt-auto">
-                  <Button className="w-full bg-blue-600 text-white py-2 font-bold hover:bg-blue-700">
+                  <Button className="w-full bg-primary text-primary-content py-2 font-bold hover:bg-primary-focus">
                     Book Engineer
                   </Button>
                 </Link>
@@ -101,7 +101,7 @@ function Home() {
       </div>
 
       {/* Features Section */}
-      <div className="bg-gray-800 text-white py-12 px-4">
+      <div className="bg-neutral text-neutral-content py-12 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold mb-8 text-center">
             Why Choose Us?
@@ -110,21 +110,21 @@ function Home() {
             <div className="text-center">
               <div className="text-4xl mb-4">🇮🇳</div>
               <h3 className="text-xl font-bold mb-2">All Over India</h3>
-              <p className="text-gray-300">
+              <p className="text-neutral-content/70">
                 Available at any location across India
               </p>
             </div>
             <div className="text-center">
               <div className="text-4xl mb-4">⏰</div>
               <h3 className="text-xl font-bold mb-2">Daily Basis</h3>
-              <p className="text-gray-300">
+              <p className="text-neutral-content/70">
                 Hire engineers for flexible daily contracts
               </p>
             </div>
             <div className="text-center">
               <div className="text-4xl mb-4">👨‍💼</div>
               <h3 className="text-xl font-bold mb-2">Expert Team</h3>
-              <p className="text-gray-300">
+              <p className="text-neutral-content/70">
                 Experienced professionals in various domains
               </p>
             </div>

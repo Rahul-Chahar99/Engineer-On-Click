@@ -100,10 +100,10 @@ function Profile() {
   }
 
   return (
-    <div className="bg-gray-800 min-h-screen p-4 flex justify-center items-center">
-      <div className="max-w-5xl w-full bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div className="bg-base-300 min-h-screen p-4 flex justify-center items-center">
+      <div className="max-w-5xl w-full bg-base-100 rounded-xl shadow-2xl overflow-hidden">
         {/* Cover Image Section */}
-        <div className="relative w-full h-48 bg-gray-300 group">
+        <div className="relative w-full h-48 bg-base-300 group">
           <img
             src={
               // This checks if formData.coverImage is a File object (like when a user uploads an image). If it is, it creates a temporary URL using URL.createObjectURL() so the browser can display the uploaded file immediately. If it's not a File (meaning it's likely a URL string), it uses that URL directly. If neither is available, it falls back to a placeholder image.
@@ -134,17 +134,18 @@ function Profile() {
 
         <div className="md:flex ">
           {/* Left Column */}
-          <div className="md:w-1/3 bg-gray-50 p-6 flex flex-col items-center justify-center md:border-r border-gray-200">
+          <div className="md:w-1/3 bg-base-200 p-6 flex flex-col items-center justify-center md:border-r border-base-300">
             <div className="text-center -mt-20 relative">
-              <div className="relative inline-block group">
-                <img
-                  className="w-32 h-32 mx-auto rounded-full border-4 border-white shadow-lg object-cover bg-white"
-                  src={
+              <div className="avatar group">
+                <div className="ring-primary ring-offset-base-100 w-32 rounded-full ring-4 ring-offset-2 relative">
+                  <img
+                    src={
                     formData.avatar instanceof File
                       ? URL.createObjectURL(formData.avatar)
                       : formData.avatar || "https://via.placeholder.com/150"
                   }
                   alt={formData.fullName}
+                    className="object-cover"
                 />
                 {edit && (
                   <div
@@ -156,6 +157,7 @@ function Profile() {
                     </span>
                   </div>
                 )}
+                </div>
               </div>
               <input
                 type="file"
@@ -164,20 +166,20 @@ function Profile() {
                 onChange={handleAvatarChange}
                 accept="image/*"
               />
-              <h1 className="text-2xl font-bold text-gray-800 mt-4">
+              <h1 className="text-2xl font-bold text-base-content mt-4">
                 {formData.fullName || userInfo.fullName}
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-base-content/70">
                 @{formData.username || userInfo.username}
               </p>
-              <p className="text-md text-gray-600 mt-2">
+              <p className="text-md text-base-content/80 mt-2">
                 {formData.jobTitle ||
                   userInfo.jobTitle ||
                   "Job title not specified"}
               </p>
             </div>
             <div className="mt-6 w-full text-center">
-              <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+              <h2 className="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-3">
                 Connect
               </h2>
               <div className="flex justify-center gap-4">
@@ -186,7 +188,7 @@ function Profile() {
                     href={userInfo.socialMedia.linkedIn}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                    className="text-primary hover:text-primary-focus transition-colors"
                   >
                     <svg
                       fill="currentColor"
@@ -202,7 +204,7 @@ function Profile() {
                     href={userInfo.socialMedia.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-black hover:text-gray-700 transition-colors"
+                    className="text-base-content hover:text-base-content/70 transition-colors"
                   >
                     <svg
                       fill="currentColor"
@@ -218,7 +220,7 @@ function Profile() {
                     href={userInfo.socialMedia.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-800 hover:text-black transition-colors"
+                    className="text-base-content hover:text-base-content/70 transition-colors"
                   >
                     <svg
                       fill="currentColor"
@@ -239,23 +241,23 @@ function Profile() {
 
           {/* Right Column */}
           <div className="md:w-2/3 p-6">
-            <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
-              <h2 className="text-xl font-bold text-gray-800">
+            <div className="flex justify-between items-center border-b border-base-300 pb-3 mb-4">
+              <h2 className="text-xl font-bold text-base-content">
                 Profile Details
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 justify-items-center sm:justify-items-end"> {/* Center buttons on mobile, right-align on larger screens */}
                 <Link to="/profile/update-password">
                 <Button
                   type="button"
-                  bgColor="bg-gray-700 hover:bg-gray-900"
-                  className="w-full flex items-center justify-center cursor-pointer text-white font-semibold rounded-lg"
+                  bgColor="bg-neutral hover:bg-neutral/80"
+                  className="w-full flex items-center justify-center cursor-pointer text-neutral-content font-semibold rounded-lg"
                 >
                   Update Password
                 </Button></Link>
                 <Button
                   type="button"
-                  bgColor="bg-gray-700 hover:bg-gray-900"
-                  className="w-full flex items-center gap-2 justify-center cursor-pointer text-white font-semibold rounded-lg"
+                  bgColor="bg-neutral hover:bg-neutral/80"
+                  className="w-full flex items-center gap-2 justify-center cursor-pointer text-neutral-content font-semibold rounded-lg"
                   onClick={() => (edit ? updateProfile() : setEdit(true))}
                 >
                   {edit ? (
@@ -300,7 +302,7 @@ function Profile() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="col-span-1">
-                <label className="text-xs font-semibold text-gray-500 uppercase">
+                <label className="text-xs font-semibold text-base-content/60 uppercase">
                   Full Name
                 </label>
                 <Input
@@ -308,11 +310,11 @@ function Profile() {
                   value={formData.fullName || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
                 />
               </div>
               <div className="col-span-1">
-                <label className="text-xs font-semibold text-gray-500 uppercase">
+                <label className="text-xs font-semibold text-base-content/60 uppercase">
                   Email
                 </label>
                 <Input
@@ -320,11 +322,11 @@ function Profile() {
                   value={formData.email || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
                 />
               </div>
               <div className="col-span-1">
-                <label className="text-xs font-semibold text-gray-500 uppercase">
+                <label className="text-xs font-semibold text-base-content/60 uppercase">
                   Mobile Number
                 </label>
                 <Input
@@ -333,12 +335,12 @@ function Profile() {
                   onChange={handleChange}
                   disabled={!edit}
                   maxLength="10"
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
                   placeholder={edit ? "Enter mobile number" : "Not provided"}
                 />
               </div>
               <div className="col-span-1">
-                <label className="text-xs font-semibold text-gray-500 uppercase">
+                <label className="text-xs font-semibold text-base-content/60 uppercase">
                   Aadhar Number
                 </label>
                 <Input
@@ -347,12 +349,12 @@ function Profile() {
                   onChange={handleChange}
                   disabled={!edit}
                   maxLength="12"
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
                   placeholder={edit ? "Enter Aadhar number" : "Not provided"}
                 />
               </div>
               <div className="col-span-1 md:col-span-2">
-                <label className="text-xs font-semibold text-gray-500 uppercase">
+                <label className="text-xs font-semibold text-base-content/60 uppercase">
                   Job Title
                 </label>
                 <Input
@@ -360,12 +362,12 @@ function Profile() {
                   value={formData.jobTitle || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
                   placeholder={edit ? "Enter Job Title" : "Not provided"}
                 />
               </div>
               <div className="col-span-1 md:col-span-2">
-                <label className="text-xs font-semibold text-gray-500 uppercase">
+                <label className="text-xs font-semibold text-base-content/60 uppercase">
                   Address
                 </label>
                 <Input
@@ -373,13 +375,13 @@ function Profile() {
                   value={formData.address || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
                   placeholder={edit ? "Enter address" : "Not provided"}
                 />
               </div>
               {edit && (
                 <div className="col-span-1 md:col-span-2">
-                  <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">
+                  <label className="text-xs font-semibold text-base-content/60 uppercase mb-1 block">
                     Social Media Links
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -389,7 +391,7 @@ function Profile() {
                       onChange={handleSocialChange}
                       disabled={!edit}
                       placeholder="LinkedIn URL"
-                      className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
+                      className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
                     />
                     <Input
                       name="twitter"
@@ -397,7 +399,7 @@ function Profile() {
                       onChange={handleSocialChange}
                       disabled={!edit}
                       placeholder="Twitter URL"
-                      className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
+                      className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
                     />
                     <Input
                       name="github"
@@ -405,7 +407,7 @@ function Profile() {
                       onChange={handleSocialChange}
                       disabled={!edit}
                       placeholder="GitHub URL"
-                      className={`w-full p-2 rounded border ${edit ? "border-gray-300 bg-white" : "!border-transparent !bg-transparent !px-0"}`}
+                      className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
                     />
                   </div>
                 </div>

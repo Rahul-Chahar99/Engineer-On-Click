@@ -65,7 +65,7 @@ function App() {
     <>
       <Toaster position="top-center" reverseOrder={false} />
       {!loading ? (
-        <div className="min-h-screen flex flex-wrap content-between bg-white">
+        <div className="min-h-screen flex flex-wrap content-between bg-base-200">
           <div className="w-full block">
             <Header />
             <main>
