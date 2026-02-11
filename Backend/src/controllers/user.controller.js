@@ -422,7 +422,7 @@ const getAiImage = asyncHandler(async (req, res) => {
   console.log(videoUrl);
   // 1. Start the actor run and wait for it to finish (waitForFinish=60 seconds)
   const runResponse = await axios.post(
-    "https://api.apify.com/v2/acts/pintostudio~youtube-transcript-scraper/runs?token=apify_api_RKmJjE9pZKaDDmqqkhB7GExKyhh08G2mIWEx&waitForFinish=60",
+    `https://api.apify.com/v2/acts/pintostudio~youtube-transcript-scraper/runs?token=${process.env.APIFY_API_TOKEN}&waitForFinish=60`,
     { videoUrl }
   );
 
@@ -434,7 +434,7 @@ const getAiImage = asyncHandler(async (req, res) => {
 
     // 3. Fetch the actual data (transcript) from the dataset
     const datasetResponse = await axios.get(
-      `https://api.apify.com/v2/datasets/${datasetId}/items?token=apify_api_RKmJjE9pZKaDDmqqkhB7GExKyhh08G2mIWEx`
+      `https://api.apify.com/v2/datasets/${datasetId}/items?token=${process.env.APIFY_API_TOKEN}`
     );
 
     // console.log("datasetResponse the axios get request" , datasetResponse.data);
