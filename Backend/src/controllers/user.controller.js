@@ -417,45 +417,45 @@ const deleteCustomer = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, customer, "Customer Deleted SuccessFully"));
 });
 
-const getAiImage = asyncHandler(async (req, res) => {
-  const { videoUrl } = req.body;
-  console.log(videoUrl);
-  // 1. Start the actor run and wait for it to finish (waitForFinish=60 seconds)
-  const runResponse = await axios.post(
-    `https://api.apify.com/v2/acts/pintostudio~youtube-transcript-scraper/runs?token=${process.env.APIFY_API_TOKEN}&waitForFinish=60`,
-    { videoUrl }
-  );
+// const getAiImage = asyncHandler(async (req, res) => {
+//   const { videoUrl } = req.body;
+//   console.log(videoUrl);
+//   // 1. Start the actor run and wait for it to finish (waitForFinish=60 seconds)
+//   const runResponse = await axios.post(
+//     `https://api.apify.com/v2/acts/pintostudio~youtube-transcript-scraper/runs?token=${process.env.APIFY_API_TOKEN}&waitForFinish=60`,
+//     { videoUrl }
+//   );
 
-  // console.log('runReponse the first axios post request', runResponse.data.data.defaultDatasetId);
+//   // console.log('runReponse the first axios post request', runResponse.data.data.defaultDatasetId);
 
-  if (runResponse.status === 200 || runResponse.status === 201) {
-    // 2. Extract the dataset ID from the run object
-    const datasetId = runResponse.data.data.defaultDatasetId;
+//   if (runResponse.status === 200 || runResponse.status === 201) {
+//     // 2. Extract the dataset ID from the run object
+//     const datasetId = runResponse.data.data.defaultDatasetId;
 
-    // 3. Fetch the actual data (transcript) from the dataset
-    const datasetResponse = await axios.get(
-      `https://api.apify.com/v2/datasets/${datasetId}/items?token=${process.env.APIFY_API_TOKEN}`
-    );
+//     // 3. Fetch the actual data (transcript) from the dataset
+//     const datasetResponse = await axios.get(
+//       `https://api.apify.com/v2/datasets/${datasetId}/items?token=${process.env.APIFY_API_TOKEN}`
+//     );
 
-    // console.log("datasetResponse the axios get request" , datasetResponse.data);
+//     // console.log("datasetResponse the axios get request" , datasetResponse.data);
 
-    // The Apify dataset returns an array. We extract the first item which contains the transcript 'text'.
-    const transcriptData = datasetResponse.data[0];
+//     // The Apify dataset returns an array. We extract the first item which contains the transcript 'text'.
+//     const transcriptData = datasetResponse.data[0];
 
-    if (!transcriptData) {
-      throw new ApiError(404, "No transcript data found");
-    }
-    // console.log("this is the data",transcriptData);
+//     if (!transcriptData) {
+//       throw new ApiError(404, "No transcript data found");
+//     }
+//     // console.log("this is the data",transcriptData);
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(200, transcriptData, "Transcript fetched successfully")
-      );
-  } else {
-    throw new ApiError(500, "Failed to fetch transcript");
-  }
-});
+//     return res
+//       .status(200)
+//       .json(
+//         new ApiResponse(200, transcriptData, "Transcript fetched successfully")
+//       );
+//   } else {
+//     throw new ApiError(500, "Failed to fetch transcript");
+//   }
+// });
 const getAiImageWithTranscript = asyncHandler(async(req,res)=>{
   const { Content } = req.body;
   
