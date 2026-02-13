@@ -417,9 +417,98 @@ const deleteCustomer = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, customer, "Customer Deleted SuccessFully"));
 });
 
+const getAiImage = asyncHandler(async (req, res) => {
+  
+  const { videoUrl } = req.body;
+  console.log(videoUrl);
+  // 1. Start the actor run and wait for it to finish (waitForFinish=60 seconds)
+  const runResponse = await axios.post(
+    `https://api.apify.com/v2/acts/pintostudio~youtube-transcript-scraper/runs?token=${process.env.APIFY_API_TOKEN}&waitForFinish=60`,
+    { videoUrl }
+  );
 
+  // console.log('runReponse the first axios post request', runResponse.data.data.defaultDatasetId);
 
+  if (runResponse.status === 200 || runResponse.status === 201) {
+    // 2. Extract the dataset ID from the run object
+    const datasetId = runResponse.data.data.defaultDatasetId;
 
+    // 3. Fetch the actual data (transcript) from the dataset
+    const datasetResponse = await axios.get(
+      `https://api.apify.com/v2/datasets/${datasetId}/items?token=${process.env.APIFY_API_TOKEN}`
+    );
+
+    // console.log("datasetResponse the axios get request" , datasetResponse.data);
+
+    // The Apify dataset returns an array. We extract the first item which contains the transcript 'text'.
+    const transcriptData = datasetResponse.data[0];
+
+    if (!transcriptData) {
+      throw new ApiError(404, "No transcript data found");
+    }
+    // console.log("this is the data",transcriptData);
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, transcriptData, "Transcript fetched successfully")
+      );
+  } else {
+    throw new ApiError(500, "Failed to fetch transcript");
+  }
+});
+const getAiImageWithTranscript = asyncHandler(async(req,res)=>{
+  const { Content } = req.body;
+  
+  
+  console.log("Transcript received for image generation");
+  console.log("Request Body:", req.body); // Debug: Check what is actually received
+
+   if (!Content) {
+    throw new ApiError(400, "Transcript is required");
+  }
+
+  if (!process.env.GOOGLE_API_KEY) {
+    console.error("GOOGLE_API_KEY is missing in environment variables");
+    throw new ApiError(500, "Server configuration error: API Key missing");
+  }
+
+  try {
+    // 1. Use Google Gemini (via API Key) to generate a creative image prompt from the transcript
+    // We use gemini-1.5-flash as it is fast and efficient
+    const googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GOOGLE_API_KEY}`;
+    
+    // Ensure Content is a string and truncate to avoid token limits or payload issues
+    const transcriptText = String(Content).substring(0, 12000);
+
+    const promptForGemini = `Based on the following video transcript, create a single, highly detailed, and creative image generation prompt (max 50 words). The prompt should describe a visual scene that captures the essence of the content. Transcript: ${transcriptText}`;
+
+    const geminiResponse = await axios.post(googleApiUrl, {
+      contents: [{ parts: [{ text: promptForGemini }] }]
+    });
+
+    const generatedPrompt = geminiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!generatedPrompt) {
+      console.error("Gemini API response invalid:", JSON.stringify(geminiResponse.data));
+      throw new Error("Failed to generate prompt from AI service");
+    }
+    
+    console.log("Gemini Generated Prompt:", generatedPrompt);
+
+    // 2. Generate the image URL using the prompt (using Pollinations for direct image generation)
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(generatedPrompt)}`;
+    console.log("Final Image URL:", imageUrl);
+
+    return res.status(200).json(new ApiResponse(200, imageUrl, "Image generated successfully"));
+  } catch (error) {
+    console.error("Error generating image:", error.message);
+    if (error.response) {
+      console.error("Upstream API Error Data:", JSON.stringify(error.response.data));
+    }
+    throw new ApiError(500, "Failed to generate image. Please check server logs.");
+  }
+});
 
 
 export {
