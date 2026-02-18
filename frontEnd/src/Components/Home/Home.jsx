@@ -89,7 +89,7 @@ function Home() {
                     {service.price}
                   </span>
                 </div>
-                <Link to="/signup" className="mt-auto">
+                <Link to="/book-engineer" className="mt-auto">
                   <Button className="w-full bg-primary text-primary-content py-2 font-bold hover:bg-primary-focus">
                     Book Engineer
                   </Button>
