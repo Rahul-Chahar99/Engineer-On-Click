@@ -48,6 +48,7 @@ function App() {
 // .data: Refers to the specific key inside that JSON object where the actual user information lives.
 // the second .data from out backend ,Your backend uses a standardized ApiResponse class (seen in user.controller.js). When it sends a response, it looks something like this:
 
+// console.log(data);to check what we got in data
 
         dispatch(login(data.data));
       } catch (error) {

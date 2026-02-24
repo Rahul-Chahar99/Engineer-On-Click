@@ -59,7 +59,7 @@ router
   .delete(verifyJWT, isAdmin, deleteContactForm);
 
 // ROUTE FOR USER TO UPDATE HIS PROFILE
-router.route("/update-profile").put(
+router.route("/update-profile").patch(
   verifyJWT,
   upload.fields([
     {
