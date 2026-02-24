@@ -25,7 +25,7 @@ function Login() {
   );
   useEffect(() => {
     if (isError) {
-      console.log(message);
+      // console.log(message);
       
       const errorMessage = typeof message === "object" ? message?.message : message;
       toast.error(errorMessage || "Login failed");

@@ -34,7 +34,7 @@ function Singup() {
   }, [isError, isSuccess, isLoading, navigate, dispatch]);
 
   const onSubmit = (data) => {
-    console.log("Form submitted with data:", data);
+    // console.log("Form submitted with data:", data);
     //create a forData object beacuase we are sending files (multiplart/form-data)
     const formData = new FormData();
     formData.append("fullName", data.fullName);

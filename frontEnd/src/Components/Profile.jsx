@@ -79,7 +79,7 @@ function Profile() {
     }
 
     try {
-      console.log("Updating profile with data:", formData);
+      // console.log("Updating profile with data:", formData);
       const response = await axios.put("/api/v1/users/update-profile", data);
 
       toast.success(response.data?.message || "Profile updated successfully");

@@ -30,7 +30,7 @@ function UpdatePassword() {
         { _skipAuthRefresh: true }, // Add this to prevent the global interceptor from logging out on 401s for this specific request
       );
       if (response.status === 200) {
-        console.log(response.data);
+        // console.log(response.data);
 
         toast.success(
           response.data?.message || "Password updated successfully",

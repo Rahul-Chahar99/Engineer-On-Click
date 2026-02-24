@@ -24,7 +24,7 @@ function Contact() {
       toast.success(response.data.message?.message || "Form submitted successfully");
       reset();
       navigate("/")
-      console.log(data);
+      // console.log(data);
       
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
