@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import Input from "../ReusableComponents/Input";
 import Button from "../ReusableComponents/Button";
 import { useDispatch, useSelector } from "react-redux";
-import { logInUser, reset } from "../Features/userSlice.js";
+import { logInUser, reset as resetAuth } from "../Features/userSlice.js";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from 'react-hot-toast'
@@ -29,13 +29,13 @@ function Login() {
       
       const errorMessage = typeof message === "object" ? message?.message : message;
       toast.error(errorMessage || "Login failed");
-      dispatch(reset());
-      reset()
+      dispatch(resetAuth());
+      // reset();
     }
     if (isSuccess) {
       const successMessage = typeof message === "object" ? message?.message : message;
       toast.success(successMessage || "Login successful");
-      dispatch(reset());
+      dispatch(resetAuth());
       navigate("/");
     }
   }, [isError, isLoading, isSuccess, message, navigate, dispatch]);

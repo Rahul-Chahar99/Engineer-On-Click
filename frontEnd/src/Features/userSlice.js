@@ -29,18 +29,15 @@ export const userRegister = createAsyncThunk(
 );
 
 // Async Thunk for User Login
-export const logInUser = createAsyncThunk("user/login", async (loginData) => {
+export const logInUser = createAsyncThunk("user/login", async (loginData, { rejectWithValue }) => {
   try {
     const response = await axios.post("/api/v1/users/login", loginData);
     return response.data;
+
+    
   } catch (error) {
-    if (error.response?.status === 404) {
-      // Corrected typo: error.reponse -> error.response
-      toast.error("User Account does not exist");
-    }
-    if(error.response?.status === 401){
-      toast.error("Invalid Credentials");
-    }
+    const errorMessage = error.response?.data?.message || "Login failed";
+    return rejectWithValue(errorMessage);
   }
 });
 
@@ -133,7 +130,7 @@ const authSlice = createSlice({
         state.isSuccess = false;
         state.authStatus = false;
         state.userInfo = null;
-        state.message = action.payload?.message;
+        state.message = action.payload || "Login failed";
       })
       // Logout Lifecycle
       .addCase(logOutUser.pending, (state) => {

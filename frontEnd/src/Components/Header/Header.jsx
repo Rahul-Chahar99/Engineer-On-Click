@@ -58,11 +58,8 @@ function Header() {
       slug: "/admin-dashboard",
       active: authStatus && userInfo?.role === "admin" ? true : false,
     },
-    {
-      name:"Generate Ai Image",
-      slug:"/generate-ai-image",
-      active:authStatus
-    }
+    
+    
   ];
 
   return (
