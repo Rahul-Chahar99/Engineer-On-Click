@@ -191,7 +191,7 @@ function BookEngineerForm() {
                 <Input
                   label="End Time"
                   type="time"
-                  className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100 cursor-pointer [color-scheme:dark]"
+                  className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100 cursor-pointer scheme-dark"
                   {...register("endTime", {
                     required: "End time is required",
                     min: { value: "10:00", message: "Time must be after 10:00 AM" },

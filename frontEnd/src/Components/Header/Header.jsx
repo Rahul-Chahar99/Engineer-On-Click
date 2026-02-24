@@ -136,7 +136,7 @@ function Header() {
                 <div tabIndex={0} role="button" className="px-2 lg:px-3 py-2 text-sm lg:text-base text-base-content hover:text-primary font-medium transition duration-200 flex items-center gap-1">
                   Theme
                 </div>
-                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <ul tabIndex={0} className="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52">
                   {themes.map((t) => (
                     <li key={t}>
                       <button onClick={() => setTheme(t)} className={theme === t ? "active" : ""}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>

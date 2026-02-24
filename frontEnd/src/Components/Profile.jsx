@@ -310,7 +310,7 @@ function Profile() {
                   value={formData.fullName || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
                 />
               </div>
               <div className="col-span-1">
@@ -322,7 +322,7 @@ function Profile() {
                   value={formData.email || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
                 />
               </div>
               <div className="col-span-1">
