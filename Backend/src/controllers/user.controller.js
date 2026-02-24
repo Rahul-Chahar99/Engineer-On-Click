@@ -8,6 +8,7 @@ import { ApiResponse } from "../utils/Apiresponse.js";
 import jwt from "jsonwebtoken";
 import Contact from "../models/contact.models.js";
 import axios from "axios";
+import * as cloudinary from "cloudinary";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -280,6 +281,27 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     { new: true }
   ).select("-password -refreshToken");
 
+  // crate a utility function after uploading new avatar or cover image the old image should delete from cloudinary
+  if (avatarLocalPath) {
+    const oldAvatarUrl = req.user.avatar;
+    if (oldAvatarUrl) {
+      // Extract public_id from the old avatar URL (assuming it's a Cloudinary URL)
+      const oldAvatarPublicId = oldAvatarUrl.split("/").pop().split(".")[0];
+      // Delete the old avatar from Cloudinary
+      await cloudinary.uploader.destroy(oldAvatarPublicId);
+      // console.log("file delete ", oldAvatarPublicId);
+    }
+  }
+  if (coverImageLocalPath) {
+    const oldCoverImageUrl = req.user.coverImage;
+    if (oldCoverImageUrl) {
+      const oldCoverImagePublicId = oldCoverImageUrl
+        .split("/")
+        .pop()
+        .split(".")[0];
+      await cloudinary.uploader.destroy(oldCoverImagePublicId);
+    }
+  }
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Profile updated successfully"));
@@ -320,7 +342,7 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
     // Verify the token signature
     const decodedToken = jwt.verify(
       incomingRefreshToken,
-      process.env.Refresh_TOKEN_SECRET
+      process.env.REFRESH_TOKEN_SECRET
     );
     const user = await User.findById(decodedToken?._id);
     if (!user) {
@@ -417,9 +439,6 @@ const deleteCustomer = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, customer, "Customer Deleted SuccessFully"));
 });
 
-
-
-
 export {
   registerUser,
   logInUser,
@@ -433,5 +452,4 @@ export {
   deleteEngineer,
   deleteCustomer,
   changeCurrentPassword,
-  
 };
