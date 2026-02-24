@@ -335,7 +335,7 @@ function Profile() {
                   onChange={handleChange}
                   disabled={!edit}
                   maxLength="10"
-                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
                   placeholder={edit ? "Enter mobile number" : "Not provided"}
                 />
               </div>
@@ -349,7 +349,7 @@ function Profile() {
                   onChange={handleChange}
                   disabled={!edit}
                   maxLength="12"
-                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
                   placeholder={edit ? "Enter Aadhar number" : "Not provided"}
                 />
               </div>
@@ -362,7 +362,7 @@ function Profile() {
                   value={formData.jobTitle || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
                   placeholder={edit ? "Enter Job Title" : "Not provided"}
                 />
               </div>
@@ -375,7 +375,7 @@ function Profile() {
                   value={formData.address || ""}
                   onChange={handleChange}
                   disabled={!edit}
-                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
                   placeholder={edit ? "Enter address" : "Not provided"}
                 />
               </div>
@@ -391,7 +391,7 @@ function Profile() {
                       onChange={handleSocialChange}
                       disabled={!edit}
                       placeholder="LinkedIn URL"
-                      className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
+                      className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
                     />
                     <Input
                       name="twitter"
@@ -399,7 +399,7 @@ function Profile() {
                       onChange={handleSocialChange}
                       disabled={!edit}
                       placeholder="Twitter URL"
-                      className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
+                      className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
                     />
                     <Input
                       name="github"
@@ -407,7 +407,7 @@ function Profile() {
                       onChange={handleSocialChange}
                       disabled={!edit}
                       placeholder="GitHub URL"
-                      className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "!border-transparent !bg-transparent !px-0 text-base-content"}`}
+                      className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
                     />
                   </div>
                 </div>
