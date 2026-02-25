@@ -186,10 +186,12 @@ const logInUser = asyncHandler(async (req, res) => {
   // httpOnly: true -> prevents client-side JS from reading the cookie (XSS protection)
   // secure: true -> only sends cookie over HTTPS (in production)
   // sameSite: "none" -> allows cross-site cookies (required for Vercel + Render)
+  // path: "/" -> cookie available for entire domain
   const options = {
     httpOnly: true,
     secure: true,
     sameSite: "none",
+    path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
 
@@ -229,6 +231,7 @@ const logOutUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     secure: true,
     sameSite: "none",
+    path: "/",
   };
 
   // Clear cookies on the client side
@@ -359,6 +362,7 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "none",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     };
     // Generate NEW tokens (Rotation)
