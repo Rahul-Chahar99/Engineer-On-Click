@@ -83,7 +83,7 @@ function Profile() {
 
     try {
       // console.log("Updating profile with data:", formData);
-      const response = await axios.put("/api/v1/users/update-profile", data);
+      const response = await axios.patch("/api/v1/users/update-profile", data);
 
       toast.success(response.data?.message || "Profile updated successfully");
       setEdit(false);
