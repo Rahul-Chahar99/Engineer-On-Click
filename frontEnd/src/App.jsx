@@ -7,6 +7,7 @@ import Header from "./Components/Header/Header";
 import Footer from "./Components/Footer/Footer";
 import axios from "axios";
 import { Toaster } from "react-hot-toast";
+import { HashLoader } from "react-spinners";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -71,7 +72,13 @@ function App() {
             <Header />
             <main>
               {/* Wrap Outlet with Suspense to handle lazy-loaded route components */}
-              <Suspense fallback={<div className="text-center py-10">Loading Page...</div>}>
+              <Suspense
+                fallback={
+                  <div className="flex justify-center items-center py-20 w-full">
+                    <HashLoader color="#36d7b7" size={50} />
+                  </div>
+                }
+              >
                 <Outlet />
               </Suspense>
             </main>
@@ -80,7 +87,9 @@ function App() {
         </div>
       ) : (
         // A proper fallback for the initial app load
-        <div className="flex justify-center items-center h-screen w-full">Loading Application...</div>
+        <div className="flex justify-center items-center h-screen w-full bg-base-200">
+          <HashLoader color="#36d7b7" size={80} />
+        </div>
       )}
     </>
   );
