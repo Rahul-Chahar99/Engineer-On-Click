@@ -7,7 +7,7 @@ import Header from "./Components/Header/Header";
 import Footer from "./Components/Footer/Footer";
 import axios from "axios";
 import { Toaster } from "react-hot-toast";
-import { HashLoader } from "react-spinners";
+import { Sca, ScaleLoaderleLoader } from "react-spinners";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -75,7 +75,7 @@ function App() {
               <Suspense
                 fallback={
                   <div className="flex justify-center items-center py-20 w-full">
-                    <HashLoader color="#36d7b7" size={50} />
+                    <ScaleLoader color="#36d7b7" size={50} />
                   </div>
                 }
               >
@@ -88,7 +88,7 @@ function App() {
       ) : (
         // A proper fallback for the initial app load
         <div className="flex justify-center items-center h-screen w-full bg-base-200">
-          <HashLoader color="#36d7b7" size={80} />
+          <ScaleLoader color="#36d7b7" size={80} />
         </div>
       )}
     </>
