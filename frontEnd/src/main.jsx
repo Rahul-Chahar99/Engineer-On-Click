@@ -1,10 +1,10 @@
-import { StrictMode, lazy } from "react";
+import { StrictMode, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import axios from "axios";
 
 // Configure axios for production
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || "";
 axios.defaults.withCredentials = true;
 
 import store from "./Features/store";
@@ -23,7 +23,9 @@ const ContactForms = lazy(() => import("./Components/ContactForms.jsx"));
 const Enginners = lazy(() => import("./Components/Enginners.jsx"));
 const About = lazy(() => import("./Components/About.jsx"));
 const UpdatePassword = lazy(() => import("./Components/UpdatePassword.jsx"));
-const BookEngineerForm = lazy(() => import("./Components/BookEngineerForm.jsx"));
+const BookEngineerForm = lazy(
+  () => import("./Components/BookEngineerForm.jsx"),
+);
 
 import {
   createBrowserRouter,
@@ -35,9 +37,7 @@ import {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-    
       <Route path="/" element={<App />}>
-      
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route
@@ -88,7 +88,13 @@ const router = createBrowserRouter(
           path="/admin-dashboard/contact-forms"
           element={
             <AuthLayout authentication>
-              <ContactForms />
+              <Suspense
+                fallback={
+                  <div className="text-center py-10">Loading forms...</div>
+                }
+              >
+                <ContactForms />
+              </Suspense>
             </AuthLayout>
           }
         />
@@ -109,15 +115,13 @@ const router = createBrowserRouter(
           }
         />
         <Route
-        path='/book-engineer'
-        element={
-          <AuthLayout authentication>
-              <BookEngineerForm/> 
-          </AuthLayout>
-        }
-
+          path="/book-engineer"
+          element={
+            <AuthLayout authentication>
+              <BookEngineerForm />
+            </AuthLayout>
+          }
         />
-       
       </Route>
     </>,
   ),
