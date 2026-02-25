@@ -44,15 +44,15 @@ function ContactForms() {
     getContactForms();
   }, []);
 
-  if (loading) {
-    return (
-      <Container>
-        <div className="flex justify-center items-center py-12">
-          <p className="text-lg">Loading contact forms...</p>
-        </div>
-      </Container>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <Container>
+  //       <div className="flex justify-center items-center py-12">
+  //         <p className="text-lg">Loading contact forms...</p>
+  //       </div>
+  //     </Container>
+  //   );
+  // }
 
   return (  
     <Container>
