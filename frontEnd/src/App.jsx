@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import "./App.css";
 import { useDispatch } from "react-redux";
 import { login, logout } from "./Features/userSlice";
@@ -70,13 +70,17 @@ function App() {
           <div className="w-full block">
             <Header />
             <main>
-              <Outlet />
+              {/* Wrap Outlet with Suspense to handle lazy-loaded route components */}
+              <Suspense fallback={<div className="text-center py-10">Loading Page...</div>}>
+                <Outlet />
+              </Suspense>
             </main>
             <Footer />
           </div>
         </div>
       ) : (
-        <div>Loading....</div>
+        // A proper fallback for the initial app load
+        <div className="flex justify-center items-center h-screen w-full">Loading Application...</div>
       )}
     </>
   );

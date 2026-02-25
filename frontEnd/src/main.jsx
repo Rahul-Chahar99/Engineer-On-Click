@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import axios from "axios";
@@ -9,20 +9,21 @@ axios.defaults.withCredentials = true;
 
 import store from "./Features/store";
 import { Provider } from "react-redux";
-import Home from "./Components/Home/Home.jsx";
-import Login from "./Components/Login.jsx";
-import Singup from "./Components/Singup.jsx";
 import App from "./App.jsx";
 import AuthLayout from "./Components/AuthLayout.jsx";
-import Profile from "./Components/Profile.jsx";
-import Admin_DashBoard from "./Components/Admin_DashBoard.jsx";
-import Customers from "./Components/Customers.jsx";
-import Contact from "./Components/Contact.jsx";
-import ContactForms from "./Components/ContactForms.jsx";
-import Enginners from "./Components/Enginners.jsx";
-import About from "./Components/About.jsx";
-import UpdatePassword from "./Components/UpdatePassword.jsx";
-import BookEngineerForm from "./Components/BookEngineerForm.jsx";
+
+const Home = lazy(() => import("./Components/Home/Home.jsx"));
+const Login = lazy(() => import("./Components/Login.jsx"));
+const Singup = lazy(() => import("./Components/Singup.jsx"));
+const Profile = lazy(() => import("./Components/Profile.jsx"));
+const Admin_DashBoard = lazy(() => import("./Components/Admin_DashBoard.jsx"));
+const Customers = lazy(() => import("./Components/Customers.jsx"));
+const Contact = lazy(() => import("./Components/Contact.jsx"));
+const ContactForms = lazy(() => import("./Components/ContactForms.jsx"));
+const Enginners = lazy(() => import("./Components/Enginners.jsx"));
+const About = lazy(() => import("./Components/About.jsx"));
+const UpdatePassword = lazy(() => import("./Components/UpdatePassword.jsx"));
+const BookEngineerForm = lazy(() => import("./Components/BookEngineerForm.jsx"));
 
 import {
   createBrowserRouter,
@@ -34,7 +35,9 @@ import {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
+    
       <Route path="/" element={<App />}>
+      
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route
