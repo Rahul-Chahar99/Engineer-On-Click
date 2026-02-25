@@ -110,8 +110,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     fullName,
-    avatar: uploadedAvatar.url,
-    coverImage: uploadedCoverImage?.url || "",
+    avatar: uploadedAvatar.secure_url,
+    coverImage: uploadedCoverImage?.secure_url || "",
     email: email.toLowerCase().trim(),
     password,
     username: username.toLowerCase().trim(),
@@ -263,14 +263,14 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   if (avatarLocalPath) {
     const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
     if (!uploadedAvatar) throw new ApiError(500, "Failed to upload new avatar");
-    updateFields.avatar = uploadedAvatar.url;
+    updateFields.avatar = uploadedAvatar.secure_url;
   }
 
   if (coverImageLocalPath) {
     const uploadedCoverImage = await uploadOnCloudinary(coverImageLocalPath);
     if (!uploadedCoverImage)
       throw new ApiError(500, "Failed to upload new cover image");
-    updateFields.coverImage = uploadedCoverImage.url;
+    updateFields.coverImage = uploadedCoverImage.secure_url;
   }
 
   const user = await User.findByIdAndUpdate(
