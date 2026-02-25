@@ -6,7 +6,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN || "*",
     credentials: true,
   })
 );
@@ -14,6 +14,20 @@ app.use(express.json({limit:"160kb"})) // Increased limit for large transcripts
 app.use(express.urlencoded({extended:true,limit:"160kb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
+
+// Health check route
+app.get('/', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Engineer-On-Click API is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', uptime: process.uptime() });
+});
+
 // routes import 
 import userRouter from './routes/user.routes.js'
 import contactRouter from './routes/contact.routes.js'

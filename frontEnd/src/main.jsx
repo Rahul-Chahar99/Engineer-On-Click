@@ -3,7 +3,8 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import axios from "axios";
 
-// Global configuration: Ensure cookies (containing tokens) are sent with every request
+// Configure axios for production
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
 axios.defaults.withCredentials = true;
 
 import store from "./Features/store";
