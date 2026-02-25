@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import Container from "./Container/Container";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -65,20 +65,17 @@ function ContactForms() {
         >
           Go Back
         </Button>
-        {contactForms && contactForms.length > 0 ? (
-          <Suspense
-            fallback={
-              <div className="flex justify-center items-center py-20 w-full">
-                <GridLoader color="#36d7b7" size={50} />
-              </div>
-            }
-          >
-            <div className="space-y-4">
-              {contactForms.map((form, index) => (
-                <div
-                  key={form._id || index}
-                  className="bg-base-100 text-base-content rounded-lg shadow-lg p-6 border border-base-300"
-                >
+        {loading ? (
+          <div className="flex justify-center items-center py-20 w-full">
+            <GridLoader color="#36d7b7" size={50} />
+          </div>
+        ) : contactForms && contactForms.length > 0 ? (
+          <div className="space-y-4">
+            {contactForms.map((form, index) => (
+              <div
+                key={form._id || index}
+                className="bg-base-100 text-base-content rounded-lg shadow-lg p-6 border border-base-300"
+              >
                   <h2 className="text-xl font-bold text-base-content">
                     {form.fullName}
                   </h2>
@@ -104,13 +101,12 @@ function ContactForms() {
                     onClick={() => deleteContactForm(form._id)}
                   />
                 </div>
-              ))}
-            </div>
-          </Suspense>
+            ))}
+          </div>
         ) : (
-          <div className="flex justify-center items-center h-screen w-full bg-base-200">
-          <GridLoader color="#36d7b7" size={80} />
-        </div>
+          <div className="flex justify-center items-center h-64">
+            <p className="text-base-content/50 text-lg">No Contact Forms Available</p>
+          </div>
         )}
       </div>
     </Container>
