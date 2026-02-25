@@ -18,6 +18,9 @@ function Profile() {
     if (userInfo) {
       setFormData({
         ...userInfo,
+        // Fix HTTP to HTTPS for Cloudinary URLs
+        avatar: userInfo.avatar?.replace('http://', 'https://'),
+        coverImage: userInfo.coverImage?.replace('http://', 'https://'),
         socialMedia:
           userInfo.socialMedia && !Array.isArray(userInfo.socialMedia)
             ? userInfo.socialMedia
