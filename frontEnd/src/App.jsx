@@ -7,7 +7,7 @@ import Header from "./Components/Header/Header";
 import Footer from "./Components/Footer/Footer";
 import axios from "axios";
 import { Toaster } from "react-hot-toast";
-import { Sca, ScaleLoaderleLoader } from "react-spinners";
+import { ScaleLoader } from "react-spinners";
 
 function App() {
   const [loading, setLoading] = useState(true);
