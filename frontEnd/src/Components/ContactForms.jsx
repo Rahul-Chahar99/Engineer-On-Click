@@ -108,11 +108,9 @@ function ContactForms() {
             </div>
           </Suspense>
         ) : (
-          <div className="flex justify-center items-center h-64">
-            <p className="text-base-content/50 text-lg">
-              No Contact Forms Available
-            </p>
-          </div>
+          <div className="flex justify-center items-center h-screen w-full bg-base-200">
+          <GridLoader color="#36d7b7" size={80} />
+        </div>
         )}
       </div>
     </Container>
