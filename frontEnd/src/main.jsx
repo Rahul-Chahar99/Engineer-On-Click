@@ -88,13 +88,9 @@ const router = createBrowserRouter(
           path="/admin-dashboard/contact-forms"
           element={
             <AuthLayout authentication>
-              <Suspense
-                fallback={
-                  <div className="text-center py-10">Loading forms...</div>
-                }
-              >
+             
                 <ContactForms />
-              </Suspense>
+              
             </AuthLayout>
           }
         />
