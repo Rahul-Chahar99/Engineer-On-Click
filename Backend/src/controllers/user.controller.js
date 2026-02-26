@@ -187,10 +187,12 @@ const logInUser = asyncHandler(async (req, res) => {
   // secure: true -> only sends cookie over HTTPS (in production)
   // sameSite: "none" -> allows cross-site cookies (required for Vercel + Render)
   // path: "/" -> cookie available for entire domain
+  // 🔧 LOCAL vs PRODUCTION: Automatically adapts based on NODE_ENV
+  const isProduction = process.env.NODE_ENV === "production";
   const options = {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: isProduction, // true in production, false locally
+    sameSite: isProduction ? "none" : "lax", // "none" for cross-site (production), "lax" for same-site (local)
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
@@ -227,10 +229,12 @@ const logOutUser = asyncHandler(async (req, res) => {
     }
   );
 
+  // 🔧 LOCAL vs PRODUCTION: Automatically adapts based on NODE_ENV
+  const isProduction = process.env.NODE_ENV === "production";
   const options = {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     path: "/",
   };
 
@@ -358,10 +362,12 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
     if (incomingRefreshToken !== user?.refreshToken) {
       throw new ApiError(401, "Refresh Token is expired");
     }
+    // 🔧 LOCAL vs PRODUCTION: Automatically adapts based on NODE_ENV
+    const isProduction = process.env.NODE_ENV === "production";
     const options = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     };

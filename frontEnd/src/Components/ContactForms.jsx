@@ -67,7 +67,7 @@ function ContactForms() {
         </Button>
         {loading ? (
           <div className="flex justify-center items-center py-20 w-full">
-            <GridLoader color="#36d7b7" size={50} />
+            <GridLoader color="#36d7b7" size={30} />
           </div>
         ) : contactForms && contactForms.length > 0 ? (
           <div className="space-y-4">

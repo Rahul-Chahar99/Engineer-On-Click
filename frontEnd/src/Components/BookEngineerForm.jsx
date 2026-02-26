@@ -2,30 +2,57 @@ import React from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import Input from '../ReusableComponents/Input.jsx'
-import Button from '../ReusableComponents/Button.jsx'
+import Input from "../ReusableComponents/Input.jsx";
+import Button from "../ReusableComponents/Button.jsx";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
+import { useEffect } from "react";
 
 function BookEngineerForm() {
-  const [loading ,setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.auth);
-
-
   const {
     handleSubmit,
     register,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm();
+  const branchCodeValue =  watch("branchCode");
+
+
+  // const [branchCode, setBranchCode] = useState("");
+  // const [branchName, setBranchName] = useState("");
+  // const [branchAddress, setBranchAddress] = useState("");
+
+  useEffect(() => {
+    // Stop if the input is completely empty
+    if (!branchCodeValue) return;
+    // 1. Start a timer for 1000 milliseconds (1 second)
+    const delayDeBounce = setTimeout(async () => {
+      try {
+        const response = await axios.post(`/api/v1/branches/search` , {branchCode:branchCodeValue});
+        if (response.status === 200) {
+         setValue('branchName',response.data.data.branchName)
+         setValue('branchAddress',response.data.data.branchAddress)
+        }
+      } catch (error) {
+        console.error("Failed to fetch branch details");
+      }
+    }, 1000);
+
+    return () => clearTimeout(delayDeBounce);
+  }, [branchCodeValue,setValue]);
+
+  
 
   const bookEngineerHandler = async (data) => {
-    setLoading(true)
+    setLoading(true);
     const customerId = userInfo?._id;
-    
+
     if (!customerId) {
       toast.error("User information not found. Please login again.");
       setLoading(false);
@@ -33,21 +60,19 @@ function BookEngineerForm() {
     }
 
     try {
-      const response = await axios.post('/api/v1/book-engineer', {
+      const response = await axios.post("/api/v1/book-engineer", {
         ...data,
-        customerId
+        customerId,
       });
       toast.success(response.data?.message || "Engineer Booked Successfully");
-      reset()
-      navigate('/')
-  
+      reset();
+      navigate("/");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went Wrong!")
-      
-    } finally{
-      setLoading(false)
-    } 
-  }
+      toast.error(error.response?.data?.message || "Something went Wrong!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-base-200 px-4 sm:px-6 lg:px-8">
@@ -61,7 +86,10 @@ function BookEngineerForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(bookEngineerHandler)} className="mt-8 space-y-6">
+        <form
+          onSubmit={handleSubmit(bookEngineerHandler)}
+          className="mt-8 space-y-6"
+        >
           <div className="space-y-4">
             {/* Date Range */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -70,9 +98,15 @@ function BookEngineerForm() {
                   label="Start Date"
                   type="date"
                   className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100 cursor-pointer [color-scheme:dark]"
-                  {...register("startDate", { required: "Start date is required" })}
+                  {...register("startDate", {
+                    required: "Start date is required",
+                  })}
                 />
-                {errors.startDate && <p className="text-xs text-red-600 mt-1">{errors.startDate.message}</p>}
+                {errors.startDate && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.startDate.message}
+                  </p>
+                )}
               </div>
               <div>
                 <Input
@@ -82,13 +116,17 @@ function BookEngineerForm() {
                   {...register("endDate", {
                     required: "End date is required",
                     validate: (val) => {
-                      if (watch('startDate') && val < watch('startDate')) {
+                      if (watch("startDate") && val < watch("startDate")) {
                         return "End date cannot be before start date";
                       }
-                    }
+                    },
                   })}
                 />
-                {errors.endDate && <p className="text-xs text-red-600 mt-1">{errors.endDate.message}</p>}
+                {errors.endDate && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.endDate.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -98,14 +136,14 @@ function BookEngineerForm() {
               inputMode="numeric"
               placeholder="Enter Branch Code"
               onInput={(e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, "")
+                e.target.value = e.target.value.replace(/[^0-9]/g, "");
               }}
               {...register("branchCode", {
                 required: "Branch Code is required",
                 pattern: {
                   value: /^[0-9]+$/,
-                  message: "Please enter numbers only"
-                }
+                  message: "Please enter numbers only",
+                },
               })}
               className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content placeholder-base-content/40 focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
             />
@@ -119,7 +157,10 @@ function BookEngineerForm() {
               label="Branch Name"
               type="text"
               placeholder="Enter Branch Name"
-              {...register("branchName", { required: "Branch Name is required" })}
+              {...register("branchName", {
+                required: "Branch Name is required",
+                
+              })}
               className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content placeholder-base-content/40 focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
             />
             {errors.branchName && (
@@ -132,7 +173,9 @@ function BookEngineerForm() {
               label="Address"
               type="text"
               placeholder="Enter Branch Address"
-              {...register("branchAddress", { required: "Branch Address is required" })}
+              {...register("branchAddress", {
+                required: "Branch Address is required",
+              })}
               className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content placeholder-base-content/40 focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
             />
             {errors.branchAddress && (
@@ -147,22 +190,22 @@ function BookEngineerForm() {
               inputMode="numeric"
               placeholder="Enter Local Contact"
               onInput={(e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, "")
+                e.target.value = e.target.value.replace(/[^0-9]/g, "");
               }}
               {...register("localContact", {
                 required: "Local Contact is required",
                 pattern: {
                   value: /^[0-9]+$/,
-                  message: "Please enter numbers only"
+                  message: "Please enter numbers only",
                 },
                 minLength: {
                   value: 10,
-                  message: "Contact number must be at least 10 digits"
+                  message: "Contact number must be at least 10 digits",
                 },
                 maxLength: {
                   value: 10,
-                  message: "Contact number must be 10 digits"
-                }
+                  message: "Contact number must be 10 digits",
+                },
               })}
               className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content placeholder-base-content/40 focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
             />
@@ -181,11 +224,21 @@ function BookEngineerForm() {
                   className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100 cursor-pointer [color-scheme:dark]"
                   {...register("startTime", {
                     required: "Start time is required",
-                    min: { value: "10:00", message: "Time must be after 10:00 AM" },
-                    max: { value: "18:30", message: "Time must be before 6:30 PM" }
+                    min: {
+                      value: "10:00",
+                      message: "Time must be after 10:00 AM",
+                    },
+                    max: {
+                      value: "18:30",
+                      message: "Time must be before 6:30 PM",
+                    },
                   })}
                 />
-                {errors.startTime && <p className="text-xs text-red-600 mt-1">{errors.startTime.message}</p>}
+                {errors.startTime && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.startTime.message}
+                  </p>
+                )}
               </div>
               <div>
                 <Input
@@ -194,16 +247,26 @@ function BookEngineerForm() {
                   className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100 cursor-pointer scheme-dark"
                   {...register("endTime", {
                     required: "End time is required",
-                    min: { value: "10:00", message: "Time must be after 10:00 AM" },
-                    max: { value: "18:30", message: "Time must be before 6:30 PM" },
+                    min: {
+                      value: "10:00",
+                      message: "Time must be after 10:00 AM",
+                    },
+                    max: {
+                      value: "18:30",
+                      message: "Time must be before 6:30 PM",
+                    },
                     validate: (val) => {
-                      if (watch('startTime') && val <= watch('startTime')) {
+                      if (watch("startTime") && val <= watch("startTime")) {
                         return "End time must be after start time";
                       }
-                    }
+                    },
                   })}
                 />
-                {errors.endTime && <p className="text-xs text-red-600 mt-1">{errors.endTime.message}</p>}
+                {errors.endTime && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.endTime.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>

@@ -3,9 +3,10 @@ import Container from "./Container/Container.jsx";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Button from "../ReusableComponents/Button.jsx";
+import {DotLoader} from "react-spinners";
 function Customers() {
   const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const deleteCustomer = async (customerId) => {
     try {
@@ -41,12 +42,7 @@ function Customers() {
     };
     getCustomers();
   }, []);
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p>Loading Customers...</p>
-      </div>
-    );
+ 
 
   return (
     <Container>
@@ -59,7 +55,12 @@ function Customers() {
         >
           Go Back
         </Button>
-        {customers && customers.length > 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-20 w-full">
+            <DotLoader color="white" size={50} />
+          </div>
+        ) :
+        customers && customers.length > 0 ? (
           <div className="space-y-4">
             {customers.map((customer, index) => (
               <div

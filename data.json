@@ -1,0 +1,59 @@
+[
+  {
+    "branchCode": "10663",
+    "branchName": "Summair Club Road",
+    "branchManagerDetails": [
+      {
+        "managerCode": "MGR001",
+        "managerName": "Alice Wonderland",
+        "managerEmail": "alice.w@example.com",
+        "managerPhoneNumber": "1234567890"
+      }
+     
+    ],
+    "branchAddress": "HDFC Bank Ltd., Shop no 1 , Grd. Floor , Vasa Vira Empire,Summair Club Road  , Nr.Metropolis Lab,Jamnagar - 361005",
+    "branchLocationGoogleLink": "https://maps.app.goo.gl/eGg2sHo64WMqNT1b8"
+  },
+  {
+    "branchCode": "10636",
+    "branchName": "Radhanpur circle,Mehsana",
+    "branchManagerDetails": [
+      {
+        "managerCode": "K16530",
+        "managerName": "Kalpesh Kumar Patel",
+        "managerEmail": "kalpeshkumar.patel5@hdfc.bank.in",
+        "managerPhoneNumber": "9727757877"
+      }
+    ],
+    "branchAddress": "HDFC Bank , Ground Floor , M.B. Square , Nr.Mahalaxmi, Radhanpur Road ,Dist.Mehsana,Gujarat-384002",
+    "branchLocationGoogleLink": "https://maps.app.goo.gl/X5hKow769YCfcgB5A"
+  },
+  {
+    "branchCode": "B003",
+    "branchName": "East End Financial Hub",
+    "branchManagerDetails": [
+      {
+        "managerCode": "MGR004",
+        "managerName": "Diana Prince",
+        "managerEmail": "diana.p@example.com",
+        "managerPhoneNumber": "6677889900"
+      }
+    ],
+    "branchAddress": "303 Pine Lane, Villageton, State, 30003",
+    "branchLocationGoogleLink": "https://maps.app.goo.gl/example3"
+  },
+  {
+    "branchCode": "B004",
+    "branchName": "Westside Microfinance",
+    "branchManagerDetails": [
+      {
+        "managerCode": "MGR006",
+        "managerName": "Eve Harrington",
+        "managerEmail": "eve.h@example.com",
+        "managerPhoneNumber": "9988776655"
+      }
+    ],
+    "branchAddress": "404 Elm Street, Hamletburg, State, 40004",
+    "branchLocationGoogleLink": "https://maps.app.goo.gl/example4"
+  }
+]
