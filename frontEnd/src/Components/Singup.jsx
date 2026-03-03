@@ -149,7 +149,7 @@ function Singup() {
               label="Avatar"
               type="file"
               className="block w-full text-xs text-base-content/70 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-content hover:file:bg-primary-focus transition cursor-pointer"
-              {...register("avatar", { required: true })}
+              {...register("avatar")}
             />
             {errors.avatar && <p className="text-xs text-red-600">Avatar is required</p>}
 

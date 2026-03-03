@@ -33,6 +33,7 @@ import userRouter from './routes/user.routes.js'
 import contactRouter from './routes/contact.routes.js'
 import bookEngineerRouter from './routes/bookEngineer.router.js'
 import branchRouter from './routes/branchRouter.js'
+import { bookEngineer, getAllEngineerRequests } from "./controllers/bookEnginner.controller.js";
 
 
 
@@ -42,6 +43,7 @@ app.use('/api/v1',contactRouter)
 app.use('/api/v1',bookEngineerRouter)
 app.use('/api/v1/admin-dashboard',userRouter)
 app.use('/api/v1/branches',branchRouter)
+app.use('/api/v1/admin-dashboard',bookEngineerRouter)
 
 
 // http://localhost:8000/api/v1/users/register

@@ -10,6 +10,14 @@ const bookEngineerSchema =  new Schema({
         type:String,
         required:true
     },
+    pincdode:{
+        type:String,
+        required:true
+    },
+    city:{
+        type:String,
+        required:true
+    },
     endDate:{
         type:String,
         required:true

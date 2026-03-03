@@ -34,6 +34,8 @@ function Enginners() {
         if (response.status === 200) {
           const allEngineers = response.data.data || response.data;
           setEngineer(allEngineers);
+          console.log("Fetched Engineers:", allEngineers);  
+          
           //toast.success("Enginners fetched successfully");
         }
       } catch (error) {
@@ -78,7 +80,7 @@ function Enginners() {
               >
                 <h2>Full Name: {engineer.fullName}</h2>
                 <p>Email : {engineer.email}</p>
-                <p>Contact No : {engineer.phoneNumber || "Not Available"}</p>
+                <p>Contact No : {engineer.mobileNo || "Not Available"}</p>
                 <p>Aadhar No : {engineer.aadharNo || "Not Available"}</p>
                 <p>Job Title : {engineer.jobTitle || "Not Available"}</p>
                 <p className="text-sm text-base-content/70 mt-2">

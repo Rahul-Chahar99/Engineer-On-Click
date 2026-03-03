@@ -56,6 +56,17 @@ function Admin_DashBoard() {
               </Button>
             </Link>
           </div>
+          {/* All incoming request for engineer */}
+          <div className="bg-base-100 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow border border-base-300">
+            <div className="text-4xl mb-4">👥</div>
+            <h3 className="text-xl font-bold mb-2 text-base-content">Booking Request </h3>
+            <p className="text-base-content/70 mb-4">View and manage booking requests</p>
+            <Link to="/admin-dashboard/booking-requests">
+              <Button className="w-full bg-primary text-primary-content py-2 font-bold hover:bg-primary-focus">
+                See All Booking Requests
+              </Button>
+            </Link>
+          </div>
 
           {/* Form Requests Card */}
           <div className="bg-base-100 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow border border-base-300">

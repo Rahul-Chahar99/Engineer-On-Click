@@ -11,6 +11,7 @@ import { useEffect } from "react";
 
 function BookEngineerForm() {
   const [loading, setLoading] = useState(false);
+  const [cities, setCities] = useState([]);
   const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.auth);
   const {
@@ -21,23 +22,21 @@ function BookEngineerForm() {
     setValue,
     formState: { errors },
   } = useForm();
-  const branchCodeValue =  watch("branchCode");
+  const branchCodeValue = watch("branchCode");
+  const pincodeValue = watch("pincode");
 
-
-  // const [branchCode, setBranchCode] = useState("");
-  // const [branchName, setBranchName] = useState("");
-  // const [branchAddress, setBranchAddress] = useState("");
-
+  // Separate useEffect for branch code
   useEffect(() => {
-    // Stop if the input is completely empty
     if (!branchCodeValue) return;
-    // 1. Start a timer for 1000 milliseconds (1 second)
+
     const delayDeBounce = setTimeout(async () => {
       try {
-        const response = await axios.post(`/api/v1/branches/search` , {branchCode:branchCodeValue});
+        const response = await axios.post(`/api/v1/branches/search`, {
+          branchCode: branchCodeValue,
+        });
         if (response.status === 200) {
-         setValue('branchName',response.data.data.branchName)
-         setValue('branchAddress',response.data.data.branchAddress)
+          setValue("branchName", response.data?.data?.branchName || "");
+          setValue("branchAddress", response.data?.data?.branchAddress || "");
         }
       } catch (error) {
         console.error("Failed to fetch branch details");
@@ -45,9 +44,47 @@ function BookEngineerForm() {
     }, 1000);
 
     return () => clearTimeout(delayDeBounce);
-  }, [branchCodeValue,setValue]);
+  }, [branchCodeValue, setValue]);
 
-  
+  // Separate useEffect for pincode
+  useEffect(() => {
+    if (!pincodeValue || pincodeValue.length < 6) {
+      setCities([]);
+      return;
+    }
+
+    const delayDeBounce = setTimeout(async () => {
+      try {
+        // Create axios instance without credentials for external API
+        const response = await axios.get(
+          `https://api.postalpincode.in/pincode/${pincodeValue}`,
+          { withCredentials: false }
+        );
+        // console.log("Pincode API response:", response.data);
+
+        if (response.data[0]?.Status === "Success") {
+          // console.log("data of response",response.data[0]);
+          const postOffices = response.data[0]?.PostOffice || [];
+          // console.log("Post Offices found:", postOffices);
+          const uniqueCities = [
+            ...new Set(postOffices.map((office) => office.District)),
+          ];
+          const allcities = postOffices.map((name)=>(name.Name +","+ uniqueCities))
+          // console.log('total cities',allcities);
+          
+          setCities(allcities);
+          // console.log("Cities found:", uniqueCities);
+        } else {
+          setCities([]);
+        }
+      } catch (error) {
+        console.log("Failed to Fetch pincodes", error);
+        setCities([]);
+      }
+    }, 1000);
+
+    return () => clearTimeout(delayDeBounce);
+  }, [pincodeValue]);
 
   const bookEngineerHandler = async (data) => {
     setLoading(true);
@@ -94,13 +131,15 @@ function BookEngineerForm() {
             {/* Date Range */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Input
-                  label="Start Date"
+                <label className="text-sm font-medium text-base-content block mb-1">
+                  Start Date
+                </label>
+                <input
                   type="date"
-                  className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100 cursor-pointer [color-scheme:dark]"
                   {...register("startDate", {
                     required: "Start date is required",
                   })}
+                  className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100"
                 />
                 {errors.startDate && (
                   <p className="text-xs text-red-600 mt-1">
@@ -109,10 +148,11 @@ function BookEngineerForm() {
                 )}
               </div>
               <div>
-                <Input
-                  label="End Date"
+                <label className="text-sm font-medium text-base-content block mb-1">
+                  End Date
+                </label>
+                <input
                   type="date"
-                  className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100 cursor-pointer [color-scheme:dark]"
                   {...register("endDate", {
                     required: "End date is required",
                     validate: (val) => {
@@ -121,6 +161,7 @@ function BookEngineerForm() {
                       }
                     },
                   })}
+                  className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100"
                 />
                 {errors.endDate && (
                   <p className="text-xs text-red-600 mt-1">
@@ -159,7 +200,6 @@ function BookEngineerForm() {
               placeholder="Enter Branch Name"
               {...register("branchName", {
                 required: "Branch Name is required",
-                
               })}
               className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content placeholder-base-content/40 focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
             />
@@ -168,6 +208,60 @@ function BookEngineerForm() {
                 {errors.branchName.message}
               </p>
             )}
+
+            <Input
+              label="Pincode"
+              type="text"
+              inputMode="numeric"
+              placeholder="Enter 6-digit Pincode"
+              maxLength="6"
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, "");
+              }}
+              {...register("pincode", {
+                required: "Pincode is required",
+                minLength: {
+                  value: 6,
+                  message: "Pincode must be 6 digits",
+                },
+                maxLength: {
+                  value: 6,
+                  message: "Pincode must be 6 digits",
+                },
+              })}
+              className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content placeholder-base-content/40 focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
+            />
+            {errors.pincode && (
+              <p className="mt-1 text-xs text-red-600 font-medium">
+                {errors.pincode.message}
+              </p>
+            )}
+
+            <div>
+              <label className="text-sm font-medium text-base-content block mb-1">
+                City / City Area
+              </label>
+              <select
+                {...register("city", {
+                  required: "City is required",
+                })}
+                className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary transition bg-base-100"
+              >
+                <option value="">
+                  {cities.length > 0 ? "Select City" : "Enter pincode first"}
+                </option>
+                {cities.map((city, index) => (
+                  <option key={index} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+              {errors.city && (
+                <p className="mt-1 text-xs text-red-600 font-medium">
+                  {errors.city.message}
+                </p>
+              )}
+            </div>
 
             <Input
               label="Address"
@@ -218,22 +312,35 @@ function BookEngineerForm() {
             {/* Time Slot */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Input
-                  label="Start Time (10am - 6:30pm)"
-                  type="time"
-                  className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100 cursor-pointer [color-scheme:dark]"
+                <label className="text-sm font-medium text-base-content block mb-1">
+                  Start Time (10 AM - 6:30 PM)
+                </label>
+                <select
                   {...register("startTime", {
                     required: "Start time is required",
-                    min: {
-                      value: "10:00",
-                      message: "Time must be after 10:00 AM",
-                    },
-                    max: {
-                      value: "18:30",
-                      message: "Time must be before 6:30 PM",
-                    },
                   })}
-                />
+                  className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100"
+                >
+                  <option value="">Select Start Time</option>
+                  <option value="10:00 AM">10:00 AM</option>
+                  <option value="10:30 AM">10:30 AM</option>
+                  <option value="11:00 AM">11:00 AM</option>
+                  <option value="11:30 AM">11:30 AM</option>
+                  <option value="12:00 PM">12:00 PM</option>
+                  <option value="12:30 PM">12:30 PM</option>
+                  <option value="1:00 PM">1:00 PM</option>
+                  <option value="1:30 PM">1:30 PM</option>
+                  <option value="2:00 PM">2:00 PM</option>
+                  <option value="2:30 PM">2:30 PM</option>
+                  <option value="3:00 PM">3:00 PM</option>
+                  <option value="3:30 PM">3:30 PM</option>
+                  <option value="4:00 PM">4:00 PM</option>
+                  <option value="4:30 PM">4:30 PM</option>
+                  <option value="5:00 PM">5:00 PM</option>
+                  <option value="5:30 PM">5:30 PM</option>
+                  <option value="6:00 PM">6:00 PM</option>
+                  <option value="6:30 PM">6:30 PM</option>
+                </select>
                 {errors.startTime && (
                   <p className="text-xs text-red-600 mt-1">
                     {errors.startTime.message}
@@ -241,27 +348,35 @@ function BookEngineerForm() {
                 )}
               </div>
               <div>
-                <Input
-                  label="End Time"
-                  type="time"
-                  className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100 cursor-pointer scheme-dark"
+                <label className="text-sm font-medium text-base-content block mb-1">
+                  End Time
+                </label>
+                <select
                   {...register("endTime", {
                     required: "End time is required",
-                    min: {
-                      value: "10:00",
-                      message: "Time must be after 10:00 AM",
-                    },
-                    max: {
-                      value: "18:30",
-                      message: "Time must be before 6:30 PM",
-                    },
-                    validate: (val) => {
-                      if (watch("startTime") && val <= watch("startTime")) {
-                        return "End time must be after start time";
-                      }
-                    },
                   })}
-                />
+                  className="block w-full rounded-lg border border-base-300 px-3 py-2 text-sm text-base-content focus:border-primary focus:ring-1 focus:ring-primary bg-base-100"
+                >
+                  <option value="">Select End Time</option>
+                  <option value="10:00 AM">10:00 AM</option>
+                  <option value="10:30 AM">10:30 AM</option>
+                  <option value="11:00 AM">11:00 AM</option>
+                  <option value="11:30 AM">11:30 AM</option>
+                  <option value="12:00 PM">12:00 PM</option>
+                  <option value="12:30 PM">12:30 PM</option>
+                  <option value="1:00 PM">1:00 PM</option>
+                  <option value="1:30 PM">1:30 PM</option>
+                  <option value="2:00 PM">2:00 PM</option>
+                  <option value="2:30 PM">2:30 PM</option>
+                  <option value="3:00 PM">3:00 PM</option>
+                  <option value="3:30 PM">3:30 PM</option>
+                  <option value="4:00 PM">4:00 PM</option>
+                  <option value="4:30 PM">4:30 PM</option>
+                  <option value="5:00 PM">5:00 PM</option>
+                  <option value="5:30 PM">5:30 PM</option>
+                  <option value="6:00 PM">6:00 PM</option>
+                  <option value="6:30 PM">6:30 PM</option>
+                </select>
                 {errors.endTime && (
                   <p className="text-xs text-red-600 mt-1">
                     {errors.endTime.message}

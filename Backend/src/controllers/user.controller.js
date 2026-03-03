@@ -94,9 +94,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // console.log("Files received:", { avatarLocalPath, coverImageLocalPath });
   // console.log("Full req.files:", req.files);
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar file is required");
-  }
+ 
 
   // Upload files to Cloudinary (external storage service)
   const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
@@ -104,13 +102,10 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const uploadedCoverImage = await uploadOnCloudinary(coverImageLocalPath);
   // console.log("uploadedCoverImage:", uploadedCoverImage);
-  if (!uploadedAvatar) {
-    throw new ApiError(500, "Failed to upload avatar image");
-  }
 
   const user = await User.create({
     fullName,
-    avatar: uploadedAvatar.secure_url,
+    avatar: uploadedAvatar?.secure_url || "",
     coverImage: uploadedCoverImage?.secure_url || "",
     email: email.toLowerCase().trim(),
     password,
@@ -393,7 +388,7 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
 
 //fetching details of all engineers at admin dashboard
 const getAllEngineers = asyncHandler(async (req, res) => {
-  const engineers = await User.find({ role: "engineer" }).select(
+  const engineers = await User.find({ role: "engineer" }).sort({_id:-1}).select(
     "-password -refreshToken"
   );
   if (!engineers || engineers.length === 0) {

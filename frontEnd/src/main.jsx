@@ -26,7 +26,7 @@ const UpdatePassword = lazy(() => import("./Components/UpdatePassword.jsx"));
 const BookEngineerForm = lazy(
   () => import("./Components/BookEngineerForm.jsx"),
 );
-
+const EngineerRequests= lazy(()=>import("./Components/EngineerRequests.jsx"));
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -107,6 +107,22 @@ const router = createBrowserRouter(
           element={
             <AuthLayout authentication>
               <Customers />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/admin-dashboard/customers"
+          element={
+            <AuthLayout authentication>
+              <Customers />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/admin-dashboard/booking-requests"
+          element={
+            <AuthLayout authentication>
+              <EngineerRequests />
             </AuthLayout>
           }
         />

@@ -19,9 +19,7 @@ function ContactForms() {
           prevForms.filter((form) => form._id !== formId),
         );
         toast.success("Contact form deleted successfully");
-      } else {
-        toast.error("Failed to delete contact form");
-      }
+      } 
     } catch (error) {
       toast.error("Error deleting contact form");
     }
