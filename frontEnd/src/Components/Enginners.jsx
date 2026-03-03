@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { Container } from "./index.components.js";
+import Container from "./Container/Container.jsx";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Button from "../ReusableComponents/Button.jsx";
