@@ -5,12 +5,6 @@ import jwt from "jsonwebtoken";
 // we have import Schema that's why no need of writing mongoose.Schema just write Schema
 const userSchema = new Schema(
   {
-    watchHistory: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Video",
-      },
-    ],
     username: {
       type: String,
       unique: true,
@@ -32,6 +26,10 @@ const userSchema = new Schema(
       index: true,
       required: true,
       trim: true,
+    },
+    is_active: {
+      type: Boolean,
+      default: true,
     },
     avatar: {
       type: String, //cloudinary url
@@ -69,9 +67,9 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["engineer", "admin","customer"],
+      enum: ["engineer", "admin", "customer"],
       default: "engineer",
-      required:true,
+      required: true,
     },
     socialMedia: {
       linkedIn: {

@@ -33,11 +33,7 @@ function Header() {
       slug: "/",
       active: true,
     },
-    {
-      name: "About Us",
-      slug: "/about",
-      active: true,
-    },
+   
     {
       name: "Contact Us",
       slug: "/contact",

@@ -120,14 +120,12 @@ function EngineerRequests() {
                   <div>
                     <p className="text-sm text-base-content/60">Start Time</p>
                     <p className="font-semibold">
-                      {new Date(request.startTime).toLocaleTimeString()}
+                      {request.startTime || "N/A"}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-base-content/60">End Time</p>
-                    <p className="font-semibold">
-                      {new Date(request.endTime).toLocaleTimeString()}
-                    </p>
+                    <p className="font-semibold">{request.endTime || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-base-content/60">

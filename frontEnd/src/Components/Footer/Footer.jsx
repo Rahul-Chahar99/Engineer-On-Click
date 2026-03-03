@@ -29,8 +29,8 @@ function Footer() {
                             </Link>
                         </li>
                         <li className='mb-4'>
-                            <Link className='text-base font-medium text-base-content hover:text-primary' to='/'>
-                                Press kit
+                            <Link className='text-base font-medium text-base-content hover:text-primary' to='/about'>
+                                About Us
                             </Link>
                         </li>
                     </ul>

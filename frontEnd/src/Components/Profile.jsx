@@ -10,22 +10,74 @@ import {Link } from "react-router-dom";
 function Profile() {
   const { userInfo } = useSelector((state) => state.auth);
   const [edit, setEdit] = useState(false);
-  const [formData, setFormData] = useState({});
-  const avatarRef = useRef(null);
-  const coverImageRef = useRef(null);
+
+  // Helper to process user data for form state
+  const processUserData = (user) => {
+    if (!user) return {};
+    return {
+      ...user,
+      avatar: user.avatar?.replace('http://', 'https://'),
+      coverImage: user.coverImage?.replace('http://', 'https://'),
+      socialMedia:
+        user.socialMedia && !Array.isArray(user.socialMedia)
+          ? user.socialMedia
+          : { linkedIn: "", twitter: "", github: "" },
+    };
+  };
+
+  const [formData, setFormData] = useState(() => processUserData(userInfo));
+
+  // --- DEBUGGING: Log Render Reasons ---
+  const renderCount = useRef(0);
+  const prevUserInfo = useRef(userInfo);
+  const prevFormData = useRef(formData);
+
+  renderCount.current++;
+  console.log(`%c[Profile] Render #${renderCount.current}`, "color: orange; font-weight: bold");
+
+  if (renderCount.current > 1) {
+    let reasonFound = false;
+    if (prevUserInfo.current !== userInfo) { console.log("Reason: Redux 'userInfo' changed"); reasonFound = true; }
+    if (prevFormData.current !== formData) { console.log("Reason: Local 'formData' state changed"); reasonFound = true; }
+    if (!reasonFound) console.log("Reason: Parent re-render or other state change");
+  } else {
+    console.log("Reason: Initial Mount");
+  }
 
   useEffect(() => {
+    prevUserInfo.current = userInfo;
+    prevFormData.current = formData;
+  });
+  // -------------------------------------
+
+  const avatarRef = useRef(null);
+  const coverImageRef = useRef(null);
+  const [isToggling, setIsToggling] = useState(false);
+  const isFirstRender = useRef(true)
+ 
+  
+
+  const handleToggle = async () => {
+    setIsToggling(true);
+    try {
+      const response = await axios.patch(`/api/v1/users/toggle-status/${userInfo._id}`);
+      setFormData(prev => ({ ...prev, is_active: response.data.data.is_active }));
+      toast.success(response.data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update status");
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
+  useEffect(() => {
+    // Skip the update on the very first render if we already initialized from props
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (userInfo) {
-      setFormData({
-        ...userInfo,
-        // Fix HTTP to HTTPS for Cloudinary URLs
-        avatar: userInfo.avatar?.replace('http://', 'https://'),
-        coverImage: userInfo.coverImage?.replace('http://', 'https://'),
-        socialMedia:
-          userInfo.socialMedia && !Array.isArray(userInfo.socialMedia)
-            ? userInfo.socialMedia
-            : { linkedIn: "", twitter: "", github: "" },
-      });
+      setFormData(processUserData(userInfo));
     }
   }, [userInfo]);
 
@@ -263,6 +315,7 @@ function Profile() {
                   className="w-full flex items-center gap-2 justify-center cursor-pointer text-neutral-content font-semibold rounded-lg"
                   onClick={() => (edit ? updateProfile() : setEdit(true))}
                 >
+                  
                   {edit ? (
                     <>
                       <svg
@@ -303,6 +356,33 @@ function Profile() {
                 </Button>
               </div>
             </div>
+            {/* Engineer Availability Toggle */}
+            {userInfo.role === "engineer" && (
+              <div className="border-b border-base-300 pb-4 mb-4">
+                <h3 className="text-lg font-semibold text-base-content mb-2">
+                  Availability Status
+                </h3>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-base-content/80 font-medium">
+                      {formData.is_active
+                        ? "Available for new assignments"
+                        : "Not currently available"}
+                    </p>
+                    <p className="text-xs text-base-content/60">
+                      This controls whether you appear in searches for available engineers.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-primary"
+                    checked={formData.is_active || false}
+                    onChange={handleToggle}
+                    disabled={isToggling || edit}
+                  />
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="col-span-1">
                 <label className="text-xs font-semibold text-base-content/60 uppercase">

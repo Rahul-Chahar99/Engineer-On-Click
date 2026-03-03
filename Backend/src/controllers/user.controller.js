@@ -317,6 +317,24 @@ const getUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req.user, "User fetched successfully"));
 });
 
+const userStatusToggle = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  user.is_active = !user.is_active;
+  await user.save({ validateBeforeSave: false });
+  
+  const updatedUser = await User.findById(userId).select("-password -refreshToken");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUser, "User status updated successfully"));
+});
+
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword, confirmPassword } = req.body;
   const user = await User.findById(req.user?.id);
@@ -460,4 +478,5 @@ export {
   deleteEngineer,
   deleteCustomer,
   changeCurrentPassword,
+  userStatusToggle,
 };

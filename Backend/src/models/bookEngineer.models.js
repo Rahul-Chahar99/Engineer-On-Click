@@ -7,10 +7,10 @@ const bookEngineerSchema =  new Schema({
         ref:"User"
     },
     startDate:{
-        type:String,
+        type:Date,
         required:true
     },
-    pincdode:{
+    pincode:{
         type:String,
         required:true
     },
@@ -19,11 +19,11 @@ const bookEngineerSchema =  new Schema({
         required:true
     },
     endDate:{
-        type:String,
+        type:Date,
         required:true
     },
     branchCode:{
-        type:Number,
+        type:String,
         required:true
     },
     branchName:{
