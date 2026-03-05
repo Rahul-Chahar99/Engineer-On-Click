@@ -138,6 +138,15 @@ function EngineerRequests() {
                     <p className="font-semibold">{request.address}</p>
                   </div>
                   <div>
+                    <p className="text-sm text-base-content/60">Total Cost</p>
+                    <p className="font-semibold">
+                      {request.totalCostOfBooking?.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                      }) || "N/A"}
+                    </p>
+                  </div>
+                  <div>
                     <p className="text-sm text-base-content/60">Requested On</p>
                     <p className="font-semibold">
                       {request.createdAt
