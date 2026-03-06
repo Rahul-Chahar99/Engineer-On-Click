@@ -2,6 +2,13 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import EngineerForm from "../models/bookEngineer.models.js";
 import { ApiResponse } from "../utils/Apiresponse.js";
+import Razorpay from "razorpay";
+import crypto from "crypto";
+
+const instance = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 const bookEngineer = asyncHandler(async (req, res) => {
   const {
@@ -42,6 +49,8 @@ const bookEngineer = asyncHandler(async (req, res) => {
   }
 
   //function to calculate total cost of booking
+  // To calculate the number of days, we find the difference in milliseconds and convert it to days.
+  // We add 1 because the period is inclusive of the start and end dates (e.g., booking for just today is 1 day).
   const totalCostFunction = () => {
     const oneDayInMs = 1000 * 60 * 60 * 24;
     const totalDays =
@@ -49,11 +58,24 @@ const bookEngineer = asyncHandler(async (req, res) => {
         Math.abs((new Date(endDate) - new Date(startDate)) / oneDayInMs)
       ) + 1;
     console.log(`Total days for booking: ${totalDays}`);
-    const totalHours = Math.abs(
-      parseInt(startTime.split(" ").at(0)) -
-        parseInt(endTime.split(" ").at(0))
-    );
-    if (totalHours < 4) return totalDays * 400;
+
+    // Helper to parse "10:00 AM" to hours (float)
+    const parseTime = (timeStr) => {
+      if (!timeStr) return 0;
+      const [time, modifier] = timeStr.split(" ");
+      let [hours, minutes] = time.split(":");
+      hours = parseInt(hours, 10);
+      if (hours === 12) {
+        hours = modifier === "PM" ? 12 : 0;
+      } else if (modifier === "PM") {
+        hours += 12;
+      }
+      return hours + parseInt(minutes || "0", 10) / 60;
+    };
+
+    const totalHours = Math.abs(parseTime(endTime) - parseTime(startTime));
+
+    if (totalHours < 4) return totalDays * 100;
 
     return totalDays * totalHours * 100;
   };
@@ -62,11 +84,20 @@ const bookEngineer = asyncHandler(async (req, res) => {
   if (isNaN(totalCost)) {
     throw new ApiError(400, "Invalid date or time format provided");
   }
-  console.log(totalCost);
-  console.log(typeof totalCost);
+  // console.log(totalCost);
+  // console.log(typeof totalCost);
+  const options = {
+    amount: Math.ceil(totalCost), // Amount in paise (ensure min 1 INR)
+    currency: "INR",
+    receipt: `receipt_${Date.now()}`,
+  };
   
+  const order = await instance.orders.create(options);
+  
+  if (!order) throw new ApiError(500, "Error creating Razorpay order");
 
-  const Engineer = await EngineerForm.create({
+  // Save booking with Pending status
+  const engineerBooking = await EngineerForm.create({
     customerId,
     startDate,
     endDate,
@@ -78,20 +109,64 @@ const bookEngineer = asyncHandler(async (req, res) => {
     localContact,
     startTime,
     endTime,
-    totalCostOfBooking:totalCost
+    totalCostOfBooking: totalCost,
+    orderId: order.id,
+    paymentStatus: "Pending",
   });
 
-  if (!Engineer) {
+  if (!engineerBooking) {
     throw new ApiError(500, "Something went wrong while booking engineer");
   }
-  // console.log(Engineer);
-
-  // To calculate the number of days, we find the difference in milliseconds and convert it to days.
-  // We add 1 because the period is inclusive of the start and end dates (e.g., booking for just today is 1 day).
 
   return res
     .status(201)
-    .json(new ApiResponse(201, Engineer, "Engineer booked successfully"));
+    .json(
+      new ApiResponse(
+        201,
+        { order, key: process.env.RAZORPAY_KEY_ID },
+        "Razorpay order created successfully"
+      )
+    );
+});
+
+const paymentVerification = asyncHandler(async (req, res) => {
+  console.log("paymentVerification payload", req.body);
+  const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+
+  const body = razorpayOrderId + "|" + razorpayPaymentId;
+
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(body.toString())
+    .digest("hex");
+
+  const isAuthentic = expectedSignature === razorpaySignature;
+
+  if (!isAuthentic) {
+    console.error("razorpay signature mismatch", {
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature,
+      expectedSignature,
+    });
+    throw new ApiError(400, "Invalid Payment Signature");
+  }
+
+  // Update booking status to Completed
+  const booking = await EngineerForm.findOneAndUpdate(
+    { orderId: razorpayOrderId },
+    {
+      $set: {
+        paymentId: razorpayPaymentId,
+        paymentStatus: "Completed",
+      },
+    },
+    { new: true }
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, booking, "Payment verified successfully"));
 });
 
 const getAllEngineerRequests = asyncHandler(async (req, res) => {
@@ -124,4 +199,9 @@ const deleteEngineerRequest = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Booking Request Deleted Successfully"));
 });
 
-export { bookEngineer, getAllEngineerRequests, deleteEngineerRequest };
+export {
+  bookEngineer,
+  getAllEngineerRequests,
+  deleteEngineerRequest,
+  paymentVerification,
+};

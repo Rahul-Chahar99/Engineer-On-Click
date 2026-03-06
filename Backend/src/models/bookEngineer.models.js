@@ -51,6 +51,18 @@ const bookEngineerSchema = new Schema(
       type: Number,
       required: true,
     },
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Completed", "Failed"],
+      default: "Pending",
+    },
+    paymentId: {
+      type: String,
+      default: "",
+    },
+    orderId: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

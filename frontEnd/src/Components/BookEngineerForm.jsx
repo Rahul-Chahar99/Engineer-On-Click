@@ -1,5 +1,5 @@
 import React from "react";
-import axios from "axios";
+import axios from "./axios.js"; // Use configured axios instance
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Input from "../ReusableComponents/Input.jsx";
@@ -8,6 +8,20 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
+
+function loadScript(src) {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => {
+      resolve(true);
+    };
+    script.onerror = () => {
+      resolve(false);
+    };
+    document.body.appendChild(script);
+  });
+}
 
 function BookEngineerForm() {
   const [loading, setLoading] = useState(false);
@@ -58,7 +72,7 @@ function BookEngineerForm() {
         // Create axios instance without credentials for external API
         const response = await axios.get(
           `https://api.postalpincode.in/pincode/${pincodeValue}`,
-          { withCredentials: false }
+          { withCredentials: false },
         );
         // console.log("Pincode API response:", response.data);
 
@@ -69,9 +83,11 @@ function BookEngineerForm() {
           const uniqueCities = [
             ...new Set(postOffices.map((office) => office.District)),
           ];
-          const allcities = postOffices.map((name)=>(name.Name +","+ uniqueCities))
+          const allcities = postOffices.map(
+            (name) => name.Name + "," + uniqueCities,
+          );
           // console.log('total cities',allcities);
-          
+
           setCities(allcities);
           // console.log("Cities found:", uniqueCities);
         } else {
@@ -97,15 +113,117 @@ function BookEngineerForm() {
     }
 
     try {
-      const response = await axios.post("/api/v1/book-engineer", {
-        ...data,
-        customerId,
-      });
-      toast.success(response.data?.message || "Engineer Booked Successfully");
-      reset();
-      navigate("/");
+      // Load Razorpay SDK
+      const res = await loadScript(
+        "https://checkout.razorpay.com/v1/checkout.js",
+      );
+
+      if (!res) {
+        toast.error("Razorpay SDK failed to load. Are you online?");
+        setLoading(false);
+        return;
+      }
+
+      // Create the booking/order on the server
+      let response;
+      try {
+        response = await axios.post("/api/v1/book-engineer", {
+          ...data,
+          customerId,
+        });
+      } catch (err) {
+        console.error("order creation failed", err.response || err);
+        toast.error(err.response?.data?.message || "Booking failed");
+        setLoading(false);
+        return;
+      }
+
+      const responseData = response.data;
+      const order = responseData.order || responseData.data?.order;
+      const key = responseData.key || responseData.data?.key;
+
+      // Check if the backend returned Razorpay order details
+      if (order) {
+        const { amount, id: order_id, currency } = order;
+
+        const options = {
+          key: key || "YOUR_KEY_ID", // Enter the Key ID generated from the Dashboard
+          amount: amount,
+          currency: currency,
+          name: "Engineer On Click", // Your business name
+          description: "Engineer Booking Transaction",
+          // image: "https://example.com/your_logo",
+          order_id: order_id,
+          // if you want to hint at UPI use method: "upi" here, but keep minimal
+          // method: "upi",
+          handler: async function (response) {
+            const paymentData = {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            };
+            console.log("payment callback data", paymentData);
+
+            try {
+              const verifyRes = await axios.post(
+                "/api/v1/paymentverification",
+                paymentData,
+              );
+              toast.success(verifyRes.data.message || "Payment Successful");
+              reset();
+              navigate("/");
+            } catch (error) {
+              console.error("verification error", error.response || error);
+              toast.error(
+                error.response?.data?.message || "Payment Verification Failed",
+              );
+            }
+          },
+          prefill: {
+            name: userInfo?.fullName || "",
+            email: userInfo?.email || "example@example.com",
+            // Clean the contact number to ensure it only contains digits.
+            // Razorpay requires a valid number for UPI.
+            contact: (data.localContact || userInfo?.mobileNo || "").replace(
+              /\D/g,
+              "",
+            ),
+          },
+          modal: {
+            ondismiss: function () {
+              setLoading(false);
+              toast("Payment cancelled");
+            },
+          },
+          notes: {
+            address: data.branchAddress,
+          },
+          theme: {
+            color: "#3399cc",
+          },
+        };
+
+        console.log("opening razorpay checkout with options", options);
+        try {
+          const rzp1 = new window.Razorpay(options);
+          rzp1.on("payment.failed", function (response) {
+            console.error("razorpay payment failed", response);
+            toast.error(response.error.description || "Payment Failed");
+          });
+          rzp1.open();
+        } catch (err) {
+          console.error("error initializing Razorpay", err);
+          toast.error("Unable to open payment gateway");
+        }
+      } else {
+        // Fallback if no payment details are returned (standard booking)
+        toast.success(response.data?.message || "Engineer Booked Successfully");
+        reset();
+        navigate("/");
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went Wrong!");
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -324,7 +442,7 @@ function BookEngineerForm() {
                   <option value="">Select Start Time</option>
                   <option value="10:00 AM">10:00 AM</option>
                   <option value="10:30 AM">10:30 AM</option>
-                  <option value="11:00 AM">11:00 AM</option> 
+                  <option value="11:00 AM">11:00 AM</option>
                   <option value="11:30 AM">11:30 AM</option>
                   <option value="12:00 PM">12:00 PM</option>
                   <option value="12:30 PM">12:30 PM</option>
