@@ -154,8 +154,24 @@ function BookEngineerForm() {
           description: "Engineer Booking Transaction",
           // image: "https://example.com/your_logo",
           order_id: order_id,
-          // if you want to hint at UPI use method: "upi" here, but keep minimal
-          // method: "upi",
+          config: {
+            display: {
+              blocks: {
+                banks: {
+                  name: "Pay using UPI",
+                  instruments: [
+                    {
+                      method: "upi"
+                    }
+                  ]
+                }
+              },
+              sequence: ["block.banks"],
+              preferences: {
+                show_default_blocks: true
+              }
+            }
+          },
           handler: async function (response) {
             const paymentData = {
               razorpayOrderId: response.razorpay_order_id,
