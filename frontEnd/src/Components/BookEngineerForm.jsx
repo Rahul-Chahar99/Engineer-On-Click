@@ -127,7 +127,7 @@ function BookEngineerForm() {
       // Create the booking/order on the server
       let response;
       try {
-        response = await axios.post("/api/v1/book-engineer", {
+       response = await axios.post("/api/v1/book-engineer", {
           ...data,
           customerId,
         });
@@ -139,6 +139,7 @@ function BookEngineerForm() {
       }
 
       const responseData = response.data;
+      console.log("Booking response", responseData);
       const order = responseData.order || responseData.data?.order;
       const key = responseData.key || responseData.data?.key;
 

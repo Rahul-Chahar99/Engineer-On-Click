@@ -75,7 +75,7 @@ const bookEngineer = asyncHandler(async (req, res) => {
 
     const totalHours = Math.abs(parseTime(endTime) - parseTime(startTime));
 
-    if (totalHours < 4) return totalDays * 100;
+    if (totalHours < 4) return totalDays * 400;
 
     return totalDays * totalHours * 100;
   };
@@ -87,13 +87,13 @@ const bookEngineer = asyncHandler(async (req, res) => {
   // console.log(totalCost);
   // console.log(typeof totalCost);
   const options = {
-    amount: Math.ceil(totalCost), // Amount in paise (ensure min 1 INR)
+    amount: Math.ceil(totalCost * 100), // Amount in paise (1 INR = 100 paise)
     currency: "INR",
     receipt: `receipt_${Date.now()}`,
   };
-  
+
   const order = await instance.orders.create(options);
-  
+
   if (!order) throw new ApiError(500, "Error creating Razorpay order");
 
   // Save booking with Pending status
@@ -163,7 +163,7 @@ const paymentVerification = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
-
+console.log("Updated booking after payment verification", booking);
   return res
     .status(200)
     .json(new ApiResponse(200, booking, "Payment verified successfully"));
