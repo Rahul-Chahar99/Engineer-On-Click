@@ -8,6 +8,9 @@ import { GridLoader } from "react-spinners";
 function EngineerRequests() {
   const [engineerRequests, setEngineerRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [availableEngineers, setAvailableEngineers] = useState([]);
+  const [activeOrderId, setActiveOrderId] = useState(null);
+  const [selectedEngineerId, setSelectedEngineerId] = useState("");
 
   const deleteBookingRequest = async (bookingId) => {
     try {
@@ -32,7 +35,7 @@ function EngineerRequests() {
         const response = await axios.get(
           "/api/v1/admin-dashboard/booking-requests",
         );
-        console.log(response.data);
+        // console.log(response.data);
         if (response.status === 200) {
           setEngineerRequests(response.data.data || response.data);
         }
@@ -46,6 +49,51 @@ function EngineerRequests() {
     };
     getEngineerRequests();
   }, []);
+
+  const showAvailableEngineer = async (orderId) => {
+    try {
+      const response = await axios.get(
+        `/api/v1/admin-dashboard/available-engineers/${orderId}`,
+      );
+      // console.log("engineer data ",response.data.data);
+      if (response.status === 200) {
+        setAvailableEngineers(response.data.data);
+        setActiveOrderId(orderId);
+        setSelectedEngineerId(""); // Reset selection
+        // console.log("Available Engineers Name are ", response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch available engineers");
+    }
+  };
+
+  const assignEngineerHandler = async () => {
+    if (!selectedEngineerId) {
+      toast.error("Please select an engineer first");
+      return;
+    }
+console.log("engineer id ",selectedEngineerId);
+
+    try {
+      const response = await axios.patch(
+        "/api/v1/admin-dashboard/assign-engineer",
+        {
+          orderId: activeOrderId,
+          engineerId: selectedEngineerId,
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Engineer Assigned Successfully");
+        setActiveOrderId(null);
+        // Refresh the list or update local state to reflect change
+        window.location.reload(); 
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to assign engineer");
+    }
+  };
 
   return (
     <Container>
@@ -70,9 +118,10 @@ function EngineerRequests() {
             {engineerRequests.map((request) => (
               <div
                 key={request._id}
-                className="bg-base-100 text-base-content rounded-lg shadow-lg p-6 border border-base-300"
+                className="bg-base-100 text-base-content rounded-lg shadow-lg border border-base-300 overflow-hidden"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   <div>
                     <p className="text-sm text-base-content/60">
                       Customer Name
@@ -133,9 +182,15 @@ function EngineerRequests() {
                     </p>
                     <p className="font-semibold">{request.localContact}</p>
                   </div>
-                  <div>
+                  <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
                     <p className="text-sm text-base-content/60">Address</p>
                     <p className="font-semibold">{request.address}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-base-content/60">
+                      Engineer Assignment
+                    </p>
+                    <p className="font-semibold">{request.engineerAssign}</p>
                   </div>
                   <div>
                     <p className="text-sm text-base-content/60">Total Cost</p>
@@ -154,12 +209,63 @@ function EngineerRequests() {
                         : "N/A"}
                     </p>
                   </div>
-                  <Button
-                    children="Delete Form"
-                    bgColor="bg-error hover:bg-error/80 text-error-content"
-                    className="mt-3 rounded-lg cursor-pointer px-4 py-2 text-white font-semibold"
-                    onClick={() => deleteBookingRequest(request._id)}
-                  />
+                  </div>
+                </div>
+
+                {/* Action Buttons Section */}
+                <div className="bg-base-200/50 px-6 py-4 border-t border-base-300">
+                  <div className="flex flex-wrap gap-3 items-center justify-end">
+                    <Button
+                      children="Delete Form"
+                      bgColor="bg-error hover:bg-error/80 text-error-content"
+                      className="w-full sm:w-auto rounded-lg cursor-pointer px-6 py-3 text-white font-semibold"
+                      onClick={() => deleteBookingRequest(request._id)}
+                    />
+                    <Button
+                      children="See Available Engineers"
+                      className="w-full sm:w-auto cursor-pointer px-6 py-3 text-white font-semibold rounded-lg"
+                      onClick={() => showAvailableEngineer(request.orderId)}
+                    />
+                  </div>
+
+                  {activeOrderId === request.orderId && (
+                    <div className="mt-4 p-4 bg-base-100 rounded-lg border border-base-300 animate-in fade-in slide-in-from-top-3">
+                      {availableEngineers.length > 0 ? (
+                        <div className="form-control w-full">
+                          <label className="label">
+                            <span className="label-text font-semibold">
+                              Select Engineer to Assign:
+                            </span>
+                          </label>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <select
+                              className="select select-bordered w-full bg-base-100 text-base-content"
+                              value={selectedEngineerId || "default"}
+                              onChange={(e) => setSelectedEngineerId(e.target.value)}
+                            >
+                              <option value="default" disabled>
+                                Pick an engineer
+                              </option>
+                              {availableEngineers.map((eng) => (
+                                <option key={eng._id} value={eng._id}>
+                                  {eng.fullName} ({eng.username || "Engineer"})
+                                </option>
+                              ))}
+                            </select>
+                            <Button
+                              children="Assign Engineer"
+                              className="w-full sm:w-auto cursor-pointer px-6 py-3 text-white font-semibold whitespace-nowrap rounded-lg"
+                              onClick={assignEngineerHandler}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-error text-sm mt-2 font-semibold">
+                          No engineers found in this area.
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

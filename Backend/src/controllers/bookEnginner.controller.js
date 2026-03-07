@@ -4,6 +4,7 @@ import EngineerForm from "../models/bookEngineer.models.js";
 import { ApiResponse } from "../utils/Apiresponse.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { User } from "../models/user.models.js";
 
 const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -163,7 +164,7 @@ const paymentVerification = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
-console.log("Updated booking after payment verification", booking);
+  console.log("Updated booking after payment verification", booking);
   return res
     .status(200)
     .json(new ApiResponse(200, booking, "Payment verified successfully"));
@@ -198,10 +199,64 @@ const deleteEngineerRequest = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, {}, "Booking Request Deleted Successfully"));
 });
+const showAvailableEngineers = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  // Using findOne because we are searching by the custom 'orderId' field.
+  // If 'id' refers to the MongoDB _id, use EngineerForm.findById(id) instead.
+  const bookingDetails = await EngineerForm.findOne({ orderId: id }).select(
+    "pincode city"
+  );
+  console.log("booking details --->>> ", bookingDetails);
+  if (!bookingDetails) throw new ApiError(404, "Data Not Found");
+  // Mock logic to assign an engineer based on pincode and city
+  const availabeEngineers = await User.find({
+    role: "engineer",
+    is_active: true,
+    pincode: bookingDetails.pincode,
+  }).select("fullName");
+  if (!availabeEngineers) throw new ApiError(404, "Data Not Found");
+  console.log(availabeEngineers);
+  return res.status(200).json(new ApiResponse(200,availabeEngineers,"Available Engineers Fetched Successfully"))
+
+});
+
+const assignEngineer = asyncHandler(async (req, res) => {
+  const { orderId, engineerId } = req.body;
+
+  if (!orderId || !engineerId) {
+    throw new ApiError(400, "Order ID and Engineer ID are required");
+  }
+
+  const engineer = await User.findById(engineerId);
+  if (!engineer) {
+    throw new ApiError(404, "Engineer not found");
+  }
+
+  const updatedBooking = await EngineerForm.findOneAndUpdate(
+    { orderId: orderId },
+    {
+      $set: {
+        engineerAssign: engineer.fullName, // Storing name for display
+      },
+    },
+    { new: true }
+  );
+
+  if (!updatedBooking) throw new ApiError(404, "Booking not found");
+  console.log(updatedBooking);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedBooking, "Engineer Assigned Successfully")
+    );
+});
 
 export {
   bookEngineer,
   getAllEngineerRequests,
   deleteEngineerRequest,
   paymentVerification,
+  showAvailableEngineers,
+  assignEngineer,
 };

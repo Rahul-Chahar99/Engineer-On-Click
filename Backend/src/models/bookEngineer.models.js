@@ -63,6 +63,11 @@ const bookEngineerSchema = new Schema(
     orderId: {
       type: String,
     },
+    engineerAssign:{
+      type:String,
+      enum:["Pending","Assigned"],
+      default:"Pending"
+    }
   },
   { timestamps: true }
 );
