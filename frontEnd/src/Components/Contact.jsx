@@ -34,7 +34,7 @@ function Contact() {
     }
   };
   return (
-    <div className="flex items-center justify-center w-full min-h-screen" style={{ backgroundColor: "hsl(255.65deg 10.5% 42.94%)" }}>
+    <div className="flex items-center justify-center w-full min-h-screen bg-base-200">
       <div className="mx-auto w-full max-w-lg bg-base-100 shadow-xl rounded-xl p-10 border border-base-300 flex flex-col justify-center">
         <h2 className="text-center text-2xl font-bold leading-tight text-base-content">
           Contact Us
