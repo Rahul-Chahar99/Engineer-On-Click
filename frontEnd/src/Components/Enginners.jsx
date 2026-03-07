@@ -83,6 +83,7 @@ function Enginners() {
                 <p>Contact No : {engineer.mobileNo || "Not Available"}</p>
                 <p>Aadhar No : {engineer.aadharNo || "Not Available"}</p>
                 <p>Job Title : {engineer.jobTitle || "Not Available"}</p>
+                <p>Status :{engineer.is_active?"Active":"Inactive"}</p>
                 <p className="text-sm text-base-content/70 mt-2">
                   <strong>Account Created:</strong>{" "}
                   {engineer.createdAt

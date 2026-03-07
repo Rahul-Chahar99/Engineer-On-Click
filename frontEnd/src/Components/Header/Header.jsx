@@ -11,7 +11,7 @@ function Header() {
   const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
-  const themes = ["light", "dark", "cupcake","luxury","black"];
+  const themes = ["light", "dark", "cupcake", "luxury", "black"];
 
   useEffect(() => {
     localStorage.setItem("theme", theme);
@@ -33,12 +33,7 @@ function Header() {
       slug: "/",
       active: true,
     },
-   
-    {
-      name: "Contact Us",
-      slug: "/contact",
-      active: userInfo?.role === "admin" ? false : true,
-    },
+
     {
       name: "Login",
       slug: "/login",
@@ -54,8 +49,6 @@ function Header() {
       slug: "/admin-dashboard",
       active: authStatus && userInfo?.role === "admin" ? true : false,
     },
-    
-    
   ];
 
   return (
@@ -107,16 +100,7 @@ function Header() {
                 </li>
               ) : null,
             )}
-            {authStatus && (
-              <li>
-                <button
-                  onClick={logOutHandler}
-                  className="px-2 lg:px-3 py-2 text-sm lg:text-base text-base-content hover:text-red-600 font-medium transition duration-200"
-                >
-                  Log Out
-                </button>
-              </li>
-            )}
+
             {authStatus && (
               <li>
                 <button
@@ -127,15 +111,37 @@ function Header() {
                 </button>
               </li>
             )}
+            {authStatus && (
+              <li>
+                <button
+                  onClick={logOutHandler}
+                  className="px-2 lg:px-3 py-2 text-sm lg:text-base text-base-content hover:text-red-600 font-medium transition duration-200"
+                >
+                  Log Out
+                </button>
+              </li>
+            )}
             <li>
               <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className="px-2 lg:px-3 py-2 text-sm lg:text-base text-base-content hover:text-primary font-medium transition duration-200 flex items-center gap-1">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="px-2 lg:px-3 py-2 text-sm lg:text-base text-base-content hover:text-primary font-medium transition duration-200 flex items-center gap-1"
+                >
                   Theme
                 </div>
-                <ul tabIndex={0} className="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52">
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52"
+                >
                   {themes.map((t) => (
                     <li key={t}>
-                      <button onClick={() => setTheme(t)} className={theme === t ? "active" : ""}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>
+                      <button
+                        onClick={() => setTheme(t)}
+                        className={theme === t ? "active" : ""}
+                      >
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -194,7 +200,9 @@ function Header() {
               </li>
             )}
             <li className="border-t border-base-300 pt-2">
-              <div className="px-4 py-2 text-sm font-medium text-base-content">Select Theme</div>
+              <div className="px-4 py-2 text-sm font-medium text-base-content">
+                Select Theme
+              </div>
               <div className="flex gap-2 px-4 pb-2">
                 {themes.map((t) => (
                   <button

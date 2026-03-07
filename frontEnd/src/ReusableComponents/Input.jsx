@@ -31,7 +31,7 @@ const Input = forwardRef(function Input(
       )}
       <input
         type={type}
-        className={`px-3 py-2 rounded-lg bg-white text-black outline-none focus:bg-gray-50 transition-all duration-300 ${className}`}
+        className={`px-3 bg-transparent py-2  rounded-lg text-white outline-none focus:bg-gray-700 transition-all duration-300 ${className}`}
         id={id}
         {...rest}
         title={id}

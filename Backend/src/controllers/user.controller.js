@@ -89,24 +89,24 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User with email or username already exists");
   }
   //here files coming from multer
-  const avatarLocalPath = req.files?.avatar?.[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+  // const avatarLocalPath = req.files?.avatar?.[0]?.path;
+  // const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
   // console.log("Files received:", { avatarLocalPath, coverImageLocalPath });
   // console.log("Full req.files:", req.files);
  
 
   // Upload files to Cloudinary (external storage service)
-  const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
-  // console.log("uploadedAvatar:", uploadedAvatar);
+  // const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
+  // // console.log("uploadedAvatar:", uploadedAvatar);
 
-  const uploadedCoverImage = await uploadOnCloudinary(coverImageLocalPath);
+  // const uploadedCoverImage = await uploadOnCloudinary(coverImageLocalPath);
   // console.log("uploadedCoverImage:", uploadedCoverImage);
 
   const user = await User.create({
     fullName,
-    avatar: uploadedAvatar?.secure_url || "",
-    coverImage: uploadedCoverImage?.secure_url || "",
+    // avatar: uploadedAvatar?.secure_url || "",
+    // coverImage: uploadedCoverImage?.secure_url || "",
     email: email.toLowerCase().trim(),
     password,
     username: username.toLowerCase().trim(),

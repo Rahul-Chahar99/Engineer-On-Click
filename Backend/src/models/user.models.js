@@ -51,6 +51,10 @@ const userSchema = new Schema(
       type: String,
       default: "",
     },
+    pincode: {
+      type: String,
+      default: "",
+    },
     aadharNo: {
       type: String,
       minlength: [12, "Please Enter Correct 12 Digit Aadhar No"],

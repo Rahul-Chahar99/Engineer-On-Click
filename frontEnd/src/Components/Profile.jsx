@@ -304,14 +304,14 @@ function Profile() {
                 <Link to="/profile/update-password">
                 <Button
                   type="button"
-                  bgColor="bg-neutral hover:bg-neutral/80"
+                  
                   className="w-full flex items-center justify-center cursor-pointer text-neutral-content font-semibold rounded-lg"
                 >
                   Update Password
                 </Button></Link>
                 <Button
                   type="button"
-                  bgColor="bg-neutral hover:bg-neutral/80"
+                  
                   className="w-full flex items-center gap-2 justify-center cursor-pointer text-neutral-content font-semibold rounded-lg"
                   onClick={() => (edit ? updateProfile() : setEdit(true))}
                 >

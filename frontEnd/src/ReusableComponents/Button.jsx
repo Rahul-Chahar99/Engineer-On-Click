@@ -1,11 +1,9 @@
-import React from "react";
-
 function Button(
   {
     children,
     type = "button",
     textColor = "text-white",
-    bgColor = "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700",
+    bgColor = "bg-linear-to-r from-gray-400 to-gray-600 hover:from-gray-700 hover:to-gray-700",
     className = "",
     ...props
   },

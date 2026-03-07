@@ -72,7 +72,7 @@ function Login() {
               label="Email or Username"
               type="text"
               placeholder="you@example.com or username"
-              className="block w-full rounded-lg border border-base-300 px-4 py-3 text-base-content placeholder-base-content/50 focus:border-primary focus:ring-primary sm:text-sm transition duration-200 ease-in-out bg-base-100"
+              className="block w-full rounded-lg border border-base-300 px-4 py-2 text-base-content placeholder-base-content/50 focus:border-primary focus:ring-primary sm:text-sm transition duration-200 ease-in-out bg-base-100"
               {...register("identifier", {
                 required: "Email or username is required",
               })}
@@ -87,7 +87,7 @@ function Login() {
               label="Password"
               type="password"
               placeholder="Enter your password"
-              className="block w-full rounded-lg border border-base-300 px-4 py-3 text-base-content placeholder-base-content/50 focus:border-primary focus:ring-primary sm:text-sm transition duration-200 ease-in-out bg-base-100"
+              className="block w-full rounded-lg border border-base-300 px-4 py-2 text-base-content placeholder-base-content/50 focus:border-primary focus:ring-primary sm:text-sm transition duration-200 ease-in-out bg-base-100"
               {...register("password", { required: true })}
             />
             {errors.password && (
@@ -102,7 +102,17 @@ function Login() {
             type="submit"
             className="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-content shadow-lg hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
           />
+          <p className="text-sm text-base-content/70 text-center">
+            ___________________ Or Create An Account ___________________
+          </p>
+          
         </form>
+        <Button
+            children="Create Account"
+            onClick={() => navigate("/signup")}
+            type="submit"
+            className="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-content shadow-lg hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
+          />
         
       </div>
     </div>

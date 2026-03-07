@@ -23,11 +23,11 @@ function Singup() {
 
   useEffect(() => {
     if (isError) {
-      toast.error(message || "Something went wrong") //replace with a toast notification in a real app
+      toast.error(message || "Something went wrong"); //replace with a toast notification in a real app
       dispatch(reset());
     }
     if (isSuccess) {
-      toast.success(message || "Account created successfully")
+      toast.success(message || "Account created successfully");
       navigate("/login"); //redirect to login page
       dispatch(reset());
     }
@@ -51,7 +51,6 @@ function Singup() {
     //   password: formData.get("password"),
     // });
 
-    
     if (data.avatar && data.avatar.length > 0) {
       formData.append("avatar", data.avatar[0]);
     }
@@ -65,10 +64,18 @@ function Singup() {
     <div className="flex items-center justify-center py-8 bg-base-200 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md bg-base-100 p-6 rounded-xl shadow-lg border border-base-300">
         <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold text-base-content">Create Account</h2>
-          <p className="text-xs text-base-content/60 mt-1">Join us to start your journey</p>
+          <h2 className="text-2xl font-bold text-base-content">
+            Create Account
+          </h2>
+          <p className="text-xs text-base-content/60 mt-1">
+            Join us to start your journey
+          </p>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data" className="space-y-3">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          encType="multipart/form-data"
+          className="space-y-3"
+        >
           <div className="space-y-2">
             <Input
               label="Full Name"
@@ -90,14 +97,17 @@ function Singup() {
                 validate: {
                   matchPattern: (value) => {
                     return (
-                      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
-                      "Email address must be a valid address"
+                      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(
+                        value,
+                      ) || "Email address must be a valid address"
                     );
                   },
                 },
               })}
             />
-            {errors.email && <p className="text-xs text-red-600">Email is required</p>}
+            {errors.email && (
+              <p className="text-xs text-red-600">Email is required</p>
+            )}
 
             <Input
               label="Username"
@@ -119,46 +129,45 @@ function Singup() {
             {errors.password && (
               <p className="text-xs text-red-600">Password is required</p>
             )}
-            
+
             <div className="flex items-center space-x-4 py-2">
-              <span className="text-sm text-base-content font-medium">Register as:</span>
+              <span className="text-sm text-base-content font-medium">
+                Register as:
+              </span>
               <div className="flex items-center">
-                <input 
-                  id="engineer" 
-                  type="radio" 
-                  value="engineer" 
+                <input
+                  id="engineer"
+                  type="radio"
+                  value="engineer"
                   className="radio radio-primary radio-sm"
-                  {...register("role", {required: "Please select a role"})} 
+                  {...register("role", { required: "Please select a role" })}
                 />
-                <label htmlFor="engineer" className="ml-2 text-sm text-base-content cursor-pointer">Engineer</label>
+                <label
+                  htmlFor="engineer"
+                  className="ml-2 text-sm text-base-content cursor-pointer"
+                >
+                  Engineer
+                </label>
               </div>
               <div className="flex items-center">
-                <input 
-                  id="customer" 
-                  type="radio" 
-                  value="customer" 
+                <input
+                  id="customer"
+                  type="radio"
+                  value="customer"
                   className="radio radio-primary radio-sm"
-                  {...register("role", {required: "Please select a role"})} 
+                  {...register("role", { required: "Please select a role" })}
                 />
-                <label htmlFor="customer" className="ml-2 text-sm text-base-content cursor-pointer">Customer</label>
+                <label
+                  htmlFor="customer"
+                  className="ml-2 text-sm text-base-content cursor-pointer"
+                >
+                  Customer
+                </label>
               </div>
             </div>
-            {errors.role && <p className="text-xs text-red-600">{errors.role.message}</p>}
-            
-            <Input
-              label="Avatar"
-              type="file"
-              className="block w-full text-xs text-base-content/70 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-content hover:file:bg-primary-focus transition cursor-pointer"
-              {...register("avatar")}
-            />
-            {errors.avatar && <p className="text-xs text-red-600">Avatar is required</p>}
-
-            <Input
-              label="Cover Image"
-              type="file"
-              className="block w-full text-xs text-base-content/70 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-content hover:file:bg-primary-focus transition cursor-pointer"
-              {...register("coverImage")}
-            />
+            {errors.role && (
+              <p className="text-xs text-red-600">{errors.role.message}</p>
+            )}
           </div>
 
           <Button
