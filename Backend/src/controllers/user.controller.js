@@ -17,22 +17,31 @@ const generateAccessAndRefreshToken = async (userId) => {
       throw new ApiError(404, "User not found while generating tokens");
     }
 
-    // Fix for legacy data where socialMedia might be stored as an array
+    
     if (user.socialMedia && Array.isArray(user.socialMedia)) {
-      user.socialMedia = {
-        linkedIn: "",
-        twitter: "",
-        github: "",
-      };
+      await User.findByIdAndUpdate(userId, {
+        $unset: { socialMedia: "" },
+      });
+      await User.findByIdAndUpdate(userId, {
+        $set: {
+          socialMedia: {
+            linkedIn: user.socialMedia[0]?.linkedIn || "",
+            twitter: user.socialMedia[0]?.twitter || "",
+            github: user.socialMedia[0]?.github || "",
+          },
+        },
+      });
     }
 
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
+    // Refetch user after potential socialMedia fix
+    const updatedUser = await User.findById(userId);
+    const accessToken = updatedUser.generateAccessToken();
+    const refreshToken = updatedUser.generateRefreshToken();
 
-    // Save the refresh token in the database to allow revocation later
-    user.refreshToken = refreshToken;
-    // validateBeforeSave: false is used to skip other validation checks (like required fields) since we are only updating the token
-    await user.save({ validateBeforeSave: false });
+    await User.findByIdAndUpdate(userId, {
+      $set: { refreshToken },
+    });
+
     return { accessToken, refreshToken };
   } catch (error) {
     if (error instanceof ApiError) throw error;
