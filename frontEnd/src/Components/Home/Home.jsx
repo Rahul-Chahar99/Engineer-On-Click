@@ -3,6 +3,8 @@ import Button from "../../ReusableComponents/Button";
 import { Link } from "react-router-dom";
 
 function Home() {
+console.log("page rendered");
+
   const services = [
     {
       id: 1,
@@ -56,7 +58,7 @@ function Home() {
           <h1 className="text-4xl font-bold mb-4">
             Professional Engineer Services
           </h1>
-          <p className="text-xl mb-4">
+          <p id="para" className="text-xl mb-4">
             Hire experienced engineers on daily basis anywhere in India
           </p>
           <Link to="/signup">

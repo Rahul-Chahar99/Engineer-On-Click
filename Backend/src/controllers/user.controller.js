@@ -7,7 +7,6 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/Apiresponse.js";
 import jwt from "jsonwebtoken";
 import Contact from "../models/contact.models.js";
-import axios from "axios";
 import * as cloudinary from "cloudinary";
 
 const generateAccessAndRefreshToken = async (userId) => {

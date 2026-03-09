@@ -2,6 +2,7 @@ import React from 'react'
 import Container from './Container/Container.jsx'
 
 function About() {
+  console.log("page about render")
   return (
     <Container>
       <div className="py-12 bg-base-200">
