@@ -4,9 +4,12 @@ import toast from "react-hot-toast";
 import Container from "./Container/Container";
 import Button from "../ReusableComponents/Button";
 import { GridLoader } from "react-spinners";
+import Input from "../ReusableComponents/Input.jsx";
 
 function EngineerRequests() {
   const [engineerRequests, setEngineerRequests] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredEngineerRequests, setFilteredEngineerRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [availableEngineers, setAvailableEngineers] = useState([]);
   const [activeOrderId, setActiveOrderId] = useState(null);
@@ -19,6 +22,9 @@ function EngineerRequests() {
       );
       if (response.status === 200) {
         setEngineerRequests((prevRequests) =>
+          prevRequests.filter((prev) => prev._id !== bookingId),
+        );
+        setFilteredEngineerRequests((prevRequests) =>
           prevRequests.filter((prev) => prev._id !== bookingId),
         );
         toast.success("Engineer Booking  Form Deleted Successfully");
@@ -38,6 +44,7 @@ function EngineerRequests() {
         // console.log(response.data);
         if (response.status === 200) {
           setEngineerRequests(response.data.data || response.data);
+          setFilteredEngineerRequests(response.data.data || response.data);
         }
       } catch (error) {
         const errorMessage =
@@ -73,7 +80,7 @@ function EngineerRequests() {
       toast.error("Please select an engineer first");
       return;
     }
-console.log("engineer id ",selectedEngineerId);
+    console.log("engineer id ", selectedEngineerId);
 
     try {
       const response = await axios.patch(
@@ -81,19 +88,33 @@ console.log("engineer id ",selectedEngineerId);
         {
           orderId: activeOrderId,
           engineerId: selectedEngineerId,
-        }
+        },
       );
 
       if (response.status === 200) {
         toast.success("Engineer Assigned Successfully");
         setActiveOrderId(null);
         // Refresh the list or update local state to reflect change
-        window.location.reload(); 
+        window.location.reload();
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to assign engineer");
     }
   };
+  useEffect(() => {
+    const delayBounceFn = setTimeout(() => {
+      if (!searchTerm) return setFilteredEngineerRequests(engineerRequests);
+      const lowerCaseTerm = searchTerm.toLowerCase();
+      const filtered = engineerRequests.filter(
+        (request) =>
+          request.customerId?.fullName?.toLowerCase().includes(lowerCaseTerm) ||
+          request.branchCode?.includes(lowerCaseTerm) ||
+          request.branchName?.includes(lowerCaseTerm),
+      );
+      setFilteredEngineerRequests(filtered);
+    }, 500);
+    return ()=>clearTimeout(delayBounceFn)
+  }, [searchTerm, engineerRequests]);
 
   return (
     <Container>
@@ -101,114 +122,132 @@ console.log("engineer id ",selectedEngineerId);
         <h1 className="text-3xl font-bold text-base-content mb-6">
           Engineer Booking Requests
         </h1>
-        <Button
-          bgColor="bg-neutral text-neutral-content"
-          className="rounded-lg mb-6"
-          onClick={() => window.history.back()}
-        >
-          Go Back
-        </Button>
+        <div className="w-full py-2 flex items-center justify-around">
+          <Button
+            bgColor="bg-neutral text-neutral-content"
+            className="rounded-lg" // This className will be passed to the underlying button
+            onClick={() => window.history.back()} // Corrected: use 'onClick' (camelCase)
+          >
+            Go Back
+          </Button>
+          <Input
+            label="Search Customers"
+            className="mt-4 mb-6 w-lg bg-white/50 px-3 py-2 rounded-lg text-black focus:bg-gray-200 transition-all duration-300"
+            placeholder="Search by Branch Name, Customer Name, or Branch Code"
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+            }}
+          />
+        </div>
 
         {loading ? (
           <div className="flex justify-center items-center py-20 w-full">
             <GridLoader color="#36d7b7" size={30} />
           </div>
-        ) : engineerRequests && engineerRequests.length > 0 ? (
+        ) : filteredEngineerRequests && filteredEngineerRequests.length > 0 ? (
           <div className="space-y-4">
-            {engineerRequests.map((request) => (
+            {filteredEngineerRequests.map((request) => (
               <div
                 key={request._id}
                 className="bg-base-100 text-base-content rounded-lg shadow-lg border border-base-300 overflow-hidden"
               >
                 <div className="p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  <div>
-                    <p className="text-sm text-base-content/60">
-                      Customer Name
-                    </p>
-                    <p className="font-semibold">
-                      {request.customerId?.fullName || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">
-                      Customer Email
-                    </p>
-                    <p className="font-semibold">
-                      {request.customerId?.email || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">
-                      Customer Mobile
-                    </p>
-                    <p className="font-semibold">
-                      {request.customerId?.mobileNo || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">Branch Code</p>
-                    <p className="font-semibold">{request.branchCode}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">Branch Name</p>
-                    <p className="font-semibold">{request.branchName}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">Start Date</p>
-                    <p className="font-semibold">
-                      {new Date(request.startDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">End Date</p>
-                    <p className="font-semibold">
-                      {new Date(request.endDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">Start Time</p>
-                    <p className="font-semibold">
-                      {request.startTime || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">End Time</p>
-                    <p className="font-semibold">{request.endTime || "N/A"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">
-                      Local Contact
-                    </p>
-                    <p className="font-semibold">{request.localContact}</p>
-                  </div>
-                  <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
-                    <p className="text-sm text-base-content/60">Address</p>
-                    <p className="font-semibold">{request.address}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">
-                      Engineer Assignment
-                    </p>
-                    <p className="font-semibold">{request.engineerAssign}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">Total Cost</p>
-                    <p className="font-semibold">
-                      {request.totalCostOfBooking?.toLocaleString("en-IN", {
-                        style: "currency",
-                        currency: "INR",
-                      }) || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-base-content/60">Requested On</p>
-                    <p className="font-semibold">
-                      {request.createdAt
-                        ? new Date(request.createdAt).toLocaleString()
-                        : "N/A"}
-                    </p>
-                  </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">
+                        Customer Name
+                      </p>
+                      <p className="font-semibold">
+                        {request.customerId?.fullName || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">
+                        Customer Email
+                      </p>
+                      <p className="font-semibold">
+                        {request.customerId?.email || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">
+                        Customer Mobile
+                      </p>
+                      <p className="font-semibold">
+                        {request.customerId?.mobileNo || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">
+                        Branch Code
+                      </p>
+                      <p className="font-semibold">{request.branchCode}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">
+                        Branch Name
+                      </p>
+                      <p className="font-semibold">{request.branchName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">Start Date</p>
+                      <p className="font-semibold">
+                        {new Date(request.startDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">End Date</p>
+                      <p className="font-semibold">
+                        {new Date(request.endDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">Start Time</p>
+                      <p className="font-semibold">
+                        {request.startTime || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">End Time</p>
+                      <p className="font-semibold">
+                        {request.endTime || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">
+                        Local Contact
+                      </p>
+                      <p className="font-semibold">{request.localContact}</p>
+                    </div>
+                    <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
+                      <p className="text-sm text-base-content/60">Address</p>
+                      <p className="font-semibold">{request.address}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">
+                        Engineer Assignment
+                      </p>
+                      <p className="font-semibold">{request.engineerAssign}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">Total Cost</p>
+                      <p className="font-semibold">
+                        {request.totalCostOfBooking?.toLocaleString("en-IN", {
+                          style: "currency",
+                          currency: "INR",
+                        }) || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">
+                        Requested On
+                      </p>
+                      <p className="font-semibold">
+                        {request.createdAt
+                          ? new Date(request.createdAt).toLocaleString()
+                          : "N/A"}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -241,7 +280,9 @@ console.log("engineer id ",selectedEngineerId);
                             <select
                               className="select select-bordered w-full bg-base-100 text-base-content"
                               value={selectedEngineerId || "default"}
-                              onChange={(e) => setSelectedEngineerId(e.target.value)}
+                              onChange={(e) =>
+                                setSelectedEngineerId(e.target.value)
+                              }
                             >
                               <option value="default" disabled>
                                 Pick an engineer
