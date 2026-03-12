@@ -173,7 +173,7 @@ const paymentVerification = asyncHandler(async (req, res) => {
 const getAllEngineerRequests = asyncHandler(async (req, res) => {
   const EngineerRequests = await EngineerForm.find()
     .sort({ _id: -1 })
-    .populate("customerId", "fullName email mobileNo");
+    .populate("customerId", "fullName email mobileNo").populate("assignedEngineerId", "fullName email mobileNo");
 
   if (!EngineerRequests || EngineerRequests.length === 0) {
     throw new ApiError(404, "No engineer requests found");
@@ -236,7 +236,8 @@ const assignEngineer = asyncHandler(async (req, res) => {
     { orderId: orderId },
     {
       $set: {
-        engineerAssign: engineer.fullName, // Storing name for display
+        engineerAssign:"Assigned",
+        assignedEngineerId:engineer._id // Storing name for display
       },
     },
     { new: true }

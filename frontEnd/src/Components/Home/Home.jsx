@@ -1,9 +1,13 @@
 import React from "react";
 import Button from "../../ReusableComponents/Button";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function Home() {
 console.log("page rendered");
+const {userInfo}=useSelector((state=>state.auth))
+console.log('user info:',userInfo);
+
 
   const services = [
     {
@@ -50,7 +54,7 @@ console.log("page rendered");
     },
   ];
 
-  return (
+  return userInfo.role !=='engineer'? (
     <div className="flex flex-col bg-base-200 w-full">
       {/* Hero Section */}
       <div className="flex items-center justify-center py-12 px-4 bg-neutral text-neutral-content">
@@ -134,7 +138,14 @@ console.log("page rendered");
         </div>
       </div>
     </div>
-  );
+  ):(
+    <div>
+      <h1 className="text-3xl font-bold text-center mt-12">Welcome {userInfo.fullName}</h1>
+     <p>See all Incoming Booking request Here</p>
+     
+     
+    </div>
+  )
 }
 
 export default Home;

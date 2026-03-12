@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { Mongoose, Schema } from "mongoose";
 import mongoose from "mongoose";
 
 const bookEngineerSchema = new Schema(
@@ -63,11 +63,16 @@ const bookEngineerSchema = new Schema(
     orderId: {
       type: String,
     },
-    engineerAssign:{
-      type:String,
-      enum:["Pending","Assigned"],
-      default:"Pending"
-    }
+    engineerAssign: {
+      type: String,
+      enum: ["Pending", "Assigned"],
+      default: "Pending",
+    },
+
+    assignedEngineerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );
