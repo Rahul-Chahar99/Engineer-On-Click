@@ -75,6 +75,11 @@ const userSchema = new Schema(
       default: "engineer",
       required: true,
     },
+    bookingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "EngineerForm",
+    },
+
     socialMedia: {
       linkedIn: {
         type: String,

@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/Apiresponse.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { User } from "../models/user.models.js";
+import { BranchData } from "../models/branchData.model.js";
 
 const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -173,7 +174,9 @@ const paymentVerification = asyncHandler(async (req, res) => {
 const getAllEngineerRequests = asyncHandler(async (req, res) => {
   const EngineerRequests = await EngineerForm.find()
     .sort({ _id: -1 })
-    .populate("customerId", "fullName email mobileNo").populate("assignedEngineerId", "fullName email mobileNo");
+    .populate("customerId", "fullName email mobileNo")
+    .populate("assignedEngineerId", "fullName email mobileNo")
+    .populate("branchId", "branchName branchLocationGoogleLink");
 
   if (!EngineerRequests || EngineerRequests.length === 0) {
     throw new ApiError(404, "No engineer requests found");
@@ -189,6 +192,8 @@ const getAllEngineerRequests = asyncHandler(async (req, res) => {
       )
     );
 });
+
+//To delete a engineer booking request
 const deleteEngineerRequest = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const deleteRequest = await EngineerForm.findByIdAndDelete(id);
@@ -199,6 +204,8 @@ const deleteEngineerRequest = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, {}, "Booking Request Deleted Successfully"));
 });
+
+//to show all available engineer where their status is_active status is true
 const showAvailableEngineers = asyncHandler(async (req, res) => {
   const { id } = req.params;
   // Using findOne because we are searching by the custom 'orderId' field.
@@ -216,10 +223,18 @@ const showAvailableEngineers = asyncHandler(async (req, res) => {
   }).select("fullName");
   if (!availabeEngineers) throw new ApiError(404, "Data Not Found");
   console.log(availabeEngineers);
-  return res.status(200).json(new ApiResponse(200,availabeEngineers,"Available Engineers Fetched Successfully"))
-
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        availabeEngineers,
+        "Available Engineers Fetched Successfully"
+      )
+    );
 });
 
+//to assign engineer to a particular booking request
 const assignEngineer = asyncHandler(async (req, res) => {
   const { orderId, engineerId } = req.body;
 
@@ -232,19 +247,31 @@ const assignEngineer = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Engineer not found");
   }
 
+  // 1. Find existing booking first to get the branchCode
+  const existingBooking = await EngineerForm.findOne({ orderId: orderId });
+  if (!existingBooking) throw new ApiError(404, "Booking not found");
+
+  // 2. Fetch branch details using that branchCode
+  const branchData = await BranchData.findOne({
+    branchCode: existingBooking.branchCode,
+  });
+
+  // 3. Perform a SINGLE update for both Engineer and Branch ID
   const updatedBooking = await EngineerForm.findOneAndUpdate(
     { orderId: orderId },
     {
       $set: {
-        engineerAssign:"Assigned",
-        assignedEngineerId:engineer._id // Storing name for display
+        engineerAssign: "Assigned",
+        assignedEngineerId: engineer._id,
+        branchId: branchData ? branchData._id : undefined,
       },
     },
     { new: true }
   );
 
-  if (!updatedBooking) throw new ApiError(404, "Booking not found");
-  console.log(updatedBooking);
+  await User.findByIdAndUpdate(engineer._id, {
+    $set: { bookingId: updatedBooking._id },
+  });
 
   return res
     .status(200)

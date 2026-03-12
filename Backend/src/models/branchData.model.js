@@ -39,6 +39,7 @@ const branchSchema = new Schema(
     branchLocationGoogleLink: {
       type: String,
     },
+    
   },
   { timestamps: true }
 );

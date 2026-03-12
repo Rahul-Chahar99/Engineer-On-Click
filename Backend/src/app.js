@@ -45,6 +45,7 @@ app.use('/api/v1/admin-dashboard',userRouter)
 app.use('/api/v1/branches',branchRouter)
 app.use('/api/v1/admin-dashboard',bookEngineerRouter)
 app.use('/api/v1/admin-dashboard',bookEngineerRouter)
+app.use('/api/v1/engineerHome',userRouter)
 
 
 

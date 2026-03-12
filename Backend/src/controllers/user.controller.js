@@ -8,6 +8,7 @@ import { ApiResponse } from "../utils/Apiresponse.js";
 import jwt from "jsonwebtoken";
 import Contact from "../models/contact.models.js";
 import * as cloudinary from "cloudinary";
+import EngineerForm from "../models/bookEngineer.models.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -473,6 +474,14 @@ const deleteCustomer = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, customer, "Customer Deleted SuccessFully"));
 });
 
+const getAllBookings=asyncHandler(async(req,res)=>{
+  const {userId}=req.params
+  
+  const bookings = await EngineerForm.find({ assignedEngineerId: userId }).populate("customerId",'fullName email localContact ').populate('branchId', 'branchLocationGoogleLink').sort({ createdAt: -1 });
+  if(!bookings || bookings.length===0) throw new ApiError(404,"No Bookings found for this engineer")
+
+  return res.status(200).json(new ApiResponse(200,bookings,"Booking Details fetched successfully"))
+})
 export {
   registerUser,
   logInUser,
@@ -487,4 +496,5 @@ export {
   deleteCustomer,
   changeCurrentPassword,
   userStatusToggle,
+  getAllBookings
 };

@@ -68,6 +68,10 @@ const bookEngineerSchema = new Schema(
       enum: ["Pending", "Assigned"],
       default: "Pending",
     },
+    branchId:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BranchData",
+    },
 
     assignedEngineerId: {
       type: mongoose.Schema.Types.ObjectId,

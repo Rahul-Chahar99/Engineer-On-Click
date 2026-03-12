@@ -13,6 +13,7 @@ import {
   getAllContactForms,
   changeCurrentPassword,
   userStatusToggle,
+  getAllBookings
 } from "../controllers/user.controller.js";
 import { deleteContactForm } from "../controllers/contact.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -45,6 +46,8 @@ router.route('/toggle-status/:userId').patch(verifyJWT,userStatusToggle)
 
 //here admin accessing all the engineers
 router.route("/engineers").get(verifyJWT, isAdmin, getAllEngineers);
+
+router.route('/bookingRequests/:userId').get(verifyJWT,getAllBookings)
 
 //with this route admin can delete a engineer
 router.route("/engineer/:id").delete(verifyJWT, isAdmin, deleteEngineer);
