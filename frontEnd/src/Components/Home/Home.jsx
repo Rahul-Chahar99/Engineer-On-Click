@@ -27,9 +27,12 @@ function Home() {
         if (response.status === 200) {
           setAllBookingRequst(response.data?.data || response.data);
           setFilteredBookingRequests(response.data?.data || response.data);
-          setLoading(false);
         }
-      } catch (error) {}
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     if (userInfo?.role === "engineer") {
       getBookings();
@@ -311,13 +314,13 @@ function Home() {
                   <div className="bg-base-200/50 px-6 py-4 border-t border-base-300">
                     <div className="flex flex-wrap gap-3 items-center justify-end">
                       <Button
-                        children="Delete Form"
+                        children="Reject Request"
                         bgColor="bg-error hover:bg-error/80 text-error-content"
                         className="w-full sm:w-auto rounded-lg cursor-pointer px-6 py-3 text-white font-semibold"
                         onClick={() => deleteBookingRequest(request._id)}
                       />
                       <Button
-                        children="See Available Engineers"
+                        children="Accept Request"
                         className="w-full sm:w-auto cursor-pointer px-6 py-3 text-white font-semibold rounded-lg"
                         onClick={() => showAvailableEngineer(request.orderId)}
                       />
