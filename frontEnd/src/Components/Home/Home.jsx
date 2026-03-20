@@ -82,7 +82,7 @@ function Home() {
     },
   ];
 
-  return userInfo.role !== "engineer" ? (
+  return userInfo?.role !== "engineer" ? (
     <div className="flex flex-col bg-base-200 w-full">
       {/* Hero Section */}
       <div className="flex items-center justify-center py-12 px-4 bg-neutral text-neutral-content">
@@ -173,7 +173,7 @@ function Home() {
       <Container>
         <div className="w-full py-8">
           <h1 className="text-3xl font-bold text-base-content mb-6">
-            Welcome {userInfo.fullName} 😊
+            Welcome {userInfo?.fullName} 😊
           </h1>
           <h1 className="text-3xl font-bold text-base-content mb-6">
             Engineer Booking Requests
