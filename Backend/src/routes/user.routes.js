@@ -13,7 +13,8 @@ import {
   getAllContactForms,
   changeCurrentPassword,
   userStatusToggle,
-  getAllBookings
+  getAllBookings,
+  rejectBookingRequest
 } from "../controllers/user.controller.js";
 import { deleteContactForm } from "../controllers/contact.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -36,18 +37,19 @@ router.route("/register").post(
 );
 
 router.route("/login").post(logInUser);
+router.route('/rejectBooking-requests/:id').patch(verifyJWT,rejectBookingRequest)
 
 // secured routes
 router.route("/logout").post(verifyJWT, logOutUser);
 router.route("/current-user").get(verifyJWT, getUser);
 router.route("/refresh-token").post(refreshAcessToken);
 router.route("/update-password").post(verifyJWT, changeCurrentPassword);
-router.route('/toggle-status/:userId').patch(verifyJWT,userStatusToggle)
+router.route("/toggle-status/:userId").patch(verifyJWT, userStatusToggle);
 
 //here admin accessing all the engineers
 router.route("/engineers").get(verifyJWT, isAdmin, getAllEngineers);
 
-router.route('/bookingRequests/:userId').get(verifyJWT,getAllBookings)
+router.route("/bookingRequests/:userId").get(verifyJWT, getAllBookings);
 
 //with this route admin can delete a engineer
 router.route("/engineer/:id").delete(verifyJWT, isAdmin, deleteEngineer);

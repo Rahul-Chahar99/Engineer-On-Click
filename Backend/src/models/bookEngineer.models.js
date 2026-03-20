@@ -65,10 +65,20 @@ const bookEngineerSchema = new Schema(
     },
     engineerAssign: {
       type: String,
-      enum: ["Pending", "Assigned"],
+      enum: [
+        "Pending",
+        "Assigned",
+        "Accepted",
+        "Rejected_By_Engineer",
+        "Completed",
+      ],
       default: "Pending",
     },
-    branchId:{
+    rejectedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    branchId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "BranchData",
     },

@@ -38,6 +38,41 @@ function Home() {
       getBookings();
     }
   }, [userInfo]);
+  useEffect(() => {
+    const delayBounceFn = setTimeout(() => {
+      if (!searchTerm) return setFilteredBookingRequests(allBookingRequest);
+      const lowerCaseTerm = searchTerm.toLowerCase();
+      const filtered = allBookingRequest.filter(
+        (request) =>
+          request.customerId?.fullName?.toLowerCase().includes(lowerCaseTerm) ||
+          request.branchCode?.includes(lowerCaseTerm) ||
+          (request.branchName?.includes(lowerCaseTerm) &&
+            request.paymentStatus !== "Pending"),
+      );
+      setFilteredBookingRequests(filtered);
+    }, 500);
+    return () => clearTimeout(delayBounceFn);
+  }, [searchTerm, allBookingRequest]);
+
+  const rejectBookingRequest = async (bookingId) => {
+    try {
+      const response = await axios.patch(
+        `/api/v1/engineerHome/rejectBooking-requests/${bookingId}`,
+      );
+      if (response.status === 200) {
+        setAllBookingRequst((prevRequests) =>
+          prevRequests.filter((prev) => prev._id !== bookingId),
+        );
+        setFilteredBookingRequests((prevRequests) =>
+          prevRequests.filter((prev) => prev._id !== bookingId),
+        );
+        toast.success("Engineer Booking  Form Deleted Successfully");
+      }
+    } catch (error) {
+      const errorMessage = response.message || "error 500";
+      toast.error(errorMessage);
+    }
+  };
 
   const services = [
     {
@@ -190,7 +225,7 @@ function Home() {
               Go Back
             </Button>
             <Input
-              label="Search Customers"
+              label="Search Requests"
               className="mt-4 mb-6 w-lg bg-white/50 px-3 py-2 rounded-lg text-black focus:bg-gray-200 transition-all duration-300"
               placeholder="Search by Branch Name, Customer Name, or Branch Code"
               onChange={(e) => {
@@ -228,7 +263,7 @@ function Home() {
                           {request.customerId?.email || "N/A"}
                         </p>
                       </div>
-                      
+
                       <div>
                         <p className="text-sm text-base-content/60">
                           Branch Code
@@ -275,17 +310,20 @@ function Home() {
                         </p>
                         <p className="font-semibold">{request.localContact}</p>
                       </div>
-                      
-                      
+
                       <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
                         <p className="text-sm text-base-content/60">Address</p>
                         <p className="font-semibold">{request.address}</p>
                       </div>
                       <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
-                        <p className="text-sm text-base-content/60">Google Link</p>
-                        <p className="font-semibold">{request.branchId?.branchLocationGoogleLink}</p>
+                        <p className="text-sm text-base-content/60">
+                          Google Link
+                        </p>
+                        <p className="font-semibold">
+                          {request.branchId?.branchLocationGoogleLink}
+                        </p>
                       </div>
-                      
+
                       <div>
                         <p className="text-sm text-base-content/60">
                           Total Cost
@@ -317,7 +355,7 @@ function Home() {
                         children="Reject Request"
                         bgColor="bg-error hover:bg-error/80 text-error-content"
                         className="w-full sm:w-auto rounded-lg cursor-pointer px-6 py-3 text-white font-semibold"
-                        onClick={() => deleteBookingRequest(request._id)}
+                        onClick={() => rejectBookingRequest(request._id)}
                       />
                       <Button
                         children="Accept Request"

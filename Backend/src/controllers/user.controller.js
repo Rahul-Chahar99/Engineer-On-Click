@@ -17,7 +17,6 @@ const generateAccessAndRefreshToken = async (userId) => {
       throw new ApiError(404, "User not found while generating tokens");
     }
 
-    
     if (user.socialMedia && Array.isArray(user.socialMedia)) {
       await User.findByIdAndUpdate(userId, {
         $unset: { socialMedia: "" },
@@ -103,7 +102,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // console.log("Files received:", { avatarLocalPath, coverImageLocalPath });
   // console.log("Full req.files:", req.files);
- 
 
   // Upload files to Cloudinary (external storage service)
   // const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
@@ -336,12 +334,16 @@ const userStatusToggle = asyncHandler(async (req, res) => {
 
   user.is_active = !user.is_active;
   await user.save({ validateBeforeSave: false });
-  
-  const updatedUser = await User.findById(userId).select("-password -refreshToken");
+
+  const updatedUser = await User.findById(userId).select(
+    "-password -refreshToken"
+  );
 
   return res
     .status(200)
-    .json(new ApiResponse(200, updatedUser, "User status updated successfully"));
+    .json(
+      new ApiResponse(200, updatedUser, "User status updated successfully")
+    );
 });
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
@@ -415,9 +417,9 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
 
 //fetching details of all engineers at admin dashboard
 const getAllEngineers = asyncHandler(async (req, res) => {
-  const engineers = await User.find({ role: "engineer" }).sort({_id:-1}).select(
-    "-password -refreshToken"
-  );
+  const engineers = await User.find({ role: "engineer" })
+    .sort({ _id: -1 })
+    .select("-password -refreshToken");
   if (!engineers || engineers.length === 0) {
     throw new ApiError(404, "No engineers found");
   }
@@ -474,14 +476,48 @@ const deleteCustomer = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, customer, "Customer Deleted SuccessFully"));
 });
 
-const getAllBookings=asyncHandler(async(req,res)=>{
-  const {userId}=req.params
-  
-  const bookings = await EngineerForm.find({ assignedEngineerId: userId }).populate("customerId",'fullName email localContact ').populate('branchId', 'branchLocationGoogleLink').sort({ createdAt: -1 });
-  if(!bookings || bookings.length===0) throw new ApiError(404,"No Bookings found for this engineer")
+const getAllBookings = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
 
-  return res.status(200).json(new ApiResponse(200,bookings,"Booking Details fetched successfully"))
-})
+  const bookings = await EngineerForm.find({
+    assignedEngineerId: userId,
+    engineerAssign: { $ne: "Rejected_By_Engineer" },
+  })
+    .populate("customerId", "fullName email localContact ")
+    .populate("branchId", "branchLocationGoogleLink")
+    .sort({ createdAt: -1 });
+  if (!bookings || bookings.length === 0)
+    throw new ApiError(404, "No Bookings found for this engineer");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, bookings, "Booking Details fetched successfully")
+    );
+});
+//To delete a engineer booking request
+const rejectBookingRequest = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const updatedRequest = await EngineerForm.findByIdAndUpdate(
+    id,
+    {
+      $set: { engineerAssign: "Rejected_By_Engineer" },
+    },
+    { new: true }
+  );
+  if (!updatedRequest) {
+    throw new ApiError(404, "Booking Request Form not Found");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        updatedRequest,
+        "Booking Request Rejected Successfully"
+      )
+    );
+});
 export {
   registerUser,
   logInUser,
@@ -496,5 +532,6 @@ export {
   deleteCustomer,
   changeCurrentPassword,
   userStatusToggle,
-  getAllBookings
+  getAllBookings,
+  rejectBookingRequest,
 };
