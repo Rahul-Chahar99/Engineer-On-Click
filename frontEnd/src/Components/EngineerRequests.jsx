@@ -41,17 +41,19 @@ function EngineerRequests() {
         const response = await axios.get(
           "/api/v1/admin-dashboard/booking-requests",
         );
-        // console.log(response.data);
-        if (response.status === 200) {
-          setEngineerRequests(response.data.data || response.data);
-          setFilteredEngineerRequests(response.data.data || response.data);
-          console.log(response.data.data);
-          
+        
+        console.log(response.data.data);
+        const finalrespone=response.data.data.filter((request)=>request.paymentStatus!=="Pending");
+        console.log(finalrespone);
+        if (response.status === 200 ) {
+          setEngineerRequests(finalrespone);
+          setFilteredEngineerRequests(finalrespone);
         }
       } catch (error) {
         const errorMessage =
           error.response?.data?.message || "Unable to fetch engineer requests";
-        toast.error(errorMessage);
+      console.log(errorMessage);
+      
       } finally {
         setLoading(false);
       }
@@ -111,11 +113,11 @@ function EngineerRequests() {
         (request) =>
           request.customerId?.fullName?.toLowerCase().includes(lowerCaseTerm) ||
           request.branchCode?.includes(lowerCaseTerm) ||
-          request.branchName?.includes(lowerCaseTerm),
+          request.branchName?.includes(lowerCaseTerm) && request.paymentStatus!=="Pending"
       );
       setFilteredEngineerRequests(filtered);
     }, 500);
-    return ()=>clearTimeout(delayBounceFn)
+    return () => clearTimeout(delayBounceFn);
   }, [searchTerm, engineerRequests]);
 
   return (
@@ -148,7 +150,7 @@ function EngineerRequests() {
           </div>
         ) : filteredEngineerRequests && filteredEngineerRequests.length > 0 ? (
           <div className="space-y-4">
-            {filteredEngineerRequests.map((request) => (
+            {filteredEngineerRequests.map((request) =>request.paymentStatus==="Pending"? null : (
               <div
                 key={request._id}
                 className="bg-base-100 text-base-content rounded-lg shadow-lg border border-base-300 overflow-hidden"
@@ -225,17 +227,27 @@ function EngineerRequests() {
                       <p className="text-sm text-base-content/60">
                         Assigned Engineer Name
                       </p>
-                      <p className="font-semibold">{request.assignedEngineerId?.fullName || "N/A"}</p>
+                      <p className="font-semibold">
+                        {request.assignedEngineerId?.fullName || "N/A"}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-base-content/60">
                         Assigned Engineer Mobile No
                       </p>
-                      <p className="font-semibold">{request.assignedEngineerId?.mobileNo || "N/A"}</p>
+                      <p className="font-semibold">
+                        {request.assignedEngineerId?.mobileNo || "N/A"}
+                      </p>
                     </div>
                     <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
                       <p className="text-sm text-base-content/60">Address</p>
                       <p className="font-semibold">{request.address}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-base-content/60">
+                        Payment Status
+                      </p>
+                      <p className="font-semibold">{request.paymentStatus}</p>
                     </div>
                     <div>
                       <p className="text-sm text-base-content/60">
