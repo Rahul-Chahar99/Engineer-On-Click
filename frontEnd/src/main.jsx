@@ -1,4 +1,4 @@
-import { StrictMode, Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import axios from "axios";
@@ -26,15 +26,17 @@ const UpdatePassword = lazy(() => import("./Components/UpdatePassword.jsx"));
 const BookEngineerForm = lazy(
   () => import("./Components/BookEngineerForm.jsx"),
 );
-const EngineerRequests = lazy(
-  () => import("./Components/EngineerRequests.jsx"),
+const EngineerRequests = lazy(()=>
+   import("./Components/EngineerRequests.jsx"),
 );
+const BankList =lazy(()=>import('./Components/BankList.jsx'))
 import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
   RouterProvider,
 } from "react-router-dom";
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -110,19 +112,20 @@ const router = createBrowserRouter(
             </AuthLayout>
           }
         />
-        <Route
-          path="/admin-dashboard/customers"
-          element={
-            <AuthLayout authentication>
-              <Customers />
-            </AuthLayout>
-          }
-        />
+
         <Route
           path="/admin-dashboard/booking-requests"
           element={
             <AuthLayout authentication>
               <EngineerRequests />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/admin-dashboard/banks-list"
+          element={
+            <AuthLayout authentication>
+              <BankList/>
             </AuthLayout>
           }
         />
@@ -140,9 +143,7 @@ const router = createBrowserRouter(
 );
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
     <Provider store={store}>
       <RouterProvider router={router} />
     </Provider>
-  </StrictMode>,
 );

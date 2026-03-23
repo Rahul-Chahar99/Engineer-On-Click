@@ -19,6 +19,7 @@ import {
 import { deleteContactForm } from "../controllers/contact.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { isAdmin, verifyJWT } from "../middlewares/auth.middleware.js";
+import { getPaginatedBankList } from "../controllers/admin.controller.js";
 
 const router = Router();
 
@@ -35,6 +36,8 @@ router.route("/register").post(
   ]),
   registerUser
 );
+// GET /api/v1/users/bankList?page=1&limit=10
+router.route("/bankList").get(verifyJWT, isAdmin, getPaginatedBankList);
 
 router.route("/login").post(logInUser);
 router.route('/rejectBooking-requests/:id').patch(verifyJWT,rejectBookingRequest)

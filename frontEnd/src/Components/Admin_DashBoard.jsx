@@ -86,6 +86,20 @@ function Admin_DashBoard() {
               </Button>
             </Link>
           </div>
+          <div className="bg-base-100 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow border border-base-300">
+            <div className="text-4xl mb-4">📋</div>
+            <h3 className="text-xl font-bold mb-2 text-base-content">
+              All Banks Data
+            </h3>
+            <p className="text-base-content/70 mb-4">
+              See the list of all banks and their details
+            </p>
+            <Link to="/admin-dashboard/banks-list">
+              <Button className="w-full bg-primary text-primary-content py-2 font-bold hover:bg-primary-focus">
+                View All Banks
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </Container>

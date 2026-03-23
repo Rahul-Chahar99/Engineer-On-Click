@@ -2,6 +2,7 @@ import "dotenv/config.js";
 
 import { app } from "./app.js";
 import connectDb from "./db/index.js";
+import redisClient from "./utils/redisClient.js";
 
 let isConnected = false;
 
