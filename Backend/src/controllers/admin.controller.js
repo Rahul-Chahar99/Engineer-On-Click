@@ -6,68 +6,67 @@ import { BranchData } from "../models/branchData.model.js";
 import { ApiResponse } from "../utils/Apiresponse.js";
 
 const getPaginatedBankList = asyncHandler(async (req, res) => {
-  // 1.setup paginated variable
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
+  // Grab the search query from the frontend (default to empty string)
+  const searchQuery = req.query.search ? req.query.search.toLowerCase() : ""; 
+  
   const cacheKey = "admin_all_banksList";
+  
   try {
-    //2. check redis for the master list
+    let allBanks = [];
+    let source = "";
+
+    // 1. Try to get from Redis
     const cacheData = await redisClient.get(cacheKey);
+    
     if (cacheData) {
-      console.log("serving all bank details from redis");
-      const allBanks = JSON.parse(cacheData);
-
-      // 3.paginate the array in-memory
-      const startIndex = (page - 1) * limit;
-      const endIndex = page * limit;
-      const paginatedResults = allBanks.slice(startIndex, endIndex);
-
-      //returning response
-      return res.status(200).json(
-        new ApiResponse(
-          200,
-          {
-            data: paginatedResults,
-            currentPage: page,
-            totalPages: Math.ceil(allBanks.length / limit),
-            totalRecords: allBanks.length,
-            source: "Redis",
-          },
-          "data fetched successfully"
-        )
-      );
+      console.log("Serving all bank details from Redis");
+      allBanks = JSON.parse(cacheData);
+      source = "Redis";
+    } else {
+      // 2. Cache miss: Fetch from MongoDB
+      console.log("Serving Bank Details from MongoDB");
+      allBanks = await BranchData.find({}).lean();
+      
+      // Save back to Redis for next time
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(allBanks));
+      source = "MongoDB";
     }
-    // 4.Cache miss: fetch all from mongo db
-    console.log("Serving Bank Details from MongoDB");
-    // .lean() makes the query faster by returning plain JS objects instead of Mongoose documents
-    const allBanks = await BranchData.find({}).lean();
 
-    // 5.  Save the Master List to Redis (Set TTL to 1 hour / 3600 seconds)
-    await redisClient.setEx(cacheKey, 3600, JSON.stringify(allBanks));
+    // 3. FILTER THE DATA BASED ON THE SEARCH QUERY FIRST
+    let filteredBanks = allBanks;
+    if (searchQuery) {
+        filteredBanks = allBanks.filter((bank) => 
+            // Make sure the field matches your database schema! (e.g., branchCode)
+            bank.branchCode?.toLowerCase().includes(searchQuery)
+        );
+    }
 
-    // 6. Paginate the fresh database results
+    // 4. THEN PAGINATE THE FILTERED LIST
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
-    const paginatedResults = allBanks.slice(startIndex, endIndex);
+    const paginatedResults = filteredBanks.slice(startIndex, endIndex);
+
+    // 5. Send Response
     return res.status(200).json(
       new ApiResponse(
         200,
         {
           data: paginatedResults,
           currentPage: page,
-          totalPages: Math.ceil(allBanks.length / limit),
-          totalRecords: allBanks.length,
-          source: "MongoDB",
+          totalPages: Math.ceil(filteredBanks.length / limit),
+          totalRecords: filteredBanks.length, // Total of the *searched* items
+          source: source,
         },
-        "data fetched successfully"
+        "Data fetched successfully"
       )
     );
+    
   } catch (error) {
-    console.error("Redis Cache/MongoDB Error: ", error);
-    throw new ApiError(500, error.message || "Internal Server Error");
+    throw new ApiError(500, "Internal Server Error");
   }
 });
-
 export const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);

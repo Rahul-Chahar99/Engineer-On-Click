@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useDeferredValue } from "react";
 import api from "./axios";
 import { ScaleLoader } from "react-spinners";
 
@@ -11,27 +11,35 @@ const BankList = () => {
   const [dataSource, setDataSource] = useState("");
   const limit = 10;
 
+  // 1. Standard immediate state for the input
+  const [inputValue, setInputValue] = useState("");
+
+  // 2. React creates the lagging/deferred version automatically
+  const deferredSearchQuery = useDeferredValue(inputValue);
+
+  // 3. We know React is processing if these two don't match
+  const isPending = inputValue !== deferredSearchQuery;
+
+  // Reset to page 1 whenever the user types something new
+  const handleSearchChange = (e) => {
+    setInputValue(e.target.value);
+    setPage(1); 
+  };
+
   useEffect(() => {
     const fetchBanks = async () => {
       setLoading(true);
       try {
+        // 4. We pass the deferredSearchQuery to the backend!
         const response = await api.get(
-          `/api/v1/users/bankList?page=${page}&limit=${limit}`,
+          `/api/v1/users/bankList?page=${page}&limit=${limit}&search=${deferredSearchQuery}`
         );
 
-        // Using the custom ApiResponse structure from the backend
         const result = response.data.data;
-
         setBanks(result.data);
-        console.log("result.data", result.data);
-
         setTotalPages(result.totalPages);
-        console.log("result.totalpage:", result.totalPages);
-
         setTotalRecords(result.totalRecords);
-        console.log("result.totalRecords:", result.totalRecords);
         setDataSource(result.source);
-        console.log("result.source:", result.source);
       } catch (error) {
         console.error("Error fetching bank list:", error);
       } finally {
@@ -39,13 +47,30 @@ const BankList = () => {
       }
     };
 
+    // This runs whenever the page changes OR the deferred value updates
     fetchBanks();
-  }, [page]);
+  }, [page, deferredSearchQuery]);
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold">Bank Branches List</h2>
+
+        {/* Search Box */}
+        <div className="relative w-full max-w-sm">
+          <input
+            type="text"
+            placeholder="Search Branch Code..."
+            className="input input-bordered w-full"
+            value={inputValue}
+            onChange={handleSearchChange}
+          />
+          {/* Spinner shows while React defers the search or fetches data */}
+          {isPending && (
+            <span className="absolute right-3 top-3 loading loading-spinner loading-sm text-primary"></span>
+          )}
+        </div>
+
         {dataSource && (
           <span
             className={`badge ${dataSource === "Redis" ? "badge-success" : "badge-info"} text-white px-3 py-3 rounded-full text-sm font-semibold`}
@@ -55,12 +80,12 @@ const BankList = () => {
         )}
       </div>
 
-      {loading ? (
+      {loading && banks.length === 0 ? (
         <div className="flex justify-center items-center h-64">
           <ScaleLoader color="#36d7b7" />
         </div>
       ) : (
-        <div className="overflow-x-auto bg-base-100 shadow-xl rounded-lg">
+        <div className={`overflow-x-auto bg-base-100 shadow-xl rounded-lg transition-opacity duration-200 ${isPending || loading ? "opacity-50" : "opacity-100"}`}>
           <table className="table w-full">
             <thead className="bg-base-200">
               <tr>
@@ -71,27 +96,35 @@ const BankList = () => {
               </tr>
             </thead>
             <tbody>
-              {banks.map((bank) => (
-                <tr key={bank._id} className="hover">
-                  <td className="font-semibold">{bank.branchCode}</td>
-                  <td>{bank.branchName}</td>
-                  <td>{bank.branchAddress}</td>
-                  <td>
-                    {bank.branchLocationGoogleLink ? (
-                      <a
-                        href={bank.branchLocationGoogleLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline"
-                      >
-                        View Map
-                      </a>
-                    ) : (
-                      "N/A"
-                    )}
+              {banks.length > 0 ? (
+                banks.map((bank) => (
+                  <tr key={bank._id} className="hover">
+                    <td className="font-semibold">{bank.branchCode}</td>
+                    <td>{bank.branchName}</td>
+                    <td>{bank.branchAddress}</td>
+                    <td>
+                      {bank.branchLocationGoogleLink ? (
+                        <a
+                          href={bank.branchLocationGoogleLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:underline"
+                        >
+                          View Map
+                        </a>
+                      ) : (
+                        "N/A"
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="text-center py-6 text-gray-500 font-semibold">
+                    No branches found matching "{deferredSearchQuery}"
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
