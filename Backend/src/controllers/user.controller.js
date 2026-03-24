@@ -331,6 +331,13 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       console.error("Redis cache deletion error: ", error);
     }
   }
+  if (user.role === "customer") {
+    try {
+      await redisClient.del("get_all_customers");
+    } catch (error) {
+      console.error("Redis cache deletion error: ", error);
+    }
+  }
 
   return res
     .status(200)
@@ -451,19 +458,31 @@ const getAllEngineers = asyncHandler(
     const cacheKey = "get_all_engineers";
 
     try {
-      let allEngineers = [];
+      let allEngineers = null;
       let source = "";
-      //1.try to fectch data from redis
-      const cacheData = await redisClient.get(cacheKey);
-      if (cacheData) {
-        console.log("serving all engineers list from redis");
-        allEngineers = JSON.parse(cacheData);
-        source = "redis";
-      } else {
+      
+      // 1. Try to fetch data from Redis
+      try {
+        const cacheData = await redisClient.get(cacheKey);
+        if (cacheData) {
+          console.log("serving all engineers list from redis");
+          allEngineers = JSON.parse(cacheData);
+          source = "Redis";
+        }
+      } catch (error) {
+        console.error("Redis fetch error (Engineers): ", error);
+      }
+
+      // 2. Fallback to MongoDB if Redis failed, was empty, or returned corrupted data
+      if (!allEngineers) {
         console.log("serving all engineers list from mongo db");
         allEngineers = await User.find({ role: "engineer" }).lean();
-        await redisClient.setEx(cacheKey, 3600, JSON.stringify(allEngineers));
         source = "MongoDB";
+        try {
+          await redisClient.setEx(cacheKey, 3600, JSON.stringify(allEngineers));
+        } catch (error) {
+          console.error("Redis cache set error (Engineers): ", error);
+        }
       }
       // 3. FILTER THE DATA BASED ON THE SEARCH QUERY FIRST
       let filteredEngineers = allEngineers;
@@ -523,30 +542,83 @@ const getAllContactForms = asyncHandler(async (req, res) => {
 
 //all Customers fetching at admin dashboard
 const getAllCustomers = asyncHandler(async (req, res) => {
-  const customers = await User.find({ role: "customer" })
-    .sort({ _id: -1 })
-    .select("-password -refreshToken");
-  if (!customers || customers.length === 0) {
-    throw new ApiError(404, "No customers found");
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const searchQuery = req.query.search ? req.query.search.toLowerCase() : "";
+  const cacheKey = "get_all_customers";
+  let customers = null;
+  let source = "";
+  
+  try {
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log("Serving customers from Redis");
+      source = "Redis";
+      customers = JSON.parse(cachedData);
+    }
+  } catch (error) {
+    console.error("Redis fetch error (Customers): ", error);
   }
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, customers, "Customers fetched successfully"));
+  if (!customers) {
+    console.log("Serving customers from MongoDB");
+    customers = await User.find({ role: "customer" }).lean();
+    source = "MongoDB";
+    try {
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(customers));
+    } catch (error) {
+      console.error("Redis cache set error (Customers): ", error);
+    }
+  }
+  let filteredCustomers = customers;
+  if (searchQuery) {
+    filteredCustomers = customers.filter((customer) =>
+      customer?.email?.includes(searchQuery)
+    );
+  }
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const paginatedResults = filteredCustomers.slice(startIndex, endIndex);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        data: paginatedResults,
+        currentPage: page,
+        totalPages: Math.ceil(filteredCustomers.length / limit),
+        totalRecords: filteredCustomers.length,
+        source: source,
+      },
+      "All customer fetched sucessfully"
+    )
+  );
+  // const customers = await User.find({ role: "customer" })
+  //   .sort({ _id: -1 })
+  //   .select("-password -refreshToken");
+  // if (!customers || customers.length === 0) {
+  //   throw new ApiError(404, "No customers found");
+  // }
+
+  // return res
+  //   .status(200)
+  //   .json(new ApiResponse(200, customers, "Customers fetched successfully"));
 });
 
 //             engineer by id - admin only
 const deleteEngineer = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const engineer = await User.findByIdAndDelete(id);
-  if (!engineer) {
-    throw new ApiError(404, "Enginner Not Found");
-  }
 
   try {
     await redisClient.del("get_all_engineers");
   } catch (error) {
     console.error("Redis cache deletion error: ", error);
+  }
+
+  if (!engineer) {
+    throw new ApiError(404, "Enginner Not Found");
   }
 
   console.log(`Deleted Engineer : ${engineer}`);
@@ -558,6 +630,13 @@ const deleteEngineer = asyncHandler(async (req, res) => {
 const deleteCustomer = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const customer = await User.findByIdAndDelete(id);
+
+  try {
+    await redisClient.del("get_all_customers");
+  } catch (error) {
+    console.error("Redis cache deletion error: ", error);
+  }
+
   if (!customer) throw new ApiError(404, "Customer Not Found");
 
   return res
