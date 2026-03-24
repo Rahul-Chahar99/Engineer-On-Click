@@ -126,7 +126,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
-
+  console.log("Created User (without sensitive fields):", createdUser);
   if (!createdUser)
     throw new ApiError(500, "something went wrong while registering user");
 
@@ -134,6 +134,13 @@ const registerUser = asyncHandler(async (req, res) => {
   if (createdUser.role === "engineer") {
     try {
       await redisClient.del("get_all_engineers");
+    } catch (error) {
+      console.error("Redis cache deletion error: ", error);
+    }
+  }
+  if (createdUser.role === "customer") {
+    try {
+      await redisClient.del("get_all_customers");
     } catch (error) {
       console.error("Redis cache deletion error: ", error);
     }
@@ -373,6 +380,14 @@ const userStatusToggle = asyncHandler(async (req, res) => {
     }
   }
 
+  if (updatedUser.role === "customer") {
+    try {
+      await redisClient.del("get_all_customers");
+    } catch (error) {
+      console.error("Redis cache deletion error: ", error);
+    }
+  }
+
   return res
     .status(200)
     .json(
@@ -460,7 +475,7 @@ const getAllEngineers = asyncHandler(
     try {
       let allEngineers = null;
       let source = "";
-      
+
       // 1. Try to fetch data from Redis
       try {
         const cacheData = await redisClient.get(cacheKey);
@@ -474,7 +489,7 @@ const getAllEngineers = asyncHandler(
       }
 
       // 2. Fallback to MongoDB if Redis failed, was empty, or returned corrupted data
-      if (!allEngineers) {
+      if (allEngineers === null) {
         console.log("serving all engineers list from mongo db");
         allEngineers = await User.find({ role: "engineer" }).lean();
         source = "MongoDB";
@@ -548,7 +563,7 @@ const getAllCustomers = asyncHandler(async (req, res) => {
   const cacheKey = "get_all_customers";
   let customers = null;
   let source = "";
-  
+
   try {
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
@@ -560,9 +575,11 @@ const getAllCustomers = asyncHandler(async (req, res) => {
     console.error("Redis fetch error (Customers): ", error);
   }
 
-  if (!customers) {
+  if (customers === null) {
     console.log("Serving customers from MongoDB");
-    customers = await User.find({ role: "customer" }).lean();
+    customers = await User.find({ role: "customer" })
+      .sort({ _id: -1 })
+      .select("-password -refreshToken").lean();
     source = "MongoDB";
     try {
       await redisClient.setEx(cacheKey, 3600, JSON.stringify(customers));
@@ -610,15 +627,13 @@ const getAllCustomers = asyncHandler(async (req, res) => {
 const deleteEngineer = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const engineer = await User.findByIdAndDelete(id);
-
+  if (!engineer) {
+    throw new ApiError(404, "Enginner Not Found");
+  }
   try {
     await redisClient.del("get_all_engineers");
   } catch (error) {
     console.error("Redis cache deletion error: ", error);
-  }
-
-  if (!engineer) {
-    throw new ApiError(404, "Enginner Not Found");
   }
 
   console.log(`Deleted Engineer : ${engineer}`);
@@ -630,14 +645,16 @@ const deleteEngineer = asyncHandler(async (req, res) => {
 const deleteCustomer = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const customer = await User.findByIdAndDelete(id);
-
+ if (!customer) {
+    throw new ApiError(404, "Enginner Not Found");
+  }
   try {
     await redisClient.del("get_all_customers");
   } catch (error) {
     console.error("Redis cache deletion error: ", error);
   }
 
-  if (!customer) throw new ApiError(404, "Customer Not Found");
+
 
   return res
     .status(200)

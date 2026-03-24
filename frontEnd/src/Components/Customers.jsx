@@ -65,7 +65,15 @@ function Customers() {
           toast.success("Customer Deleted Successfully");
         }
       } catch (error) {
-        toast.error("Failed to delete Customer");
+        if (error.response && error.response.status === 404) {
+          setCustomers((prevCusotmer) =>
+            prevCusotmer.filter((cust) => cust._id !== customerId),
+          );
+          setTotalRecords((prev) => prev - 1);
+          toast.success("Customer already removed");
+        } else {
+          toast.error("Failed to delete Customer");
+        }
       }
     };
 
