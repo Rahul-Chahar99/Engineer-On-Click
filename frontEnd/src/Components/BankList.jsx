@@ -49,6 +49,10 @@ const BankList = () => {
 
     // This runs whenever the page changes OR the deferred value updates
     fetchBanks();
+    const interval=setInterval(fetchBanks,60000) // auto refresh every 60 seconds
+
+    // Cleanup interval on unmount or before next effect runs
+    return () => clearInterval(interval);
   }, [page, deferredSearchQuery]);
 
   return (

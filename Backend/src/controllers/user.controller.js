@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken";
 import Contact from "../models/contact.models.js";
 import * as cloudinary from "cloudinary";
 import EngineerForm from "../models/bookEngineer.models.js";
+import redisClient from "../utils/redisClient.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -128,6 +129,15 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (!createdUser)
     throw new ApiError(500, "something went wrong while registering user");
+
+  // Invalidate Redis cache so the new engineer appears immediately in the Admin Dashboard
+  if (createdUser.role === "engineer") {
+    try {
+      await redisClient.del("get_all_engineers");
+    } catch (error) {
+      console.error("Redis cache deletion error: ", error);
+    }
+  }
 
   //here we are sending 201 status for resource creation and created user object to front end
   return res
@@ -313,6 +323,15 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       await cloudinary.uploader.destroy(oldCoverImagePublicId);
     }
   }
+
+  if (user.role === "engineer") {
+    try {
+      await redisClient.del("get_all_engineers");
+    } catch (error) {
+      console.error("Redis cache deletion error: ", error);
+    }
+  }
+
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Profile updated successfully"));
@@ -338,6 +357,14 @@ const userStatusToggle = asyncHandler(async (req, res) => {
   const updatedUser = await User.findById(userId).select(
     "-password -refreshToken"
   );
+
+  if (updatedUser.role === "engineer") {
+    try {
+      await redisClient.del("get_all_engineers");
+    } catch (error) {
+      console.error("Redis cache deletion error: ", error);
+    }
+  }
 
   return res
     .status(200)
@@ -416,17 +443,72 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
 });
 
 //fetching details of all engineers at admin dashboard
-const getAllEngineers = asyncHandler(async (req, res) => {
-  const engineers = await User.find({ role: "engineer" })
-    .sort({ _id: -1 })
-    .select("-password -refreshToken");
-  if (!engineers || engineers.length === 0) {
-    throw new ApiError(404, "No engineers found");
+const getAllEngineers = asyncHandler(
+  async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const searchQuery = req.query.search ? req.query.search.toLowerCase() : "";
+    const cacheKey = "get_all_engineers";
+
+    try {
+      let allEngineers = [];
+      let source = "";
+      //1.try to fectch data from redis
+      const cacheData = await redisClient.get(cacheKey);
+      if (cacheData) {
+        console.log("serving all engineers list from redis");
+        allEngineers = JSON.parse(cacheData);
+        source = "redis";
+      } else {
+        console.log("serving all engineers list from mongo db");
+        allEngineers = await User.find({ role: "engineer" }).lean();
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(allEngineers));
+        source = "MongoDB";
+      }
+      // 3. FILTER THE DATA BASED ON THE SEARCH QUERY FIRST
+      let filteredEngineers = allEngineers;
+      if (searchQuery) {
+        filteredEngineers = allEngineers.filter(
+          (engineer) =>
+            engineer?.fullName?.toLowerCase().includes(searchQuery) ||
+            engineer?.mobileNo?.includes(searchQuery) ||
+            engineer?.pincode?.includes(searchQuery)
+        );
+      }
+      // 4. THEN PAGINATE THE FILTERED LIST
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+      const paginatedResults = filteredEngineers.slice(startIndex, endIndex);
+      // 5. Send Response
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            data: paginatedResults,
+            currentPage: page,
+            totalPages: Math.ceil(filteredEngineers.length / limit),
+            totalRecords: filteredEngineers.length, // Total of the *searched* items
+            source: source,
+          },
+          "Data fetched successfully"
+        )
+      );
+    } catch (error) {
+      throw new ApiError(500, "internal server error");
+    }
   }
-  return res
-    .status(200)
-    .json(new ApiResponse(200, engineers, "Engineers fetched successfully"));
-});
+  //    {
+  //   const engineers = await User.find({ role: "engineer" })
+  //     .sort({ _id: -1 })
+  //     .select("-password -refreshToken");
+  //   if (!engineers || engineers.length === 0) {
+  //     throw new ApiError(404, "No engineers found");
+  //   }
+  //   return res
+  //     .status(200)
+  //     .json(new ApiResponse(200, engineers, "Engineers fetched successfully"));
+  // }
+);
 
 //fetching of all contact forms at admin page
 const getAllContactForms = asyncHandler(async (req, res) => {
@@ -460,6 +542,13 @@ const deleteEngineer = asyncHandler(async (req, res) => {
   if (!engineer) {
     throw new ApiError(404, "Enginner Not Found");
   }
+
+  try {
+    await redisClient.del("get_all_engineers");
+  } catch (error) {
+    console.error("Redis cache deletion error: ", error);
+  }
+
   console.log(`Deleted Engineer : ${engineer}`);
 
   return res

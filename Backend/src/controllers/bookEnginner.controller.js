@@ -172,6 +172,13 @@ const paymentVerification = asyncHandler(async (req, res) => {
 });
 
 const getAllEngineerRequests = asyncHandler(async (req, res) => {
+  // const page = parseInt(req.query.page) || 1;
+  // const limit = parseInt(req.query.limit) || 10;
+
+  // const searchQuery = req.query.search ? req.query.search.toLowerCase() : "";
+
+  // const cacheKey="all_engineers_requests"
+  
   const EngineerRequests = await EngineerForm.find()
     .sort({ _id: -1 })
     .populate("customerId", "fullName email mobileNo")
