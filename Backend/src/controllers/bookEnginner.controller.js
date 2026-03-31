@@ -6,6 +6,10 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { User } from "../models/user.models.js";
 import { BranchData } from "../models/branchData.model.js";
+import redisClient from "../utils/redisClient.js";
+import { log } from "console";
+import { json } from "stream/consumers";
+import { request } from "express";
 
 const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -182,32 +186,91 @@ const paymentVerification = asyncHandler(async (req, res) => {
 });
 
 const getAllEngineerRequests = asyncHandler(async (req, res) => {
-  // const page = parseInt(req.query.page) || 1;
-  // const limit = parseInt(req.query.limit) || 10;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
 
-  // const searchQuery = req.query.search ? req.query.search.toLowerCase() : "";
-
-  // const cacheKey="all_engineers_requests"
+  const searchQuery = req.query.search ? req.query.search.toLowerCase() : "";
+  let source = "";
+  const cacheKey = "all_engineers_requests";
+  let engineerRequests = null;
+  try {
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log("Serving from Redis");
+      engineerRequests = JSON.parse(cachedData);
+      source = "Redis";
+    }
+  } catch (error) {
+    console.error("Redis fetch error (Engineers): ", error);
+  }
+  if (engineerRequests === null) {
+    console.log("serving data from mongodb");
+    engineerRequests = await EngineerForm.find()
+      .sort({ _id: -1 })
+      .populate("customerId", "fullName email mobileNo")
+      .populate("assignedEngineerId", "fullName email mobileNo")
+      .populate("branchId", "branchName branchLocationGoogleLink branchCode")
+      ;
+    source = "MongoDB";
+    try {
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(engineerRequests));
+    } catch (error) {
+      console.error("Redis cache set error (Engineers): ", error);
+    }
+  }
+  // 3. FILTER THE DATA BASED ON THE SEARCH QUERY FIRST
+  let filteredEngineerRequests = engineerRequests;
+  console.log("filter engineer request", filteredEngineerRequests);
   
-  const EngineerRequests = await EngineerForm.find()
-    .sort({ _id: -1 })
-    .populate("customerId", "fullName email mobileNo")
-    .populate("assignedEngineerId", "fullName email mobileNo")
-    .populate("branchId", "branchName branchLocationGoogleLink");
-
-  if (!EngineerRequests || EngineerRequests.length === 0) {
-    throw new ApiError(404, "No engineer requests found");
+  if (searchQuery) {
+    //admin can search data on engineer email, customer email,branch Name and branch Code
+    filteredEngineerRequests = engineerRequests.filter(
+      (request) =>
+        request?.branchCode?.includes(searchQuery) ||
+        request?.branchName?.toLowerCase().includes(searchQuery) ||
+        request?.customerId?.email?.toLowerCase().includes(searchQuery) ||
+        request?.assignedEngineerId?.email.toLowerCase().includes(searchQuery)
+    );
   }
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        EngineerRequests,
-        "Engineer Requests fetched Successfully"
-      )
-    );
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const paginatedResults = filteredEngineerRequests.slice(startIndex, endIndex);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        data: paginatedResults,
+        source: source,
+        currentPage: page,
+        totalPages: Math.ceil(filteredEngineerRequests.length / limit),
+        totalRecords: filteredEngineerRequests.length, // Total of the *searched* items
+      },
+      "Data fetched successfully"
+    )
+
+  );
+
+  // const EngineerRequests = await EngineerForm.find()
+  //   .sort({ _id: -1 })
+  //   .populate("customerId", "fullName email mobileNo")
+  //   .populate("assignedEngineerId", "fullName email mobileNo")
+  //   .populate("branchId", "branchName branchLocationGoogleLink");
+
+  // if (!EngineerRequests || EngineerRequests.length === 0) {
+  //   throw new ApiError(404, "No engineer requests found");
+  // }
+
+  // return res
+  //   .status(200)
+  //   .json(
+  //     new ApiResponse(
+  //       200,
+  //       EngineerRequests,
+  //       "Engineer Requests fetched Successfully"
+  //     )
+  //   );
 });
 
 //To delete a engineer booking request
