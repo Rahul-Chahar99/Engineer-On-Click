@@ -5,7 +5,7 @@ import { login, logout } from "./Features/userSlice";
 import { Outlet } from "react-router-dom";
 import Header from "./Components/Header/Header";
 import Footer from "./Components/Footer/Footer";
-import axios from "axios";
+import axios from "./Components/axios.js";
 import toast, { Toaster } from "react-hot-toast";
 import { ScaleLoader } from "react-spinners";
 import { io } from "socket.io-client";
