@@ -166,6 +166,16 @@ const paymentVerification = asyncHandler(async (req, res) => {
     { new: true }
   );
   console.log("Updated booking after payment verification", booking);
+
+  // Notify admin via WebSocket about the newly created booking
+  const io = req.app.get("io");
+  if (io) {
+    io.to("admin_room").emit("new_booking_notification", {
+      message: "A new booking has been successfully paid and created.",
+      bookingDetails: booking,
+    });
+  }
+
   return res
     .status(200)
     .json(new ApiResponse(200, booking, "Payment verified successfully"));

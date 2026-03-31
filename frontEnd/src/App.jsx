@@ -1,17 +1,51 @@
 import { Suspense, useEffect, useState } from "react";
 import "./App.css";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { login, logout } from "./Features/userSlice";
 import { Outlet } from "react-router-dom";
 import Header from "./Components/Header/Header";
 import Footer from "./Components/Footer/Footer";
 import axios from "axios";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { ScaleLoader } from "react-spinners";
+import { io } from "socket.io-client";
+
+// Export socket so it can be imported and used in other components (like Admin Dashboard)
+export let socket;
 
 function App() {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.auth);
+
+  // --- Socket Initialization & Setup (Step 3) ---
+  useEffect(() => {
+    // Only connect to WebSocket if the user is authenticated
+    if (userInfo) {
+      socket = io(import.meta.env.VITE_API_URL || "http://localhost:8000", {
+        withCredentials: true, 
+      });
+
+      // Tell the backend who connected to join specific role-based rooms
+      socket.emit("setup", userInfo);
+
+      // Listen for admin notifications globally
+      if (userInfo.role === "admin") {
+        socket.on("new_booking_notification", (data) => {
+          console.log("New booking notification:", data);
+          // Trigger a success toast
+          toast.success(data.message || "A new booking was successfully created!");
+        });
+      }
+
+      // Cleanup connection on unmount or when user logs out
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, [userInfo]);
+  // ----------------------------------------------
+
   useEffect(() => {
     // 1. Axios Interceptor: Handle 401s by refreshing token
     const interceptorId = axios.interceptors.response.use(
