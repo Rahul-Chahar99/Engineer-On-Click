@@ -6,7 +6,6 @@ const validate = (schema) => (req, res, next) => {
   } catch (error) {
     console.log("error is :", error);
 
-    // Use Zod's native .issues array (some versions do not support .errors)
     let errorMessage = "Validation failed";
     if (error.name === "ZodError" && error.issues.length > 0) {
       errorMessage = error.issues[0].message;
@@ -18,8 +17,5 @@ const validate = (schema) => (req, res, next) => {
     });
   }
 };
-
-// Usage in your routes:
-// router.post('/register', validate(registerSchema), registerController);
 
 export { validate };
