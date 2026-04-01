@@ -34,6 +34,8 @@ const BankList = () => {
         const response = await api.get(
           `/api/v1/users/bankList?page=${page}&limit=${limit}&search=${deferredSearchQuery}`
         );
+        console.log("response is :",response.data);
+        
 
         const result = response.data.data;
         setBanks(result.data);

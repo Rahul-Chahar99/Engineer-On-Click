@@ -19,7 +19,7 @@ import {
 import { deleteContactForm } from "../controllers/contact.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { isAdmin, verifyJWT } from "../middlewares/auth.middleware.js";
-import { getPaginatedBankList } from "../controllers/admin.controller.js";
+import { getAllBranches } from "../controllers/admin.controller.js";
 import { registerSchema,loginSchema } from "../utils/validateSchema.js";
 import {validate} from "../middlewares/validate.middleware.js";
 
@@ -40,7 +40,7 @@ router.route("/register").post(
   registerUser
 );
 // GET /api/v1/users/bankList?page=1&limit=10
-router.route("/bankList").get(verifyJWT, isAdmin, getPaginatedBankList);
+router.route("/bankList").get(verifyJWT, isAdmin, getAllBranches);
 
 router.route("/login").post(validate(loginSchema),logInUser);
 router.route('/rejectBooking-requests/:id').patch(verifyJWT,rejectBookingRequest)

@@ -36,14 +36,17 @@ const createBranch = asyncHandler(async(req,res)=>{
     if(!branch){
         throw new ApiError(500,"Failed to create branch");
     }
+    try {
+        const keys = await redisClient.keys("get_all_banks*");
+        if (keys.length > 0) {
+          await redisClient.del(keys);
+        }
+      } catch (error) {
+        console.error("Redis cache deletion error: ", error);
+      }
 
     // Clear the Redis cache so the next GET request fetches the newly created branch
-    try {
-        await redisClient.del("admin_all_banksList");
-        console.log("Redis cache 'admin_all_banksList' invalidated due to new branch creation");
-    } catch (error) {
-        console.error("Redis cache deletion error: ", error);
-    }
+    
 
     return res.status(201).json(
         new ApiResponse(201, branch, "Branch created successfully")

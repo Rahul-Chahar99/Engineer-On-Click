@@ -23,7 +23,6 @@ const userSchema = new Schema(
 
     fullName: {
       type: String,
-      index: true,
       required: true,
       trim: true,
     },
@@ -54,6 +53,7 @@ const userSchema = new Schema(
     pincode: {
       type: String,
       default: "",
+      index:true
     },
     aadharNo: {
       type: String,
@@ -74,6 +74,7 @@ const userSchema = new Schema(
       enum: ["engineer", "admin", "customer"],
       default: "engineer",
       required: true,
+      index:true,
     },
     bookingId: {
       type: mongoose.Schema.Types.ObjectId,

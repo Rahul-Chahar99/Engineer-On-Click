@@ -10,6 +10,7 @@ import Contact from "../models/contact.models.js";
 import * as cloudinary from "cloudinary";
 import EngineerForm from "../models/bookEngineer.models.js";
 import redisClient from "../utils/redisClient.js";
+import { response } from "express";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -133,7 +134,10 @@ const registerUser = asyncHandler(async (req, res) => {
   // Invalidate Redis cache so the new engineer appears immediately in the Admin Dashboard
   if (createdUser.role === "engineer") {
     try {
-      await redisClient.del("get_all_engineers");
+      const keys = await redisClient.keys("get_all_engineers*");
+      if (keys.length > 0) {
+        await redisClient.del(keys);
+      }
     } catch (error) {
       console.error("Redis cache deletion error: ", error);
     }
@@ -329,7 +333,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
   if (user.role === "engineer") {
     try {
-      await redisClient.del("get_all_engineers");
+      const keys = await redisClient.keys("get_all_engineers*");
+      if (keys.length > 0) {
+        await redisClient.del(keys);
+      }
     } catch (error) {
       console.error("Redis cache deletion error: ", error);
     }
@@ -370,7 +377,10 @@ const userStatusToggle = asyncHandler(async (req, res) => {
 
   if (updatedUser.role === "engineer") {
     try {
-      await redisClient.del("get_all_engineers");
+      const keys = await redisClient.keys("get_all_engineers*");
+      if (keys.length > 0) {
+        await redisClient.del(keys);
+      }
     } catch (error) {
       console.error("Redis cache deletion error: ", error);
     }
@@ -465,11 +475,13 @@ const getAllEngineers = asyncHandler(
   async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const searchQuery = req.query.search ? req.query.search.toLowerCase() : "";
-    const cacheKey = "get_all_engineers";
+    const searchQuery = req.query.search ? req.query.search.trim() : "";
+
+    // Cache key must be unique to the specific page, limit, and search parameters
+    const cacheKey = `get_all_engineers_page_${page}_limit_${limit}_search_${searchQuery.toLowerCase()}`;
 
     try {
-      let allEngineers = null;
+      let responseData = null;
       let source = "";
 
       // 1. Try to fetch data from Redis
@@ -477,7 +489,7 @@ const getAllEngineers = asyncHandler(
         const cacheData = await redisClient.get(cacheKey);
         if (cacheData) {
           console.log("serving all engineers list from redis");
-          allEngineers = JSON.parse(cacheData);
+          responseData = JSON.parse(cacheData);
           source = "Redis";
         }
       } catch (error) {
@@ -485,44 +497,61 @@ const getAllEngineers = asyncHandler(
       }
 
       // 2. Fallback to MongoDB if Redis failed, was empty, or returned corrupted data
-      if (allEngineers === null) {
+      if (!responseData) {
         console.log("serving all engineers list from mongo db");
-        allEngineers = await User.find({ role: "engineer" }).lean();
+
+        // Build the database query object
+        const query = { role: "engineer" };
+
+        // If there's a search, use regex for partial, case-insensitive matches in DB
+        /*If the user typed something into a search bar (stored in the searchQuery variable), this block modifies the database query to look for that text.
+
+        $or: Tells the database that a record is a match if the search term is found in any of the listed fields (Full Name OR Mobile Number OR Pincode).
+
+        $regex: Uses regular expressions to allow for partial matches. If the user searches "Smit", it will successfully find "Smith".
+
+        $options: "i": Makes the search case-insensitive. Searching for "john" will match "John", "JOHN", or "jOhN".*/
+        if (searchQuery) {
+          query.$or = [
+            { fullName: { $regex: searchQuery, $options: "i" } },
+            { mobileNo: { $regex: searchQuery, $options: "i" } },
+            { pincode: { $regex: searchQuery, $options: "i" } },
+          ];
+        }
+
+        // Determine the total matching records so frontend knows total pages
+        const totalRecords = await User.countDocuments(query);
+
+        // Fetch paginated documents using skip and limit
+        const skip = (page - 1) * limit;
+        const engineers = await User.find(query)
+          .sort({ _id: -1 })
+          .skip(skip)
+          .limit(limit)
+          .select("-password -refreshToken")
+          .lean();
+
+        responseData = {
+          data: engineers,
+          currentPage: page,
+          totalPages: Math.ceil(totalRecords / limit),
+          totalRecords: totalRecords,
+        };
+
         source = "MongoDB";
         try {
-          await redisClient.setEx(cacheKey, 3600, JSON.stringify(allEngineers));
+          await redisClient.setEx(cacheKey, 3600, JSON.stringify(responseData));
         } catch (error) {
           console.error("Redis cache set error (Engineers): ", error);
         }
       }
-      // 3. FILTER THE DATA BASED ON THE SEARCH QUERY FIRST
-      let filteredEngineers = allEngineers;
-      if (searchQuery) {
-        filteredEngineers = allEngineers.filter(
-          (engineer) =>
-            engineer?.fullName?.toLowerCase().includes(searchQuery) ||
-            engineer?.mobileNo?.includes(searchQuery) ||
-            engineer?.pincode?.includes(searchQuery)
-        );
-      }
-      // 4. THEN PAGINATE THE FILTERED LIST
-      const startIndex = (page - 1) * limit;
-      const endIndex = page * limit;
-      const paginatedResults = filteredEngineers.slice(startIndex, endIndex);
+
+      responseData.source = source;
+
       // 5. Send Response
-      return res.status(200).json(
-        new ApiResponse(
-          200,
-          {
-            data: paginatedResults,
-            currentPage: page,
-            totalPages: Math.ceil(filteredEngineers.length / limit),
-            totalRecords: filteredEngineers.length, // Total of the *searched* items
-            source: source,
-          },
-          "Data fetched successfully"
-        )
-      );
+      return res
+        .status(200)
+        .json(new ApiResponse(200, responseData, "Data fetched successfully"));
     } catch (error) {
       throw new ApiError(500, "internal server error");
     }
@@ -555,69 +584,69 @@ const getAllContactForms = asyncHandler(async (req, res) => {
 const getAllCustomers = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 5;
-  const searchQuery = req.query.search ? req.query.search.toLowerCase() : "";
-  const cacheKey = "get_all_customers";
-  let customers = null;
+  const searchQuery = req.query.search ? req.query.search.trim() : "";
+  const cacheKey = `get_all_customers_page=${page}_limit=${limit}_searchQuery=${searchQuery.toLowerCase()}`;
+  let responseData = null;
   let source = "";
 
   try {
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
-      console.log("Serving customers from Redis");
+      console.log("Serving allCustomersList from Redis");
       source = "Redis";
-      customers = JSON.parse(cachedData);
+      responseData = JSON.parse(cachedData);
     }
   } catch (error) {
     console.error("Redis fetch error (Customers): ", error);
   }
 
-  if (customers === null) {
-    console.log("Serving customers from MongoDB");
-    customers = await User.find({ role: "customer" })
+  if (!responseData) {
+    console.log("Serving allCustomersList from MongoDB");
+
+    const query = { role: "customer" };
+
+    if (searchQuery) {
+      query.$or = [{ email: { $regex: searchQuery, $options: "i" } }];
+    }
+
+    const totalRecords = await User.countDocuments(query);
+    const skip = (page - 1) * limit;
+    allCustomersList = await User.find(query)
+    .skip(skip)
+      .limit(limit)
       .sort({ _id: -1 })
       .select("-password -refreshToken")
       .lean();
+    responseData = {
+      data: allCustomersList,
+      totalPages: Math.ceil(allCustomersList.length / limit),
+      totalRecords: totalRecords,
+      currentPage: page,
+    };
     source = "MongoDB";
     try {
-      await redisClient.setEx(cacheKey, 3600, JSON.stringify(customers));
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(responseData));
     } catch (error) {
       console.error("Redis cache set error (Customers): ", error);
     }
   }
-  let filteredCustomers = customers;
-  if (searchQuery) {
-    filteredCustomers = customers.filter((customer) =>
-      customer?.email?.includes(searchQuery)
+  responseData.source = source;
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, responseData, "All customer fetched sucessfully")
     );
-  }
-
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const paginatedResults = filteredCustomers.slice(startIndex, endIndex);
-
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        data: paginatedResults,
-        currentPage: page,
-        totalPages: Math.ceil(filteredCustomers.length / limit),
-        totalRecords: filteredCustomers.length,
-        source: source,
-      },
-      "All customer fetched sucessfully"
-    )
-  );
-  // const customers = await User.find({ role: "customer" })
+  // const allCustomersList = await User.find({ role: "customer" })
   //   .sort({ _id: -1 })
   //   .select("-password -refreshToken");
-  // if (!customers || customers.length === 0) {
-  //   throw new ApiError(404, "No customers found");
+  // if (!allCustomersList || allCustomersList.length === 0) {
+  //   throw new ApiError(404, "No allCustomersList found");
   // }
 
   // return res
   //   .status(200)
-  //   .json(new ApiResponse(200, customers, "Customers fetched successfully"));
+  //   .json(new ApiResponse(200, allCustomersList, "Customers fetched successfully"));
 });
 
 //             engineer by id - admin only
@@ -628,7 +657,10 @@ const deleteEngineer = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Enginner Not Found");
   }
   try {
-    await redisClient.del("get_all_engineers");
+    const keys = await redisClient.keys("get_all_engineers*");
+    if (keys.length > 0) {
+      await redisClient.del(keys);
+    }
   } catch (error) {
     console.error("Redis cache deletion error: ", error);
   }
@@ -646,7 +678,10 @@ const deleteCustomer = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Enginner Not Found");
   }
   try {
-    await redisClient.del("get_all_customers");
+    const keys = await redisClient.keys("get_all_customers*");
+    if (keys.length > 0) {
+      await redisClient.del(keys);
+    }
   } catch (error) {
     console.error("Redis cache deletion error: ", error);
   }
