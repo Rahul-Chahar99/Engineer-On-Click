@@ -23,6 +23,8 @@ function Singup() {
 
   useEffect(() => {
     if (isError) {
+      // console.log(message?.[0].message);
+      
       toast.error(message || "Something went wrong"); //replace with a toast notification in a real app
       dispatch(reset());
     }

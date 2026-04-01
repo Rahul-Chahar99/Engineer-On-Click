@@ -80,13 +80,13 @@ const registerUser = asyncHandler(async (req, res) => {
   // if (missingFields.length > 0) {
   //   throw new ApiError(400, `Missing required fields: ${missingFields.join(", ")}`);
   // }
-  if (
-    [fullName, email, username, password].some(
-      (field) => !field || field?.trim() === ""
-    )
-  ) {
-    throw new ApiError(400, "All fields are required");
-  }
+  // if (
+  //   [fullName, email, username, password].some(
+  //     (field) => !field || field?.trim() === ""
+  //   )
+  // ) {
+  //   throw new ApiError(400, "All fields are required");
+  // }
 
   const existedUser = await User.findOne({
     $or: [
@@ -165,10 +165,6 @@ const logInUser = asyncHandler(async (req, res) => {
   //find user and remove password and refresh token
   //at the end send the refresh token and access token using cookies and rest of user details
   const { email, password, username } = req.body;
-
-  if (!email && !username) {
-    throw new ApiError(400, "email or username is required");
-  }
 
   const user = await User.findOne({
     $or: [
@@ -579,7 +575,8 @@ const getAllCustomers = asyncHandler(async (req, res) => {
     console.log("Serving customers from MongoDB");
     customers = await User.find({ role: "customer" })
       .sort({ _id: -1 })
-      .select("-password -refreshToken").lean();
+      .select("-password -refreshToken")
+      .lean();
     source = "MongoDB";
     try {
       await redisClient.setEx(cacheKey, 3600, JSON.stringify(customers));
@@ -645,7 +642,7 @@ const deleteEngineer = asyncHandler(async (req, res) => {
 const deleteCustomer = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const customer = await User.findByIdAndDelete(id);
- if (!customer) {
+  if (!customer) {
     throw new ApiError(404, "Enginner Not Found");
   }
   try {
@@ -653,8 +650,6 @@ const deleteCustomer = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("Redis cache deletion error: ", error);
   }
-
-
 
   return res
     .status(200)
