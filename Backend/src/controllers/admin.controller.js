@@ -63,8 +63,6 @@ const getAllBranches = asyncHandler(async (req, res) => {
       } catch (error) {
         console.error("Redis cache set error (Banks):", error);
       }
-
-   
     }
 
     responseData.source = source;

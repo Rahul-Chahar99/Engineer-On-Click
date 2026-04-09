@@ -4,7 +4,7 @@ import { isAdmin, verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router()
 
-router.route('/create-branch',verifyJWT,isAdmin).post(createBranch)
-router.route('/search',verifyJWT).post(getBranchByCode)
+router.route('/create-branch').post(verifyJWT,isAdmin,createBranch)
+router.route('/search').post(verifyJWT,getBranchByCode)
 
 export default router;

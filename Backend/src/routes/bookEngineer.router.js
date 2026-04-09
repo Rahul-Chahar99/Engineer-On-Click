@@ -6,9 +6,9 @@ const router = Router()
 
 router.route('/book-engineer').post(bookEngineer)
 router.route('/paymentverification').post(paymentVerification)
-router.route('/booking-requests',verifyJWT,isAdmin).get(getAllEngineerRequests)
-router.route('/booking-requests/:id',verifyJWT,isAdmin).delete(deleteEngineerRequest)
-router.route('/available-engineers/:id',verifyJWT,isAdmin).get(showAvailableEngineers)
-router.route('/assign-engineer',verifyJWT,isAdmin).patch(assignEngineer )
+router.route('/booking-requests').get(verifyJWT,isAdmin,getAllEngineerRequests)
+router.route('/booking-requests/:id').delete(verifyJWT,isAdmin,deleteEngineerRequest)
+router.route('/available-engineers/:id').get(verifyJWT,isAdmin,showAvailableEngineers)
+router.route('/assign-engineer').patch(assignEngineer )
 
 export default router;
