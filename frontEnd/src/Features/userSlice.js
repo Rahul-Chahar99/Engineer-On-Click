@@ -102,7 +102,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.isError = false;
-        state.userInfo = action.payload.data;
+        state.userInfo = null; // Registration doesn't log in the user, so we keep userInfo null
         state.message = action.payload.message;
       })
       .addCase(userRegister.rejected, (state, action) => {

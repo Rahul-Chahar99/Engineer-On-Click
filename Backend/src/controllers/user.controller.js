@@ -611,12 +611,13 @@ const getAllCustomers = asyncHandler(async (req, res) => {
 
     const totalRecords = await User.countDocuments(query);
     const skip = (page - 1) * limit;
-    allCustomersList = await User.find(query)
+   const allCustomersList = await User.find(query)
     .skip(skip)
       .limit(limit)
       .sort({ _id: -1 })
       .select("-password -refreshToken")
       .lean();
+    // console.log(allCustomersList);
     responseData = {
       data: allCustomersList,
       totalPages: Math.ceil(allCustomersList.length / limit),

@@ -32,13 +32,14 @@ function Customers() {
         const response = await axios.get(
           `/api/v1/admin-dashboard/customers?page=${page}&limit=${limit}&search=${defferedQuery}`,
         );
+      
         if (response.status === 200) {
           const result = response.data.data || response.data;
           setCustomers(result.data);
           setTotalPages(result.totalPages);
           setTotalRecords(result.totalRecords);
           setDataSource(result.source);
-          console.log(dataSource);
+         
         }
       } catch (error) {
         // toast.error("Unable to fetch customers");
