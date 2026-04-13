@@ -22,7 +22,7 @@ function App() {
   useEffect(() => {
     // Only connect to WebSocket if the user is authenticated
     if (userInfo) {
-      socket = io(import.meta.env.VITE_API_URL || "http://localhost:8000", {
+      socket = io(import.meta.env.VITE_API_BASE_URL || "http://localhost:8000", {
         withCredentials: true, 
       });
 

@@ -148,6 +148,8 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
+        state.authStatus = false;
+        state.userInfo = null;
         state.message = action.payload || "Logout failed";
       });
   },
