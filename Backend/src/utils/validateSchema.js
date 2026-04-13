@@ -10,7 +10,8 @@ const registerSchema = z.object({
 });
 
 const loginSchema = z.object({
-  email: z.string().trim().lowercase().email("Invalid email address"),
+  email: z.string().trim().lowercase().email("Invalid email address").optional(),
+  username: z.string().trim().min(3, "Username must be at least 3 characters long").optional(),
   password: z
     .string()
     .min(6, "Password must be at least 6 characters long"),
