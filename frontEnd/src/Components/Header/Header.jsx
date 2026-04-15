@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { logOutUser, reset } from "../../Features/userSlice";
-import { useState, useEffect } from "react";
+import {useMemo, useState, useEffect } from "react";
 import toast from "react-hot-toast";
+
 
 function Header() {
   const navigate = useNavigate();
@@ -27,29 +28,32 @@ function Header() {
     toast.success("Logged out successfully");
   };
 
-  const navItems = [
-    {
-      name: "Home",
-      slug: "/",
-      active: true,
-    },
+  const navItems = useMemo(
+    () => [
+      {
+        name: "Home",
+        slug: "/",
+        active: true,
+      },
 
-    {
-      name: "Login",
-      slug: "/login",
-      active: !authStatus,
-    },
-    {
-      name: "Signup",
-      slug: "/signup",
-      active: !authStatus,
-    },
-    {
-      name: "Admin Dashboard",
-      slug: "/admin-dashboard",
-      active: authStatus && userInfo?.role === "admin" ? true : false,
-    },
-  ];
+      {
+        name: "Login",
+        slug: "/login",
+        active: !authStatus,
+      },
+      {
+        name: "Signup",
+        slug: "/signup",
+        active: !authStatus,
+      },
+      {
+        name: "Admin Dashboard",
+        slug: "/admin-dashboard",
+        active: authStatus && userInfo?.role === "admin" ? true : false,
+      },
+    ],
+    [authStatus, userInfo],
+  ); // Recompute navItems only when authStatus or userInfo changes
 
   return (
     <header className="py-2 sm:py-3 shadow bg-base-100 border-b border-base-300">

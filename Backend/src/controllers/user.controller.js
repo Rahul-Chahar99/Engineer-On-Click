@@ -266,7 +266,7 @@ const logOutUser = asyncHandler(async (req, res) => {
 });
 
 const updateUserProfile = asyncHandler(async (req, res) => {
-  const { fullName, email, mobileNo, aadharNo, address, jobTitle } = req.body;
+  const { fullName, email, mobileNo, aadharNo, address, jobTitle, pincode } = req.body;
   // socialMedia comes as an object from req.body when sent via FormData
   const socialMedia = req.body.socialMedia || {};
 
@@ -279,6 +279,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     aadharNo,
     address,
     jobTitle,
+    pincode,
     socialMedia,
   };
 

@@ -1,15 +1,17 @@
 import React from "react";
 import { useState, useEffect, useRef } from "react";
 import Button from "../ReusableComponents/Button.jsx";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import Input from "../ReusableComponents/Input.jsx";
 import axios from "axios";
 import toast from "react-hot-toast";
 import {Link } from "react-router-dom";
+import { login } from "../Features/userSlice.js";
 
 function Profile() {
   const { userInfo } = useSelector((state) => state.auth);
   const [edit, setEdit] = useState(false);
+  const dispatch = useDispatch();
 
   // Helper to process user data for form state
   const processUserData = (user) => {
@@ -26,29 +28,6 @@ function Profile() {
   };
 
   const [formData, setFormData] = useState(() => processUserData(userInfo));
-
-  // --- DEBUGGING: Log Render Reasons ---
-  const renderCount = useRef(0);
-  const prevUserInfo = useRef(userInfo);
-  const prevFormData = useRef(formData);
-
-  renderCount.current++;
-  console.log(`%c[Profile] Render #${renderCount.current}`, "color: orange; font-weight: bold");
-
-  if (renderCount.current > 1) {
-    let reasonFound = false;
-    if (prevUserInfo.current !== userInfo) { console.log("Reason: Redux 'userInfo' changed"); reasonFound = true; }
-    if (prevFormData.current !== formData) { console.log("Reason: Local 'formData' state changed"); reasonFound = true; }
-    if (!reasonFound) console.log("Reason: Parent re-render or other state change");
-  } else {
-    console.log("Reason: Initial Mount");
-  }
-
-  useEffect(() => {
-    prevUserInfo.current = userInfo;
-    prevFormData.current = formData;
-  });
-  // -------------------------------------
 
   const avatarRef = useRef(null);
   const coverImageRef = useRef(null);
@@ -111,6 +90,10 @@ function Profile() {
       return toast.error("Aadhar number must be exactly 12 digits.");
     }
 
+    if (formData.pincode && formData.pincode.length !== 6) {
+      return toast.error("Pincode must be exactly 6 digits.");
+    }
+
     const data = new FormData();
     for (const key in formData) {
       if (key === "socialMedia") {
@@ -136,10 +119,9 @@ function Profile() {
     try {
       // console.log("Updating profile with data:", formData);
       const response = await axios.patch("/api/v1/users/update-profile", data);
-
+      dispatch(login(response.data.data)); // Update Redux store with new user info
       toast.success(response.data?.message || "Profile updated successfully");
       setEdit(false);
-      window.location.reload();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update profile");
       console.error("Update error:", error);
@@ -460,6 +442,24 @@ function Profile() {
                   disabled={!edit}
                   className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
                   placeholder={edit ? "Enter address" : "Not provided"}
+                />
+              </div>
+              <div className="col-span-1 md:col-span-2">
+                <label className="text-xs font-semibold text-base-content/60 uppercase">
+                  Pincode
+                </label>
+                <Input
+                  name="pincode"
+                  value={formData.pincode || ""}
+                  onChange={handleChange}
+                  disabled={!edit}
+                  maxLength="6"
+                  inputMode="numeric"
+                  onInput={(e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                  }}
+                  className={`w-full p-2 rounded border ${edit ? "border-base-300 bg-base-100 text-base-content" : "border-transparent bg-transparent px-0! text-base-content"}`}
+                  placeholder={edit ? "Enter pincode" : "Not provided"}
                 />
               </div>
               {edit && (
