@@ -7,9 +7,6 @@ import crypto from "crypto";
 import { User } from "../models/user.models.js";
 import { BranchData } from "../models/branchData.model.js";
 import redisClient from "../utils/redisClient.js";
-import { log } from "console";
-import { json } from "stream/consumers";
-import { request } from "express";
 
 const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -189,96 +186,76 @@ const getAllEngineerRequests = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
 
-  const searchQuery = req.query.search ? req.query.search.toLowerCase() : "";
+  const searchQuery = req.query.search ? req.query.search.trim() : "";
+  const cacheKey = `all_engineer_requests_page_${page}_limit_${limit}_search_${searchQuery.toLowerCase()}`;
+  let responseData = null;
   let source = "";
-  const cacheKey = "all_engineers_requests";
-  let engineerRequests = null;
   try {
-    const cachedData = await redisClient.get(cacheKey);
-    if (cachedData) {
-      console.log("Serving from Redis");
-      engineerRequests = JSON.parse(cachedData);
-      source = "Redis";
+    const cacheData = await redisClient.get(cacheKey);
+    if (cacheData) {
+      console.log("serving all Booking request from redis");
+      responseData = JSON.parse(cacheData);
+      source = "redis";
     }
   } catch (error) {
-    console.error("Redis fetch error (Engineers): ", error);
+    console.error("Reids fetch error (Booking Reuest): ", error);
   }
-  if (engineerRequests === null) {
-    console.log("serving data from mongodb");
-    engineerRequests = await EngineerForm.find()
-      .sort({ _id: -1 })
+
+  //fallback to mongodb if redis failed , was empty or return corrupted data
+  if (!responseData) {
+    console.log("Serving all Booking requests from MongoDB");
+    const query = {};
+    if (searchQuery) {
+      query.$or = [
+        { branchCode: { $regex: searchQuery, $options: "i" } },
+        { fullName: { $regex: searchQuery, $options: "i" } },
+      ];
+    }
+
+    const totalRecords = await EngineerForm.countDocuments(query);
+    const skip = (page - 1) * limit;
+    const bookings = await EngineerForm.find(query)
       .populate("customerId", "fullName email mobileNo")
-      .populate("assignedEngineerId", "fullName email mobileNo")
-      .populate("branchId", "branchName branchLocationGoogleLink branchCode")
-      ;
+      .populate("branchId", "branchCode branchLocationGoogleLink branchName")
+      .populate("assignedEngineerId", "email fullName")
+      .sort({ _id: 1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    responseData = {
+      data: bookings,
+      currentPage: page,
+      totalPages: Math.ceil(totalRecords / limit),
+      totalRecords,
+    };
     source = "MongoDB";
     try {
-      await redisClient.setEx(cacheKey, 3600, JSON.stringify(engineerRequests));
+      await redisClient.setEx(cacheKey, 10, JSON.stringify(responseData));
     } catch (error) {
-      console.error("Redis cache set error (Engineers): ", error);
+      console.error("Redis cache set error (Bookings) :", error);
     }
   }
-  // 3. FILTER THE DATA BASED ON THE SEARCH QUERY FIRST
-  let filteredEngineerRequests = engineerRequests;
-  console.log("filter engineer request", filteredEngineerRequests);
-  
-  if (searchQuery) {
-    //admin can search data on engineer email, customer email,branch Name and branch Code
-    filteredEngineerRequests = engineerRequests.filter(
-      (request) =>
-        request?.branchCode?.includes(searchQuery) ||
-        request?.branchName?.toLowerCase().includes(searchQuery) ||
-        request?.customerId?.email?.toLowerCase().includes(searchQuery) ||
-        request?.assignedEngineerId?.email.toLowerCase().includes(searchQuery)
-    );
-  }
-
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const paginatedResults = filteredEngineerRequests.slice(startIndex, endIndex);
-
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        data: paginatedResults,
-        source: source,
-        currentPage: page,
-        totalPages: Math.ceil(filteredEngineerRequests.length / limit),
-        totalRecords: filteredEngineerRequests.length, // Total of the *searched* items
-      },
-      "Data fetched successfully"
-    )
-
-  );
-
-  // const EngineerRequests = await EngineerForm.find()
-  //   .sort({ _id: -1 })
-  //   .populate("customerId", "fullName email mobileNo")
-  //   .populate("assignedEngineerId", "fullName email mobileNo")
-  //   .populate("branchId", "branchName branchLocationGoogleLink");
-
-  // if (!EngineerRequests || EngineerRequests.length === 0) {
-  //   throw new ApiError(404, "No engineer requests found");
-  // }
-
-  // return res
-  //   .status(200)
-  //   .json(
-  //     new ApiResponse(
-  //       200,
-  //       EngineerRequests,
-  //       "Engineer Requests fetched Successfully"
-  //     )
-  //   );
+  responseData.source = source;
+  return res
+    .status(200)
+    .json(new ApiResponse(200, responseData, "Data Fetched Successfully"));
 });
-
+//Hello Sir, I Saw the B1 role opening and wanted to express interest. Even though I'm WASE band-4th year scholar,I have been preparing stronly for such roles and would appreciate a chance to interview and be considered for the position. Thank you for your time and consideration.
 //To delete a engineer booking request
 const deleteEngineerRequest = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const deleteRequest = await EngineerForm.findByIdAndDelete(id);
   if (!deleteRequest) {
     throw new ApiError(404, "Booking Request Form not Found");
+  }
+  try {
+    const keys = await redisClient.keys(`all_engineer_requests*`);
+    if (keys.length > 0) {
+      await redisClient.del(keys);
+    }
+    // Invalidate cache for the first page with default limit and no search
+  } catch (error) {
+    console.error("Redis cache deletion error (Booking Requests) :", error);
   }
   return res
     .status(200)
@@ -348,6 +325,14 @@ const assignEngineer = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
+  try {
+    const keys = await redisClient.keys(`all_engineer_requests*`);
+    if (keys.length > 0) {
+      await redisClient.del(`all_engineer_requests*`); // Invalidate cache for the first page with default limit and no search
+    }
+  } catch (error) {
+    console.error("Redis cache deletion error (Booking Requests) :", error);
+  }
 
   await User.findByIdAndUpdate(engineer._id, {
     $set: { bookingId: updatedBooking._id },
