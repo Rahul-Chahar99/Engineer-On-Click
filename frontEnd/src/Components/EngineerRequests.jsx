@@ -8,6 +8,7 @@ import { GridLoader } from "react-spinners";
 import { useDeferredValue } from "react";
 
 function EngineerRequests() {
+  console.log("page rendered")
   const [engineerRequests, setEngineerRequests] = useState([]);
   const [inputValue, setInputValue] = useState("");
 
@@ -65,9 +66,7 @@ function EngineerRequests() {
         
         
 
-        // const finalrespone = result.data.filter(
-        //   (request) => request.paymentStatus !== "Pending",
-        // );
+        
         console.log(result.data);
         setEngineerRequests(result.data);
         setDataSource(result.source);

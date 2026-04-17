@@ -14,7 +14,7 @@ import {
   changeCurrentPassword,
   userStatusToggle,
   getAllBookings,
-  rejectBookingRequest,
+  rejectOrAcceptBookingRequest,
 } from "../controllers/user.controller.js";
 import { deleteContactForm } from "../controllers/contact.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -44,8 +44,8 @@ router.route("/bankList").get(verifyJWT, isAdmin, getAllBranches);
 
 router.route("/login").post(validate(loginSchema), logInUser);
 router
-  .route("/rejectBooking-requests/:id")
-  .patch(verifyJWT, rejectBookingRequest);
+  .route("/rejectOrAcceptBooking-requests/:id")
+  .patch(verifyJWT, rejectOrAcceptBookingRequest);
 
 // secured routes
 router.route("/logout").post(verifyJWT, logOutUser);

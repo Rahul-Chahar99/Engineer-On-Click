@@ -230,7 +230,7 @@ const getAllEngineerRequests = asyncHandler(async (req, res) => {
     };
     source = "MongoDB";
     try {
-      await redisClient.setEx(cacheKey, 10, JSON.stringify(responseData));
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(responseData));
     } catch (error) {
       console.error("Redis cache set error (Bookings) :", error);
     }

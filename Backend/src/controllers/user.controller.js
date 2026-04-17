@@ -10,7 +10,7 @@ import Contact from "../models/contact.models.js";
 import * as cloudinary from "cloudinary";
 import EngineerForm from "../models/bookEngineer.models.js";
 import redisClient from "../utils/redisClient.js";
-import { response } from "express";
+import mongoose from "mongoose";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -266,7 +266,8 @@ const logOutUser = asyncHandler(async (req, res) => {
 });
 
 const updateUserProfile = asyncHandler(async (req, res) => {
-  const { fullName, email, mobileNo, aadharNo, address, jobTitle, pincode } = req.body;
+  const { fullName, email, mobileNo, aadharNo, address, jobTitle, pincode } =
+    req.body;
   // socialMedia comes as an object from req.body when sent via FormData
   const socialMedia = req.body.socialMedia || {};
 
@@ -612,8 +613,8 @@ const getAllCustomers = asyncHandler(async (req, res) => {
 
     const totalRecords = await User.countDocuments(query);
     const skip = (page - 1) * limit;
-   const allCustomersList = await User.find(query)
-    .skip(skip)
+    const allCustomersList = await User.find(query)
+      .skip(skip)
       .limit(limit)
       .sort({ _id: -1 })
       .select("-password -refreshToken")
@@ -695,46 +696,100 @@ const deleteCustomer = asyncHandler(async (req, res) => {
 
 const getAllBookings = asyncHandler(async (req, res) => {
   const { userId } = req.params;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const searchQuery = req.query.search ? req.query.search.trim() : "";
+  const cacheKey = `all_bookings_engineer_${userId}_page_${page}_limit_${limit}_search_${searchQuery.toLowerCase()}`;
 
-  const bookings = await EngineerForm.find({
-    assignedEngineerId: userId,
-    engineerAssign: { $ne: "Rejected_By_Engineer" },
-  })
-    .populate("customerId", "fullName email localContact ")
-    .populate("branchId", "branchLocationGoogleLink")
-    .sort({ createdAt: -1 });
-  if (!bookings || bookings.length === 0)
-    throw new ApiError(404, "No Bookings found for this engineer");
+  let source = "";
+  let responseData = null;
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(200, bookings, "Booking Details fetched successfully")
-    );
+  // 1. Try Redis
+  try {
+    const cacheData = await redisClient.get(cacheKey);
+    if (cacheData) {
+      console.log("serving booking request from redis");
+      responseData = JSON.parse(cacheData);
+      source = "Redis";
+    }
+  } catch (error) {
+    console.error("Redis Fetch Error (Bookings):", error);
+  }
+
+  // 2. Fallback to MongoDB
+  if (!responseData) {
+    console.log("serving all booking request from MongoDB");
+    const query = {
+      assignedEngineerId: new mongoose.Types.ObjectId(userId),
+      engineerAssign: { $ne: "Rejected_By_Engineer" },
+    };
+
+    if (searchQuery) {
+      query.$or = [
+        { branchName: { $regex: searchQuery, $options: "i" } },
+        { branchCode: { $regex: searchQuery, $options: "i" } },
+      ];
+    }
+
+    const totalRecords = await EngineerForm.countDocuments(query);
+    const skip = (page - 1) * limit;
+
+    const bookings = await EngineerForm.find(query)
+      .populate("customerId", "fullName email mobileNo")
+      .populate("branchId", "branchLocationGoogleLink")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+      console.log(bookings);
+      
+
+    responseData = {
+      data: bookings,
+      currentPage: page,
+      totalPages: Math.ceil(totalRecords / limit),
+      totalRecords,
+    };
+    source = "MongoDB";
+
+    try {
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(responseData));
+    } catch (error) {
+      console.error("Redis cache set error (Bookings):", error);
+    }
+  }
+
+  responseData.source = source;
+  return res.status(200).json(new ApiResponse(200, responseData, "Booking Details fetched successfully"));
 });
+
+
+
 //To delete a engineer booking request
-const rejectBookingRequest = asyncHandler(async (req, res) => {
+const rejectOrAcceptBookingRequest = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const { status } = req.body;
+
   const updatedRequest = await EngineerForm.findByIdAndUpdate(
     id,
     {
-      $set: { engineerAssign: "Rejected_By_Engineer" },
+      $set: {
+        engineerAssign:
+          status === "rejected" ? "Rejected_By_Engineer" : "Accepted",
+      },
     },
     { new: true }
   );
   if (!updatedRequest) {
     throw new ApiError(404, "Booking Request Form not Found");
   }
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        updatedRequest,
-        "Booking Request Rejected Successfully"
-      )
-    );
+  const message =
+    status === "rejected"
+      ? "Booking Request Rejected Successfully"
+      : "Booking Request Accepted Successfully";
+  return res.status(200).json(new ApiResponse(200, updatedRequest, message));
 });
+
 export {
   registerUser,
   logInUser,
@@ -750,5 +805,5 @@ export {
   changeCurrentPassword,
   userStatusToggle,
   getAllBookings,
-  rejectBookingRequest,
+  rejectOrAcceptBookingRequest,
 };

@@ -5,76 +5,9 @@ import Button from "../../ReusableComponents/Button";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Container from "../Container/Container.jsx";
-import Input from "../../ReusableComponents/Input.jsx";
 import { GridLoader } from "react-spinners";
-function Home() {
-  console.log("page rendered");
-  const [loading, setLoading] = useState(true);
-  const { userInfo } = useSelector((state) => state.auth);
-  // console.log('user info:',userInfo);
-  const [allBookingRequest, setAllBookingRequst] = useState([]);
-  const [filteredBookingRequest, setFilteredBookingRequests] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    const getBookings = async () => {
-      try {
-        const response = await axios.get(
-          `api/v1/engineerHome/bookingRequests/${userInfo._id}`,
-        );
-        console.log("respone of bookings", response.data.data);
-
-        if (response.status === 200) {
-          setAllBookingRequst(response.data?.data || response.data);
-          setFilteredBookingRequests(response.data?.data || response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching bookings:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (userInfo?.role === "engineer") {
-      getBookings();
-    }
-  }, [userInfo]);
-  useEffect(() => {
-    const delayBounceFn = setTimeout(() => {
-      if (!searchTerm) return setFilteredBookingRequests(allBookingRequest);
-      const lowerCaseTerm = searchTerm.toLowerCase();
-      const filtered = allBookingRequest.filter(
-        (request) =>
-          request.customerId?.fullName?.toLowerCase().includes(lowerCaseTerm) ||
-          request.branchCode?.includes(lowerCaseTerm) ||
-          (request.branchName?.includes(lowerCaseTerm) &&
-            request.paymentStatus !== "Pending"),
-      );
-      setFilteredBookingRequests(filtered);
-    }, 500);
-    return () => clearTimeout(delayBounceFn);
-  }, [searchTerm, allBookingRequest]);
-
-  const rejectBookingRequest = async (bookingId) => {
-    try {
-      const response = await axios.patch(
-        `/api/v1/engineerHome/rejectBooking-requests/${bookingId}`,
-      );
-      if (response.status === 200) {
-        setAllBookingRequst((prevRequests) =>
-          prevRequests.filter((prev) => prev._id !== bookingId),
-        );
-        setFilteredBookingRequests((prevRequests) =>
-          prevRequests.filter((prev) => prev._id !== bookingId),
-        );
-        toast.success("Engineer Booking  Form Deleted Successfully");
-      }
-    } catch (error) {
-      const errorMessage = response.message || "error 500";
-      toast.error(errorMessage);
-    }
-  };
-
-  const services = [
+import toast from "react-hot-toast";
+ const services = [
     {
       id: 1,
       title: "Switch Configuration",
@@ -119,6 +52,105 @@ function Home() {
       icon: "✅",
     },
   ];
+function Home() {
+  console.log("page render");
+  
+  const [allBookingRequest, setAllBookingRequst] = useState([]);
+  const [inputValue, setInputValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dataSource, setDataSource] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages,setTotalPages]=useState(1);
+  const [totalRecords,setTotalRecords]=useState(0);
+  const { userInfo } = useSelector((state) => state.auth);
+  const [acceptedIds, setAcceptedIds] = useState(new Set());
+  const limit = 5;
+
+  const isPending = inputValue !== searchQuery;
+
+  const handleChange = (e) => {
+    setInputValue(e.target.value);
+    if (page !== 1) {
+      setPage(1);
+    }
+  };
+
+  useEffect(() => {
+    if (userInfo?.role !== "engineer" || !userInfo?._id) {
+      return;
+    }
+
+    const getBookings = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `/api/v1/engineerHome/bookingRequests/${userInfo._id}?page=${page}&limit=${limit}&search=${searchQuery}`,
+        );
+        if (response.status !== 200) {
+          throw new Error(response.data.message || "Failed to fetch booking requests for engineer");
+        }
+        const result = response.data.data;
+        console.log('result for engineer booking requests:',result);
+        
+        setAllBookingRequst(result.data);
+        setDataSource(result.source);
+        setTotalPages(result.totalPages);
+        setTotalRecords(result.totalRecords);
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || error.message || "Unable to fetch booking requests for engineer";
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getBookings();
+    const interval = setInterval(getBookings, 60000);
+    return () => clearInterval(interval);
+  }, [userInfo?.role, userInfo?._id, page, searchQuery]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchQuery(inputValue), 700);
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
+  const rejectOrAcceptBookingRequest = async (bookingId, status) => {
+    try {
+      const response = await axios.patch(
+        `/api/v1/engineerHome/rejectOrAcceptBooking-requests/${bookingId}`,
+        { status },
+      );
+
+      const responseOfEngineer = response.data.data.engineerAssign;
+
+      if (
+        response.status === 200 &&
+        responseOfEngineer === "Rejected_By_Engineer"
+      ) {
+        setAllBookingRequst((prevRequests) =>
+          prevRequests.filter((prev) => prev._id !== bookingId),
+        );
+        toast.success("Engineer booking request deleted successfully");
+      } else if (response.status === 200 && responseOfEngineer === "Accepted") {
+        setAllBookingRequst((prevRequests) =>
+          prevRequests.map((prev) =>
+            prev._id === bookingId
+              ? { ...prev, engineerAssign: "Accepted" }
+              : prev,
+          ),
+        );
+        setAcceptedIds((prev) => new Set(prev).add(bookingId));
+        toast.success("Booking request accepted successfully");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || "Server error";
+      toast.error(errorMessage);
+    }
+  };
+
+ 
 
   return userInfo?.role !== "engineer" ? (
     <div className="flex flex-col bg-base-200 w-full">
@@ -207,176 +239,206 @@ function Home() {
       </div>
     </div>
   ) : (
-    <div>
-      <Container>
-        <div className="w-full py-8">
-          <h1 className="text-3xl font-bold text-base-content mb-6">
-            Welcome {userInfo?.fullName} 😊
-          </h1>
-          <h1 className="text-3xl font-bold text-base-content mb-6">
-            Engineer Booking Requests
-          </h1>
-          <div className="w-full py-2 flex items-center justify-around">
-            <Button
-              bgColor="bg-neutral text-neutral-content"
-              className="rounded-lg" // This className will be passed to the underlying button
-              onClick={() => window.history.back()} // Corrected: use 'onClick' (camelCase)
-            >
-              Go Back
-            </Button>
-            <Input
-              label="Search Requests"
-              className="mt-4 mb-6 w-lg bg-white/50 px-3 py-2 rounded-lg text-black focus:bg-gray-200 transition-all duration-300"
-              placeholder="Search by Branch Name, Customer Name, or Branch Code"
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-              }}
-            />
+    <Container>
+      <div className="w-full py-8">
+
+        {/* ── Header ── */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-base-content">
+              Welcome, {userInfo?.fullName} 👋
+            </h1>
+            <p className="text-base-content/50 text-sm mt-1">Your assigned booking requests</p>
           </div>
 
-          {loading ? (
-            <div className="flex justify-center items-center py-20 w-full">
-              <GridLoader color="#36d7b7" size={30} />
-            </div>
-          ) : filteredBookingRequest && filteredBookingRequest.length > 0 ? (
-            <div className="space-y-4">
-              {filteredBookingRequest.map((request) => (
-                <div
-                  key={request._id}
-                  className="bg-base-100 text-base-content rounded-lg shadow-lg border border-base-300 overflow-hidden"
-                >
-                  <div className="p-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                      <div>
-                        <p className="text-sm text-base-content/60">
-                          Customer Name
-                        </p>
-                        <p className="font-semibold">
-                          {request.customerId?.fullName || "N/A"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-base-content/60">
-                          Customer Email
-                        </p>
-                        <p className="font-semibold">
-                          {request.customerId?.email || "N/A"}
-                        </p>
-                      </div>
+          <div className="relative w-full max-w-sm">
+            <input
+              type="text"
+              placeholder="Search by branch name or code…"
+              className="input input-bordered w-full bg-white/50 text-black focus:bg-gray-100 transition-all duration-300"
+              value={inputValue}
+              onChange={handleChange}
+            />
+            {isPending && (
+              <span className="absolute right-3 top-3 loading loading-spinner loading-sm text-primary" />
+            )}
+          </div>
 
-                      <div>
-                        <p className="text-sm text-base-content/60">
-                          Branch Code
-                        </p>
-                        <p className="font-semibold">{request.branchCode}</p>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-base-content/50 font-medium">
+              {totalRecords} record{totalRecords !== 1 ? "s" : ""}
+            </span>
+            {dataSource && (
+              <span className={`badge ${
+                dataSource.toLowerCase() === "redis" ? "badge-success" : "badge-info"
+              } text-white px-3 py-3 rounded-full text-sm font-semibold whitespace-nowrap`}>
+                ⚡ {dataSource}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* ── Content ── */}
+        {loading && allBookingRequest.length === 0 ? (
+          <div className="flex justify-center items-center h-64">
+            <GridLoader color="#36d7b7" size={15} />
+          </div>
+        ) : allBookingRequest.length > 0 ? (
+          <div className={`space-y-4 transition-opacity duration-200 ${
+            isPending || loading ? "opacity-50" : "opacity-100"
+          }`}>
+            {allBookingRequest.map((request) => {
+              const isAccepted = acceptedIds.has(request._id) || request.engineerAssign === "Accepted";
+              return (
+                <div key={request._id} className="bg-base-100 text-base-content rounded-2xl shadow-md border border-base-300 overflow-hidden">
+
+                  {/* Card Header */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 bg-base-200/60 border-b border-base-300">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                        {request.customerId?.fullName?.[0]?.toUpperCase() || "?"}
                       </div>
                       <div>
-                        <p className="text-sm text-base-content/60">
-                          Branch Name
-                        </p>
+                        <p className="font-bold text-base-content leading-tight">{request.customerId?.fullName || "N/A"}</p>
+                        <p className="text-xs text-base-content/50">{request.customerId?.email || "—"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`badge font-semibold px-3 py-2 text-white ${
+                        request.engineerAssign === "Accepted" ? "badge-success" :
+                        request.engineerAssign === "Rejected_By_Engineer" ? "badge-error" :
+                        "badge-info"
+                      }`}>
+                        🔧 {request.engineerAssign}
+                      </span>
+                      <span className="badge badge-ghost font-semibold px-3 py-2 text-base-content">
+                        {request.totalCostOfBooking?.toLocaleString("en-IN", { style: "currency", currency: "INR" }) || "N/A"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    {/* Customer */}
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-base-content/40">👤 Customer</h3>
+                      <div>
+                        <p className="text-xs text-base-content/50 uppercase tracking-wide mb-1">Mobile</p>
+                        <p className="font-semibold">{request.customerId?.mobileNo || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-base-content/50 uppercase tracking-wide mb-1">Local Contact</p>
+                        <p className="font-semibold">{request.localContact || "N/A"}</p>
+                      </div>
+                    </div>
+
+                    {/* Branch */}
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-base-content/40">🏢 Branch</h3>
+                      <div>
+                        <p className="text-xs text-base-content/50 uppercase tracking-wide mb-1">Branch Name</p>
                         <p className="font-semibold">{request.branchName}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-base-content/60">
-                          Start Date
-                        </p>
-                        <p className="font-semibold">
-                          {new Date(request.startDate).toLocaleDateString()}
-                        </p>
+                        <p className="text-xs text-base-content/50 uppercase tracking-wide mb-1">Branch Code</p>
+                        <p className="font-semibold">{request.branchCode}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-base-content/60">End Date</p>
-                        <p className="font-semibold">
-                          {new Date(request.endDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-base-content/60">
-                          Start Time
-                        </p>
-                        <p className="font-semibold">
-                          {request.startTime || "N/A"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-base-content/60">End Time</p>
-                        <p className="font-semibold">
-                          {request.endTime || "N/A"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-base-content/60">
-                          Local Contact
-                        </p>
-                        <p className="font-semibold">{request.localContact}</p>
-                      </div>
-
-                      <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
-                        <p className="text-sm text-base-content/60">Address</p>
+                        <p className="text-xs text-base-content/50 uppercase tracking-wide mb-1">Address</p>
                         <p className="font-semibold">{request.address}</p>
                       </div>
-                      <div className="sm:col-span-2 lg:col-span-3 xl:col-span-4">
-                        <p className="text-sm text-base-content/60">
-                          Google Link
-                        </p>
-                        <p className="font-semibold">
-                          {request.branchId?.branchLocationGoogleLink}
-                        </p>
-                      </div>
+                      {request.branchId?.branchLocationGoogleLink && (
+                        <a
+                          href={request.branchId.branchLocationGoogleLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary text-sm hover:underline font-semibold"
+                        >
+                          📍 View on Maps
+                        </a>
+                      )}
+                    </div>
 
-                      <div>
-                        <p className="text-sm text-base-content/60">
-                          Total Cost
-                        </p>
-                        <p className="font-semibold">
-                          {request.totalCostOfBooking?.toLocaleString("en-IN", {
-                            style: "currency",
-                            currency: "INR",
-                          }) || "N/A"}
-                        </p>
+                    {/* Schedule */}
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-base-content/40">📅 Schedule</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-xs text-base-content/50 uppercase tracking-wide mb-1">Start Date</p>
+                          <p className="font-semibold">{new Date(request.startDate).toLocaleDateString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-base-content/50 uppercase tracking-wide mb-1">End Date</p>
+                          <p className="font-semibold">{new Date(request.endDate).toLocaleDateString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-base-content/50 uppercase tracking-wide mb-1">Start Time</p>
+                          <p className="font-semibold">{request.startTime || "N/A"}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-base-content/50 uppercase tracking-wide mb-1">End Time</p>
+                          <p className="font-semibold">{request.endTime || "N/A"}</p>
+                        </div>
                       </div>
                       <div>
-                        <p className="text-sm text-base-content/60">
-                          Requested On
-                        </p>
-                        <p className="font-semibold">
-                          {request.createdAt
-                            ? new Date(request.createdAt).toLocaleString()
-                            : "N/A"}
-                        </p>
+                        <p className="text-xs text-base-content/50 uppercase tracking-wide mb-1">Requested On</p>
+                        <p className="font-semibold">{request.createdAt ? new Date(request.createdAt).toLocaleString() : "N/A"}</p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Action Buttons Section */}
-                  <div className="bg-base-200/50 px-6 py-4 border-t border-base-300">
-                    <div className="flex flex-wrap gap-3 items-center justify-end">
-                      <Button
-                        children="Reject Request"
-                        bgColor="bg-error hover:bg-error/80 text-error-content"
-                        className="w-full sm:w-auto rounded-lg cursor-pointer px-6 py-3 text-white font-semibold"
-                        onClick={() => rejectBookingRequest(request._id)}
-                      />
-                      <Button
-                        children="Accept Request"
-                        className="w-full sm:w-auto cursor-pointer px-6 py-3 text-white font-semibold rounded-lg"
-                        onClick={() => showAvailableEngineer(request.orderId)}
-                      />
-                    </div>
+                  {/* Action Footer */}
+                  <div className="bg-base-200/40 px-6 py-4 border-t border-base-300 flex flex-wrap gap-3 items-center justify-end">
+                    <button
+                      className="btn btn-error btn-sm rounded-lg text-white font-semibold"
+                      onClick={() => rejectOrAcceptBookingRequest(request._id, "rejected")}
+                    >
+                      ✖ Reject
+                    </button>
+                    <button
+                      className={`btn btn-sm rounded-lg text-white font-semibold ${
+                        isAccepted ? "btn-success cursor-not-allowed" : "btn-primary"
+                      }`}
+                      onClick={() => rejectOrAcceptBookingRequest(request._id, "accepted")}
+                      disabled={isAccepted}
+                    >
+                      {isAccepted ? "✅ Accepted" : "✔ Accept"}
+                    </button>
                   </div>
+
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex justify-center items-center h-64">
-              <p className="text-base-content/50 text-lg">
-                No Engineer Requests Available
-              </p>
-            </div>
-          )}
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col justify-center items-center h-64 bg-base-100 rounded-2xl shadow border border-base-300 gap-3">
+            <span className="text-5xl">📋</span>
+            <p className="text-base-content/50 text-lg font-semibold">No booking requests found</p>
+            {inputValue && <p className="text-base-content/30 text-sm">Try a different search term</p>}
+          </div>
+        )}
+
+        {/* ── Pagination ── */}
+        <div className="flex justify-between items-center mt-8">
+          <p className="text-sm text-base-content/50 font-medium">
+            Total: <span className="font-bold text-base-content">{totalRecords}</span> records
+          </p>
+          <div className="join">
+            <button className="join-item btn btn-sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
+              « Prev
+            </button>
+            <button className="join-item btn btn-sm pointer-events-none">
+              {page} / {totalPages}
+            </button>
+            <button className="join-item btn btn-sm" disabled={page >= totalPages || totalPages === 0} onClick={() => setPage(page + 1)}>
+              Next »
+            </button>
+          </div>
         </div>
-      </Container>
-    </div>
+
+      </div>
+    </Container>
   );
 }
 
