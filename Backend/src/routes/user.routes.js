@@ -22,6 +22,7 @@ import { isAdmin, verifyJWT } from "../middlewares/auth.middleware.js";
 import { getAllBranches } from "../controllers/admin.controller.js";
 import { registerSchema, loginSchema } from "../utils/validateSchema.js";
 import { validate } from "../middlewares/validate.middleware.js";
+import { rateLimitMiddleware } from "../middlewares/ratelimit.middleware.js";
 
 const router = Router();
 
@@ -40,7 +41,7 @@ router.route("/register").post(
   registerUser
 );
 // GET /api/v1/users/bankList?page=1&limit=10
-router.route("/bankList").get(verifyJWT, isAdmin, getAllBranches);
+router.route("/bankList").get(verifyJWT, isAdmin,rateLimitMiddleware, getAllBranches);
 
 router.route("/login").post(validate(loginSchema), logInUser);
 router

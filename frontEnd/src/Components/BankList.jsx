@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useDeferredValue } from "react";
 import api from "./axios";
 import { ScaleLoader } from "react-spinners";
+import toast from "react-hot-toast";
 
 const BankList = () => {
   const [banks, setBanks] = useState([]);
@@ -43,7 +44,12 @@ const BankList = () => {
         setTotalRecords(result.totalRecords);
         setDataSource(result.source);
       } catch (error) {
-        console.error("Error fetching bank list:", error);
+        if(error.response?.status===429){
+          toast.error("Too many requests. Please wait a moment or 60 seconds before trying again.");
+        }
+        else{
+          toast.error(error.response?.data?.message || "Failed to fetch bank branches");
+        }
       } finally {
         setLoading(false);
       }

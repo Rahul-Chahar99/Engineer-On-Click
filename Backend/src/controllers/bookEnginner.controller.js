@@ -243,6 +243,7 @@ const getAllEngineerRequests = asyncHandler(async (req, res) => {
 //Hello Sir, I Saw the B1 role opening and wanted to express interest. Even though I'm WASE band-4th year scholar,I have been preparing stronly for such roles and would appreciate a chance to interview and be considered for the position. Thank you for your time and consideration.
 //To delete a engineer booking request
 const deleteEngineerRequest = asyncHandler(async (req, res) => {
+  
   const { id } = req.params;
   const deleteRequest = await EngineerForm.findByIdAndDelete(id);
   if (!deleteRequest) {

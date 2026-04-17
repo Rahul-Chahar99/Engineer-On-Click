@@ -4,6 +4,9 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
+// Trust the reverse proxy (Render/Vercel) so req.ip captures the user's real IP instead of the load balancer's IP
+app.set("trust proxy", 1);
+
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || "*",
