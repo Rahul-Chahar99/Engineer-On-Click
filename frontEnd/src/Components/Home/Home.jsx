@@ -107,7 +107,7 @@ function Home() {
     };
 
     getBookings();
-    const interval = setInterval(getBookings, 60000);
+    const interval = setInterval(getBookings, 600000);
     return () => clearInterval(interval);
   }, [userInfo?.role, userInfo?._id, page, searchQuery]);
 

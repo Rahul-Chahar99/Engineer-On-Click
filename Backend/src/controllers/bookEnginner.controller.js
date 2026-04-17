@@ -248,10 +248,28 @@ const deleteEngineerRequest = asyncHandler(async (req, res) => {
   if (!deleteRequest) {
     throw new ApiError(404, "Booking Request Form not Found");
   }
+
+
+  // Unset the bookingId from the assigned engineer
+  if (deleteRequest.assignedEngineerId) {
+    await User.findByIdAndUpdate(deleteRequest.assignedEngineerId, {
+      $unset: { bookingId: 1 },
+    });
+  }
+
   try {
     const keys = await redisClient.keys(`all_engineer_requests*`);
     if (keys.length > 0) {
       await redisClient.del(keys);
+    }
+
+    // Clear the cache for the assigned engineer's booking requests
+    if (deleteRequest.assignedEngineerId) {
+      const engineerIdStr = deleteRequest.assignedEngineerId.toString();
+      const engineerKeys = await redisClient.keys(`all_bookings_engineer_${engineerIdStr}*`);
+      if (engineerKeys.length > 0) {
+        await redisClient.del(engineerKeys);
+      }
     }
     // Invalidate cache for the first page with default limit and no search
   } catch (error) {
@@ -326,12 +344,21 @@ const assignEngineer = asyncHandler(async (req, res) => {
     { new: true }
   );
   try {
-    const keys = await redisClient.keys(`all_engineer_requests*`);
-    if (keys.length > 0) {
-      await redisClient.del(`all_engineer_requests*`); // Invalidate cache for the first page with default limit and no search
+    const adminKeys = await redisClient.keys(`all_engineer_requests*`);
+    if (adminKeys.length > 0) {
+      await Promise.all(adminKeys.map((key) => redisClient.del(key)));
     }
   } catch (error) {
-    console.error("Redis cache deletion error (Booking Requests) :", error);
+    console.error("Redis cache deletion error (Admin):", error);
+  }
+
+  try {
+    const engineerKeys = await redisClient.keys(`all_bookings_engineer_${engineer._id.toString()}*`);
+    if (engineerKeys.length > 0) {
+      await Promise.all(engineerKeys.map((key) => redisClient.del(key)));
+    }
+  } catch (error) {
+    console.error("Redis cache deletion error (Engineer):", error);
   }
 
   await User.findByIdAndUpdate(engineer._id, {

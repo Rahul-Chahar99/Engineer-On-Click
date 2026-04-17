@@ -741,8 +741,7 @@ const getAllBookings = asyncHandler(async (req, res) => {
       .skip(skip)
       .limit(limit)
       .lean();
-      console.log(bookings);
-      
+    console.log(bookings);
 
     responseData = {
       data: bookings,
@@ -760,15 +759,20 @@ const getAllBookings = asyncHandler(async (req, res) => {
   }
 
   responseData.source = source;
-  return res.status(200).json(new ApiResponse(200, responseData, "Booking Details fetched successfully"));
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, responseData, "Booking Details fetched successfully")
+    );
 });
-
-
 
 //To delete a engineer booking request
 const rejectOrAcceptBookingRequest = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
+  console.log("id--->>>",id);
+  console.log('status--->>>',status)
+  
 
   const updatedRequest = await EngineerForm.findByIdAndUpdate(
     id,
@@ -782,6 +786,16 @@ const rejectOrAcceptBookingRequest = asyncHandler(async (req, res) => {
   );
   if (!updatedRequest) {
     throw new ApiError(404, "Booking Request Form not Found");
+  }
+  try {
+    const keys = await redisClient.keys(
+      `all_bookings_engineer_${updatedRequest.assignedEngineerId}*`
+    );
+    if (keys.length > 0) {
+      await redisClient.del(keys);
+    }
+  } catch (error) {
+    console.error("Redis Cache Deletion Error (Bookings): ", error);
   }
   const message =
     status === "rejected"

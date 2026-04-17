@@ -38,15 +38,13 @@ import { bookEngineer, getAllEngineerRequests } from "./controllers/bookEnginner
 
 
 //routes declaration
-app.use('/api/v1/users',userRouter)
-app.use('/api/v1',contactRouter)
-app.use('/api/v1',bookEngineerRouter)
-app.use('/api/v1/admin-dashboard',userRouter)
-app.use('/api/v1/branches',branchRouter)
-app.use('/api/v1/admin-dashboard',bookEngineerRouter)
-app.use('/api/v1/admin-dashboard',bookEngineerRouter)
-app.use('/api/v1/engineerHome',userRouter)
-app.use('api/v1/admin-dashboard',userRouter)
+app.use('/api/v1/users', userRouter)
+app.use('/api/v1', contactRouter)
+app.use('/api/v1', bookEngineerRouter)
+app.use('/api/v1/admin-dashboard', userRouter)
+app.use('/api/v1/branches', branchRouter)
+app.use('/api/v1/admin-dashboard', bookEngineerRouter)
+app.use('/api/v1/engineerHome', userRouter)
 
 
 
