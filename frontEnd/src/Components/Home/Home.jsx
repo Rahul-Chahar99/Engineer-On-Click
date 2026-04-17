@@ -246,7 +246,7 @@ function Home() {
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-base-content">
-              Welcome, {userInfo?.fullName} 👋
+              Welcome jhantu, {userInfo?.fullName} 👋
             </h1>
             <p className="text-base-content/50 text-sm mt-1">Your assigned booking requests</p>
           </div>
