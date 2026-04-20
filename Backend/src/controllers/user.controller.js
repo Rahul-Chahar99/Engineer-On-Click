@@ -806,10 +806,12 @@ const rejectOrAcceptBookingRequest = asyncHandler(async (req, res) => {
 //Goole login controller
 const googleAuthCallback = asyncHandler(async (req, res) => {
   console.log("Req.user ->>>", req.user)
+  
+  const frontendUrl = process.env.CORS_ORIGIN || process.env.FRONTEND_URL || "http://localhost:5173";
   //passport passes the authenticated user to req.user after successful authentication with Google
   if (!req.user) {
     return res.redirect(
-      `${process.env.FRONTEND_URL}/login?error=Google authentication failed`
+      `${frontendUrl}/login?error=Google authentication failed`
     );
   }
   //Reuse the existing robust token generation logic
@@ -832,7 +834,7 @@ const googleAuthCallback = asyncHandler(async (req, res) => {
   return res
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .redirect(process.env.FRONTEND_URL); //Redirect to home/dashboard after the successful login
+    .redirect(frontendUrl); //Redirect to home/dashboard after the successful login
 });
 export {
   registerUser,
