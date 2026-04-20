@@ -770,9 +770,8 @@ const getAllBookings = asyncHandler(async (req, res) => {
 const rejectOrAcceptBookingRequest = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  console.log("id--->>>",id);
-  console.log('status--->>>',status)
-  
+  console.log("id--->>>", id);
+  console.log("status--->>>", status);
 
   const updatedRequest = await EngineerForm.findByIdAndUpdate(
     id,
@@ -804,6 +803,37 @@ const rejectOrAcceptBookingRequest = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, updatedRequest, message));
 });
 
+//Goole login controller
+const googleAuthCallback = asyncHandler(async (req, res) => {
+  console.log("Req.user ->>>", req.user)
+  //passport passes the authenticated user to req.user after successful authentication with Google
+  if (!req.user) {
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/login?error=Google authentication failed`
+    );
+  }
+  //Reuse the existing robust token generation logic
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    req.user._id
+  );
+  console.log("Access Token--->>",accessToken);
+  console.log("Refresh Token--->>",refreshToken);
+  
+
+  // 🔧 LOCAL vs PRODUCTION: Automatically adapts based on NODE_ENV
+  const isProduction = process.env.NODE_ENV === "production";
+  const options = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+  return res
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .redirect(process.env.FRONTEND_URL); //Redirect to home/dashboard after the successful login
+});
 export {
   registerUser,
   logInUser,
@@ -820,4 +850,5 @@ export {
   userStatusToggle,
   getAllBookings,
   rejectOrAcceptBookingRequest,
+  googleAuthCallback,
 };

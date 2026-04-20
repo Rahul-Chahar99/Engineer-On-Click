@@ -37,9 +37,22 @@ const userSchema = new Schema(
     coverImage: {
       type: String,
     },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+    providerId: {
+      type: String,
+      defualt: null,
+    },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: function () {
+        // Password is only required if the user is registering locally
+        //this function will return true when user logsin with password other wise false and reuired becomes safe
+        return this.authProvider === "local";
+      },
       minlength: [6, "Password must be at least 6 character long"],
       maxlength: [30, "Password can not be more than 30 character long"],
     },
@@ -53,7 +66,7 @@ const userSchema = new Schema(
     pincode: {
       type: String,
       default: "",
-      index:true
+      index: true,
     },
     aadharNo: {
       type: String,
@@ -74,7 +87,7 @@ const userSchema = new Schema(
       enum: ["engineer", "admin", "customer"],
       default: "engineer",
       required: true,
-      index:true,
+      index: true,
     },
     bookingId: {
       type: mongoose.Schema.Types.ObjectId,

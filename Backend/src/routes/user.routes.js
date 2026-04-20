@@ -23,12 +23,28 @@ import { getAllBranches } from "../controllers/admin.controller.js";
 import { registerSchema, loginSchema } from "../utils/validateSchema.js";
 import { validate } from "../middlewares/validate.middleware.js";
 import { rateLimitMiddleware } from "../middlewares/ratelimit.middleware.js";
-
+import passport from "passport";
+import { googleAuthCallback } from "../controllers/user.controller.js";
 const router = Router();
 
-// Apply rate limiting to ALL routes in this router centrally (100 requests per 60 seconds)
-router.use(rateLimitMiddleware(10, 60));
+// Apply rate limiting to ALL routes in this router centrally (increased to 100 requests per 60 seconds)
+router.use(rateLimitMiddleware(100, 60));
 
+//Initiate Goole OAuth flow
+router
+  .route("/auth/google")
+  .get(passport.authenticate("google", { scope: ["profile", "email"] }));
+
+// Google call back route
+router
+  .route("/auth/google/callback")
+  .get(
+    passport.authenticate("google", {
+      session: false,
+      failureRedirect: "/login",
+    }),
+    googleAuthCallback
+  );
 router.route("/register").post(
   upload.fields([
     {
@@ -44,7 +60,9 @@ router.route("/register").post(
   registerUser
 );
 // GET /api/v1/users/bankList?page=1&limit=10
-router.route("/bankList").get(verifyJWT, isAdmin,rateLimitMiddleware(5,30), getAllBranches);
+router
+  .route("/bankList")
+  .get(verifyJWT, isAdmin, rateLimitMiddleware(5, 30), getAllBranches);
 
 router.route("/login").post(validate(loginSchema), logInUser);
 router

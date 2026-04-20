@@ -6,9 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logInUser, reset as resetAuth } from "../Features/userSlice.js";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import toast from 'react-hot-toast'
-
-
+import toast from "react-hot-toast";
 
 function Login() {
   const dispatch = useDispatch();
@@ -23,17 +21,23 @@ function Login() {
   const { isLoading, isError, isSuccess, message } = useSelector(
     (state) => state.auth,
   );
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/v1/users/auth/google`;
+  };
   useEffect(() => {
     if (isError) {
       // console.log(message);
-      
-      const errorMessage = typeof message === "object" ? message?.message : message;
+
+      const errorMessage =
+        typeof message === "object" ? message?.message : message;
       toast.error(errorMessage || "Login failed");
       dispatch(resetAuth());
       // reset();
     }
     if (isSuccess) {
-      const successMessage = typeof message === "object" ? message?.message : message;
+      const successMessage =
+        typeof message === "object" ? message?.message : message;
       toast.success(successMessage || "Login successful");
       dispatch(resetAuth());
       navigate("/");
@@ -51,9 +55,7 @@ function Login() {
       payload.username = identifier;
     }
     dispatch(logInUser(payload));
-    console.log('login button clicked')
-    
-    
+    console.log("login button clicked");
   };
 
   return (
@@ -104,18 +106,28 @@ function Login() {
             disabled={isLoading}
             className="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-content shadow-lg hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
           />
+          <Button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="flex w-full justify-center rounded-lg bg-white px-4 py-3 text-sm font-bold text-gray-700 shadow-lg border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5 mt-4"
+          >
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="Google logo"
+              className="h-5 w-5 mr-2"
+            />
+            Continue with Google
+          </Button>
           <p className="text-sm text-base-content/70 text-center">
             ___________________ Or Create An Account ___________________
           </p>
-          
         </form>
         <Button
-            children="Create Account"
-            onClick={() => navigate("/signup")}
-            type="submit"
-            className="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-content shadow-lg hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
-          />
-        
+          children="Create Account"
+          onClick={() => navigate("/signup")}
+          type="submit"
+          className="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-content shadow-lg hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
+        />
       </div>
     </div>
   );

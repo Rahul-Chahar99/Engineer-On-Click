@@ -7,6 +7,7 @@
 NODE_ENV=production
 MONGODB_URI=mongodb+srv://rahulchahar020:rahul123@cluster0.p53naxw.mongodb.net
 CORS_ORIGIN=https://engineer-on-click-6eln.vercel.app
+BACKEND_URL=https://engineer-on-click-2.onrender.com
 PORT=10000
 ACCESS_TOKEN_SECRET=basically_here_we_use_a_complex_String_but_for_now_i_am_using_this_msg_as_a_string
 ACCESS_TOKEN_EXPIRY=1d
