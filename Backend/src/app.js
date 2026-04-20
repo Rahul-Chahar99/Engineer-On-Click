@@ -7,6 +7,8 @@ const app = express();
 // Trust the reverse proxy (Render/Vercel) so req.ip captures the user's real IP instead of the load balancer's IP
 app.set("trust proxy", 1);
 
+// app.use(rateLimitMiddleware(100, 60)); // Make sure to call the function if uncommenting!
+
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || "*",
@@ -37,6 +39,7 @@ import contactRouter from './routes/contact.routes.js'
 import bookEngineerRouter from './routes/bookEngineer.router.js'
 import branchRouter from './routes/branchRouter.js'
 import { bookEngineer, getAllEngineerRequests } from "./controllers/bookEnginner.controller.js";
+// import { rateLimitMiddleware } from "./middlewares/ratelimit.middleware.js";
 
 
 

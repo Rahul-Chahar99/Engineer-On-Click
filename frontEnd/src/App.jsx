@@ -14,6 +14,8 @@ import { io } from "socket.io-client";
 export let socket;
 
 function App() {
+  console.log("App component render");
+
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
@@ -22,9 +24,12 @@ function App() {
   useEffect(() => {
     // Only connect to WebSocket if the user is authenticated
     if (userInfo) {
-      socket = io(import.meta.env.VITE_API_BASE_URL || "http://localhost:8000", {
-        withCredentials: true, 
-      });
+      socket = io(
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:8000",
+        {
+          withCredentials: true,
+        },
+      );
 
       // Tell the backend who connected to join specific role-based rooms
       socket.emit("setup", userInfo);
@@ -34,7 +39,9 @@ function App() {
         socket.on("new_booking_notification", (data) => {
           console.log("New booking notification:", data);
           // Trigger a success toast
-          toast.success(data.message || "A new booking was successfully created!");
+          toast.success(
+            data.message || "A new booking was successfully created!",
+          );
         });
       }
 
@@ -49,9 +56,9 @@ function App() {
   useEffect(() => {
     // 1. Axios Interceptor: Handle 401s by refreshing token
     const interceptorId = axios.interceptors.response.use(
-//       axios.interceptors.response.use: This registers a "listener" that intercepts every HTTP response received by the application.
-// (response) => response: The first argument handles successful responses (status 200-299). It simply returns the response as is, doing nothing extra.
-// async (error) => { ... }: The second argument handles errors (status 400+). This is where the logic lives.
+      //       axios.interceptors.response.use: This registers a "listener" that intercepts every HTTP response received by the application.
+      // (response) => response: The first argument handles successful responses (status 200-299). It simply returns the response as is, doing nothing extra.
+      // async (error) => { ... }: The second argument handles errors (status 400+). This is where the logic lives.
       (response) => response, // Return successful responses as is
       async (error) => {
         // originalRequest: Saves the configuration (URL, method, data, headers) of the request that just failed. We need this to retry the request later if we successfully refresh the token.
@@ -80,14 +87,21 @@ function App() {
       try {
         const { data } = await axios.get("/api/v1/users/current-user");
         //data: Refers to the variable holding the entire JSON response above.
-// .data: Refers to the specific key inside that JSON object where the actual user information lives.
-// the second .data from out backend ,Your backend uses a standardized ApiResponse class (seen in user.controller.js). When it sends a response, it looks something like this:
+        // .data: Refers to the specific key inside that JSON object where the actual user information lives.
+        // the second .data from out backend ,Your backend uses a standardized ApiResponse class (seen in user.controller.js). When it sends a response, it looks something like this:
 
-// console.log(data);to check what we got in data
+        // console.log(data);to check what we got in data
 
         dispatch(login(data.data));
       } catch (error) {
-        dispatch(logout());
+        // Only log out if the backend explicitly says the session is invalid (401)
+        if (error.response?.status === 401) {
+          dispatch(logout());
+        } else if (error.response?.status === 429) {
+          toast.error(
+            "Too many requests. Please refresh the page in a minute.",
+          );
+        }
       } finally {
         setLoading(false);
       }

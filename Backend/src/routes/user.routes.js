@@ -26,6 +26,9 @@ import { rateLimitMiddleware } from "../middlewares/ratelimit.middleware.js";
 
 const router = Router();
 
+// Apply rate limiting to ALL routes in this router centrally (100 requests per 60 seconds)
+router.use(rateLimitMiddleware(10, 60));
+
 router.route("/register").post(
   upload.fields([
     {
@@ -41,7 +44,7 @@ router.route("/register").post(
   registerUser
 );
 // GET /api/v1/users/bankList?page=1&limit=10
-router.route("/bankList").get(verifyJWT, isAdmin,rateLimitMiddleware, getAllBranches);
+router.route("/bankList").get(verifyJWT, isAdmin,rateLimitMiddleware(5,30), getAllBranches);
 
 router.route("/login").post(validate(loginSchema), logInUser);
 router
