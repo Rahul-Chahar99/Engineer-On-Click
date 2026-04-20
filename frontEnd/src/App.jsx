@@ -9,6 +9,7 @@ import axios from "./Components/axios.js";
 import toast, { Toaster } from "react-hot-toast";
 import { ScaleLoader } from "react-spinners";
 import { io } from "socket.io-client";
+import Chatbot from "./Components/Chatbot.jsx";
 
 // Export socket so it can be imported and used in other components (like Admin Dashboard)
 export let socket;
@@ -130,6 +131,7 @@ function App() {
                 <Outlet />
               </Suspense>
             </main>
+            <Chatbot />
             <Footer />
           </div>
         </div>

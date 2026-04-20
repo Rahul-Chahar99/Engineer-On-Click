@@ -7,16 +7,18 @@ import { Server } from "socket.io";
 import { app } from "./app.js";
 import connectDb from "./db/index.js";
 import redisClient from "./utils/redisClient.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // --- Socket.io Setup ---
 const server = http.createServer(app);
-const allowedOrigin = process.env.NODE_ENV === 'production' 
-  ? process.env.CORS_ORIGIN || "https://engineer-on-click.vercel.app" 
-  : "http://localhost:5173";
+const allowedOrigin =
+  process.env.NODE_ENV === "production"
+    ? process.env.CORS_ORIGIN || "https://engineer-on-click.vercel.app"
+    : "http://localhost:5173";
 
 const io = new Server(server, {
   cors: {
-    // 'credentials: true' strictly forbids origin from being '*'. 
+    // 'credentials: true' strictly forbids origin from being '*'.
     // If CORS_ORIGIN is '*' or undefined, we safely fallback to the local React dev server URL.
     // When deployed on Render, ensure CORS_ORIGIN is set to your Vercel frontend URL in the Render dashboard.
     origin: allowedOrigin,
@@ -28,6 +30,9 @@ const io = new Server(server, {
 // Make 'io' accessible in all Express controllers via req.app.get("io")
 app.set("io", io);
 
+//Initialize Google Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
 io.on("connection", (socket) => {
   console.log("A user connected via WebSocket:", socket.id);
 
@@ -38,7 +43,31 @@ io.on("connection", (socket) => {
       if (userData.role === "admin") {
         socket.join("admin_room"); // Dedicated room for admin notifications
       }
-      console.log(`User ${userData.fullName || userData._id} joined their rooms`);
+      console.log(
+        `User ${userData.fullName || userData._id} joined their rooms`
+      );
+    }
+  });
+  // Listen for messages from the React frontend
+  socket.on("sendMessage", async (userMessage) => {
+    try {
+      // Use Gemini 1.5 Flash (the current recommended standard)
+    // Use the current stable Flash model
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const systemPrompt = `You are a helpful, friendly customer support assistant for "Engineer on Click". 
+            Engineer on Click is a platform where users can book professional engineers for various services.
+            Keep your answers short, professional, and helpful. Do not use complex formatting.
+            
+            User message: ${userMessage}`;
+      const result = await model.generateContent(systemPrompt);
+      const aiReply = result.response.text();
+      // Emit the AI's reply back to this specific user's browser
+      socket.emit("receiveMessage", { text: aiReply });
+    } catch (error) {
+      console.error("Gemini AI Error:", error);
+      socket.emit("receiveMessage", {
+        text: "Sorry, our systems are currently busy. Please try again later.",
+      });
     }
   });
 
