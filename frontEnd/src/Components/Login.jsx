@@ -23,7 +23,7 @@ function Login() {
   );
 
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/v1/users/auth/google`;
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/api/v1/users/auth/google`;
   };
   useEffect(() => {
     if (isError) {
@@ -106,6 +106,9 @@ function Login() {
             disabled={isLoading}
             className="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-content shadow-lg hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5"
           />
+           <p className="text-sm text-base-content/70 text-center">
+           Only For Engineer Log In Use Google Login
+          </p>
           <Button
             type="button"
             onClick={handleGoogleLogin}
