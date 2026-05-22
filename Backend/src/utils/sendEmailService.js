@@ -5,14 +5,14 @@ if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
 }
 
 const transporter = nodemailer.createTransport({
-  service: "gmail", // Using Gmail as a default. Remove if using custom SMTP.
   host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: process.env.SMTP_PORT || 465,
-  secure: true,
+  port: process.env.SMTP_PORT || 587,
+  secure: false, // true for 465, false for 587 (STARTTLS)
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  connectionTimeout: 15000, // Allow 15 seconds for connection on slow cloud instances
 });
 
 export const sendEmail = async (user) => {
