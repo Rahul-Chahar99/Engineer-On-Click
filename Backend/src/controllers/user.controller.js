@@ -11,6 +11,7 @@ import * as cloudinary from "cloudinary";
 import EngineerForm from "../models/bookEngineer.models.js";
 import redisClient from "../utils/redisClient.js";
 import mongoose from "mongoose";
+import { myEmitter } from "../utils/eventEmitter.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -149,7 +150,7 @@ const registerUser = asyncHandler(async (req, res) => {
       console.error("Redis cache deletion error: ", error);
     }
   }
-
+myEmitter.emit("userRegistered",createdUser)
   //here we are sending 201 status for resource creation and created user object to front end
   return res
     .status(201)

@@ -52,11 +52,12 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", async (userMessage) => {
     try {
       // Use Gemini 1.5 Flash (the current recommended standard)
-    // Use the current stable Flash model
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      // Use the current stable Flash model
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const systemPrompt = `You are a helpful, friendly customer support assistant (Helsinki your name) for "Engineer on Click". 
             Engineer on Click is a platform where users can book professional engineers for various services.
             Keep your answers short, professional, and helpful. Do not use complex formatting.
+            if user ask for any thing more than engineer on click related then politely refuse to answer and say "Sorry, I can only assist with questions related to Engineer on Click. Please contact our support team for further assistance."
             
             User message: ${userMessage}`;
       const result = await model.generateContent(systemPrompt);

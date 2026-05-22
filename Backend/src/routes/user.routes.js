@@ -28,7 +28,7 @@ import { googleAuthCallback } from "../controllers/user.controller.js";
 const router = Router();
 
 // Apply rate limiting to ALL routes in this router centrally (increased to 100 requests per 60 seconds)
-router.use(rateLimitMiddleware(100, 60));
+router.use(rateLimitMiddleware(100, 60, "global_users"));
 
 //Initiate Goole OAuth flow
 router
