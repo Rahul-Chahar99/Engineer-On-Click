@@ -1,0 +1,65 @@
+name: CI/CD Pipeline to AWS EC2
+
+on:
+  push:
+    branches:
+      - main # Triggers when you push to main
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 290993051085.dkr.ecr.us-east-1.amazonaws.com
+
+jobs:
+  build-and-push:
+    name: Build and Push to ECR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push Backend Image
+        run: |
+          docker build -t ${{ env.ECR_REGISTRY }}/backend:latest ./Backend
+          docker push ${{ env.ECR_REGISTRY }}/backend:latest
+
+      - name: Build, tag, and push Frontend Image
+        run: |
+          docker build -t ${{ env.ECR_REGISTRY }}/frontend:latest ./frontEnd
+          docker push ${{ env.ECR_REGISTRY }}/frontend:latest
+
+  deploy:
+    name: Deploy to EC2
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute deployment on EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.ECR_HOST_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            # Login to ECR on the EC2 instance
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+            
+            # Navigate to app directory (create if it doesn't exist)
+            mkdir -p ~/engineer-on-click
+            cd ~/engineer-on-click
+            
+            # Fetch parameters from AWS Parameter Store and save them to .env
+            # Assumes your parameters start with /eoc/prod/ (Adjust if different)
+            aws ssm get-parameters-by-path --path "/eoc/prod" --with-decryption --query "Parameters[*].[Name,Value]" --output text | awk -F'\t' '{split($1,a,"/"); print a[length(a)] "=" $2}' > .env
+            
+            # Pull latest images and restart docker compose
+            docker-compose up -d --pull always

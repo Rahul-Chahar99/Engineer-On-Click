@@ -1,7 +1,6 @@
 import redisClient from "../utils/redisClient.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { log } from "console";
 
 export const rateLimitMiddleware = (
   maxRequest = 10,
