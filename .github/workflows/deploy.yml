@@ -58,14 +58,7 @@ jobs:
             cd ~/Engineer-On-Click
             
             # Fetch parameters from AWS Parameter Store and save them to .env
-            aws ssm get-parameters-by-path \
-              --path "/prod/engineer-on-click" \
-              --recursive \
-              --with-decryption \
-              --query "Parameters[*].[Name,Value]" \
-              --output text | awk -F'\t' '{split($1,a,"/"); print a[length(a)] "=\"" $2 "\""}' > .env
-
-            
+            aws ssm get-parameters-by-path --path "/prod/engineer-on-click" --with-decryption --query "Parameters[*].[Name,Value]" --output text | awk -F'\t' 'NF>=2 {split($1,a,"/"); print a[length(a)] "=" $2}' > .env
             
             # Pull latest images and restart docker compose
             docker compose up -d --pull always
