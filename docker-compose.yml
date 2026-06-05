@@ -1,4 +1,3 @@
-
 services:
   backend:
     image: 290993051085.dkr.ecr.us-east-1.amazonaws.com/engineer-on-click-backend:latest
