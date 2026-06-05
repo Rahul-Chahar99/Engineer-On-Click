@@ -13,9 +13,6 @@ services:
     container_name: eoc_frontend
     restart: always
     ports:
-      - "80:80" # Map HTTP port 80 of the host to port 80 of the Nginx container
+      - "80:80"
     depends_on:
       - backend
-
-
-      #done
