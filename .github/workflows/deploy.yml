@@ -30,13 +30,13 @@ jobs:
 
       - name: Build, tag, and push Backend Image
         run: |
-          docker build -t ${{ env.ECR_REGISTRY }}/backend:latest ./Backend
-          docker push ${{ env.ECR_REGISTRY }}/backend:latest
+          docker build -t ${{ env.ECR_REGISTRY }}/engineer-on-click-backend:latest ./Backend
+          docker push ${{ env.ECR_REGISTRY }}/engineer-on-click-backend:latest
 
       - name: Build, tag, and push Frontend Image
         run: |
-          docker build -t ${{ env.ECR_REGISTRY }}/frontend:latest ./frontEnd
-          docker push ${{ env.ECR_REGISTRY }}/frontend:latest
+          docker build -t ${{ env.ECR_REGISTRY }}/engineer-on-click-frontend:latest ./frontEnd
+          docker push ${{ env.ECR_REGISTRY }}/engineer-on-click-frontend:latest
 
   deploy:
     name: Deploy to EC2
