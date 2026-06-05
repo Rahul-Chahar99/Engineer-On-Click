@@ -54,8 +54,8 @@ jobs:
             aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
             
             # Navigate to app directory (create if it doesn't exist)
-            mkdir -p ~/engineer-on-click
-            cd ~/engineer-on-click
+            mkdir -p ~/Engineer-on-click
+            cd ~/Engineer-on-click
             
             # Fetch parameters from AWS Parameter Store and save them to .env
             aws ssm get-parameters-by-path --path "/prod/engineer-on-click" --with-decryption --query "Parameters[*].[Name,Value]" --output text | awk -F'\t' '{split($1,a,"/"); print a[length(a)] "=" $2}' > .env
