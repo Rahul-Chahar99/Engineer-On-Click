@@ -10,7 +10,7 @@ services:
       - .env
 
   frontend:
-    image: 290993051085.dkr.ecr.us-east-1.amazonaws.com/engineer-on-click-frontend:latest
+    image: 290993051085.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
     container_name: eoc_frontend
     restart: always
     ports:
