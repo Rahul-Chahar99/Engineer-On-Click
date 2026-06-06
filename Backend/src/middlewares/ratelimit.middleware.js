@@ -18,7 +18,7 @@ export const rateLimitMiddleware = (
 
     const key = `rate_limit:${prefix}:${identifier}`;
     console.log("Rate Limit Identifier ->>>", identifier);
-    log("Rate Limit Key ->>>", key);
+   console.log("Rate Limit Key ->>>", key);
 
     try {
       const currentRequests = await redisClient.incr(key);
