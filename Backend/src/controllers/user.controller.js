@@ -209,10 +209,11 @@ const logInUser = asyncHandler(async (req, res) => {
   // path: "/" -> cookie available for entire domain
   // 🔧 LOCAL vs PRODUCTION: Automatically adapts based on NODE_ENV
   const isProduction = process.env.NODE_ENV === "production";
+  const isCrossOrigin = process.env.CROSS_ORIGIN === "true";
   const options = {
     httpOnly: true,
-    secure: isProduction, // true in production, false locally
-    sameSite: isProduction ? "none" : "lax", // "none" for cross-site (production), "lax" for same-site (local)
+    secure: isProduction && isCrossOrigin, // true in cross-origin production (HTTPS required), false locally or EC2 HTTP
+    sameSite: isProduction && isCrossOrigin ? "none" : "lax", // "none" for cross-site, "lax" for same-site (EC2)
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
@@ -251,10 +252,11 @@ const logOutUser = asyncHandler(async (req, res) => {
 
   // 🔧 LOCAL vs PRODUCTION: Automatically adapts based on NODE_ENV
   const isProduction = process.env.NODE_ENV === "production";
+  const isCrossOrigin = process.env.CROSS_ORIGIN === "true";
   const options = {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction && isCrossOrigin,
+    sameSite: isProduction && isCrossOrigin ? "none" : "lax",
     path: "/",
   };
 
@@ -446,10 +448,11 @@ const refreshAcessToken = asyncHandler(async (req, res) => {
     }
     // 🔧 LOCAL vs PRODUCTION: Automatically adapts based on NODE_ENV
     const isProduction = process.env.NODE_ENV === "production";
+    const isCrossOrigin = process.env.CROSS_ORIGIN === "true";
     const options = {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction && isCrossOrigin,
+      sameSite: isProduction && isCrossOrigin ? "none" : "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     };
@@ -825,10 +828,11 @@ const googleAuthCallback = asyncHandler(async (req, res) => {
 
   // 🔧 LOCAL vs PRODUCTION: Automatically adapts based on NODE_ENV
   const isProduction = process.env.NODE_ENV === "production";
+  const isCrossOrigin = process.env.CROSS_ORIGIN === "true";
   const options = {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction && isCrossOrigin,
+    sameSite: isProduction && isCrossOrigin ? "none" : "lax",
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   };
