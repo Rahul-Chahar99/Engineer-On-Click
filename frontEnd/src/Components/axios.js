@@ -18,4 +18,6 @@ const api = axios.create({
   withCredentials: true, // This is important for sending cookies (like auth tokens) with each request
 });
 
+//test
+
 export default api;
